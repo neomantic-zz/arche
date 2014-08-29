@@ -18,7 +18,6 @@
                 (discoverable-resource resource-name))
            (GET "/discoverable_resources/" []
                 (discoverable-resource-collection)))
-
   (route/not-found "Not Found")) ;; TODO - this returns content-type text/html, should be text/plain
 
 (def handler
