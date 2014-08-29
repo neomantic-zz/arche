@@ -6,9 +6,12 @@
                  [compojure "1.1.8"]
                  [ring/ring-core "1.3.1"]
                  [ring/ring-jetty-adapter "1.3.0"]]
-  :dev-dependencies [[ring-serve "0.1.2"]]
-  :plugins [[lein-ring "0.8.7"]]
+  :profiles {:uberjar {:aot :all}
+             :dev {:dependencies [[ring-serve "0.1.2"]
+                                  [speclj "3.1.0"]]}}
+  :plugins [[lein-ring "0.8.7"]
+            [speclj "3.1.0"]]
   :main ^:skip-aot wormhole-clj.core
   :ring {:handler wormhole-clj.core/handler}
-  :target-path "target/%s"
-  :profiles {:uberjar {:aot :all}})
+  :test-paths ["spec"]
+  :target-path "target/%s")
