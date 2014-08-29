@@ -13,10 +13,12 @@
   :handle-ok (fn [_] (format "Returning %s" resource-name)))
 
 (defroutes wormhole-app
-  (GET "/v2/discoverable_resources/:resource-name" [resource-name]
-       (discoverable-resource resource-name))
-  (GET "/v2/discoverable_resources/" []
-       (discoverable-resource-collection))
+  (context "/v2" []
+           (GET "/discoverable_resources/:resource-name" [resource-name]
+                (discoverable-resource resource-name))
+           (GET "/discoverable_resources/" []
+                (discoverable-resource-collection)))
+
   (route/not-found "Not Found")) ;; TODO - this returns content-type text/html, should be text/plain
 
 (def handler
