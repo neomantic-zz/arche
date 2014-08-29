@@ -7,6 +7,8 @@
                  [ring/ring-core "1.3.1"]
                  [ring/ring-jetty-adapter "1.3.0"]]
   :dev-dependencies [[ring-serve "0.1.2"]]
+  :plugins [[lein-ring "0.8.7"]]
   :main ^:skip-aot wormhole-clj.core
+  :ring {:handler wormhole-clj.core/handler}
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}})
