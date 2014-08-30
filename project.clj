@@ -9,15 +9,14 @@
                  [org.clojure/java.jdbc "0.3.5"]
                  [mysql/mysql-connector-java "5.1.25"]]
   :profiles {:uberjar {:aot :all}
-             :dev-common {:dependencies [[ring-serve "0.1.2"]
-                                         [speclj "3.1.0"]]}
-             :dev [:dev-common]}
-  :plugins [[lein-cucumber "1.0.2"]
-            [lein-ring "0.8.7"]
-            [speclj "3.1.0"]
-            [clj-sql-up "0.3.3"]]
+             :dev {:dependencies [[speclj "3.1.0"]]}}
   :clj-sql-up {
                :deps [[mysql/mysql-connector-java "5.1.25"]]}
+  :plugins [[lein-cucumber "1.0.2"]
+            [ring-serve "0.1.2"]
+            [lein-ring "0.8.11"]
+            [speclj "3.1.0"]
+            [clj-sql-up "0.3.3"]]
   :main ^:skip-aot wormhole-clj.core
   :ring {:handler wormhole-clj.core/handler}
   :test-paths ["spec"]
