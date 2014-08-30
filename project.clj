@@ -9,7 +9,8 @@
   :profiles {:uberjar {:aot :all}
              :dev {:dependencies [[ring-serve "0.1.2"]
                                   [speclj "3.1.0"]]}}
-  :plugins [[lein-ring "0.8.7"]
+  :plugins [[lein-cucumber "1.0.2"]
+            [lein-ring "0.8.7"]
             [speclj "3.1.0"]]
   :main ^:skip-aot wormhole-clj.core
   :ring {:handler wormhole-clj.core/handler}
