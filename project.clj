@@ -9,8 +9,9 @@
                  [org.clojure/java.jdbc "0.3.5"]
                  [mysql/mysql-connector-java "5.1.25"]]
   :profiles {:uberjar {:aot :all}
-             :dev {:dependencies [[ring-serve "0.1.2"]
-                                  [speclj "3.1.0"]]}}
+             :dev-common {:dependencies [[ring-serve "0.1.2"]
+                                         [speclj "3.1.0"]]}
+             :dev [:dev-common]}
   :plugins [[lein-cucumber "1.0.2"]
             [lein-ring "0.8.7"]
             [speclj "3.1.0"]
