@@ -6,7 +6,8 @@
                  [compojure "1.1.8"]
                  [ring/ring-core "1.3.1"]
                  [ring/ring-jetty-adapter "1.3.0"]]
-  :profiles {:uberjar {:aot :all}}
+  :profiles {:uberjar {:aot :all}
+             :dev {:dependencies [[speclj "3.1.0"]]}}
   :plugins [[ring-serve "0.1.2"]
             [lein-ring "0.8.11"]
             [speclj "3.1.0"]]
