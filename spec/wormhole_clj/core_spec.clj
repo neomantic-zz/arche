@@ -35,10 +35,37 @@
  (it "return the correct status code"
     (should= 404 (:status (request "random/path")))))
 
-(describe
- "creates a discoverable resource"
- (before (clean-database))
- (it "creates one"
-     (should= "studies" (discoverable-resource-create "studies" "http://localhost/studies" "http://localhost/alps/studies"))))
+(let [resource-name "studies"
+      link-relation "http://localhost/alps/studies"
+      href "http://localhost/studies"]
+  (describe
+   "creates a discoverable resource"
+   (before (clean-database))
+   (it "creates one"
+       (should= {:id 1
+                 :resource-name resource-name
+                 :link-relation link-relation
+                 :href href}
+                (discoverable-resource-create
+                 resource-name
+                 link-relation
+                 href))))
+  (describe
+   "duplications of discoverable resources"
+   (before
+    (do
+      (clean-database)
+      (discoverable-resource-create resource-name
+                                    link-relation
+                                    href)))
+   (it "returns an error"
+       (should=  {:errors
+                  {:taken-by {:resource-name resource-name
+                              :link-relation link-relation
+                              :href href}}}
+                 (discoverable-resource-create resource-name
+                                    link-relation
+                                    href)))))
+
 
 (run-specs)
