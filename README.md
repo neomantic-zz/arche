@@ -20,17 +20,14 @@ FIXME: listing of options this app accepts.
 
 ...
 
-### Bugs
+## Bugs
 
-...
-
-### Any Other Sections
-### That You Think
-### Might be Useful
+## Development
+To run unit tests: `lein with-profile spec,test specx`
 
 ## License
 
-Copyright © 2014 FIXME
+Copyright © 2014 Chad Albers
 
 Distributed under the Eclipse Public License either version 1.0 or (at
 your option) any later version.
