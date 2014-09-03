@@ -1,4 +1,5 @@
 (ns wormhole-clj.core-spec
+  (:use wormhole-clj.db)
   (:require [speclj.core :refer :all]
             [clojure.java.jdbc :as jdbc]
             [wormhole-clj.core :refer :all]
@@ -10,16 +11,8 @@
 (defn successful? [response]
   (= (:status response) 200))
 
-(def mysql-dbspec
-  {:classname "com.mysql.jdbc.Driver"
-   :subprotocol "mysql"
-   :user (env :database-user)
-   :password  (env :database-password)
-   :delimiters "`"
-   :subname (env :database-subname)})
-
 (defn- clean-database []
-  (jdbc/db-do-commands mysql-dbspec "TRUNCATE TABLE discoverable_resources;"))
+  (jdbc/db-do-commands dbspec "TRUNCATE TABLE discoverable_resources;"))
 
 (describe
  "routes to GET discoverable resources"

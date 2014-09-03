@@ -1,24 +1,19 @@
 (ns wormhole-clj.core
-  (:use compojure.core korma.db korma.core)
+  (:use compojure.core korma.db korma.core wormhole-clj.db)o
   (:require [liberator.core :refer [resource defresource]]
             [ring.middleware.params :refer [wrap-params]]
             [compojure.route :as route]
             [clojure.string :as str]
             [environ.core :refer [env]]))
 
-(defdb devdb {:classname "com.mysql.jdbc.Driver"
-			  :subprotocol "mysql"
-              :user (env :database-user)
-              :password (env :database-password)
-              :delimiters "`"
-              :subname (env :database-subname)})
-
 (declare discoverable-resources)
+
+(defdb db dbspec)
 
 (defentity discoverable-resources
   (pk :id)
   (table :discoverable_resources)
-  (database devdb)
+  (database db)
   (entity-fields [:resource_name :resource-name]))
 
 (defresource discoverable-resource-get-collection []
