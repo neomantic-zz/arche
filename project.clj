@@ -26,6 +26,7 @@
   :main ^:skip-aot wormhole-clj.core
   :ring {:handler wormhole-clj.core/handler}
   :test-paths ["spec"]
+  :cucumber-feature-paths ["features/"]
   :target-path "target/%s"
   :pom-addition [:developers [:developer {:id "neomantic"}
                               [:name "Chad Albers"]
