@@ -1,19 +1,12 @@
-;; (ns wormhole-clj.features.step-definitions.discoverable-resources-steps
-;;   (:use cucumber-clojure)
-;;   (:require [speclj.core :refer :all]
-;;             [wormhole-clj.core :refer :all]))
-
-
-(use 'wormhole-clj.core)
-(use 'wormhole-clj.db)
-(use 'clojure.test)
-(use 'clojure.java.jdbc)
+(ns step-definitions.discoverable-resources-steps
+  (:use wormhole-clj.core wormhole-clj.db cucumber.runtime.clj)
+  (:require [clojure.java.jdbc :as jdbc]))
 
 (defn table-to-map [table]
   (into {} (map vec (.raw table))))
 
 (After []
-       (db-do-commands dbspec "TRUNCATE TABLE discoverable_resources;"))
+       (jdbc/db-do-commands dbspec "TRUNCATE TABLE discoverable_resources;"))
 
 (Given #"^a discoverable resource exists with the following attributes:$" [table]
        (let [table-map (table-to-map table)]
