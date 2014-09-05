@@ -6,7 +6,7 @@
             [environ.core :refer [env]]))
 
 (defn request [uri & params]
-  (wormhole-app {:request-method :get :uri uri :params (first params)}))
+  (wormhole-routes {:request-method :get :uri uri :params (first params)}))
 
 (defn successful? [response]
   (= (:status response) 200))
@@ -14,10 +14,21 @@
 (defn- clean-database []
   (jdbc/db-do-commands dbspec "TRUNCATE TABLE discoverable_resources;"))
 
+(defn factory-discoverable-resource-create [resource-name]
+  (discoverable-resource-create
+   resource-name
+   (format "%s%s" "http://factory/alps/" resource-name)
+   (format "%s%s" "http://factory/" resource-name)))
+
 (describe
  "routes to GET discoverable resources"
- (it "supports /v2/discoverable_resources/ with a name"
-     (should-be successful? (request "/v2/discoverable_resources/hello")))
+ (describe
+  "when item exists"
+  (before
+   (clean-database)
+   (factory-discoverable-resource-create "studies"))
+  (it "supports /v2/discoverable_resources/ with a name"
+      (should-be successful? (request (format "%s%s" "/v2/discoverable_resources/" "studies")))))
  (it "supports /v2/discoverable_resources/ without name"
      (should-be successful? (request "/v2/discoverable_resources/"))))
 
@@ -28,6 +39,31 @@
  (it "return the correct status code"
     (should= 404 (:status (request "random/path")))))
 
+(describe
+ "persisted entity"
+ (it "returns an empty entity"
+     (should= @(atom {:link-relation "" :href "" :resource-name ""}) @persisted-entity))
+ (it "resets the enity"
+     (do
+       (reset! persisted-entity "something")
+       (reset-persisted-entity!)
+       (should= @(atom {:link-relation "" :href "" :resource-name ""}) @persisted-entity))))
+
+(let [resource-name "studies"
+      link-relation "http://localhost/alps/studies"
+      href "http://localhost/studies"]
+  (describe
+   "finding one discoverable resources"
+   (before (clean-database)
+           (discoverable-resource-create
+            resource-name link-relation href))
+   (it "returns a map of the record"
+       (should==
+        {:resource_name resource-name
+         :link_relation link-relation
+         :href href}
+        (discoverable-resource-first resource-name)))))
+
 (let [resource-name "studies"
       link-relation "http://localhost/alps/studies"
       href "http://localhost/studies"]
@@ -35,30 +71,31 @@
    "creates a discoverable resource"
    (before (clean-database))
    (it "creates one"
-       (should= {:id 1
-                 :resource-name resource-name
-                 :link-relation link-relation
-                 :href href}
-                (discoverable-resource-create
-                 resource-name
-                 link-relation
-                 href))))
+       (let [created (discoverable-resource-create
+                      resource-name
+                      link-relation
+                      href)]
+         (should== (conj
+                    created
+                    {:resource_name resource-name
+                     :link_relation link-relation
+                     :href href})
+                   created))))
   (describe
    "duplications of discoverable resources"
-   (before
-    (do
-      (clean-database)
-      (discoverable-resource-create resource-name
-                                    link-relation
-                                    href)))
+   (before (clean-database)
+           (discoverable-resource-create resource-name
+                                         link-relation
+                                         href))
    (it "returns an error"
-       (should=  {:errors
-                  {:taken-by {:resource-name resource-name
-                              :link-relation link-relation
-                              :href href}}}
+       (should== {:errors
+                  {:taken-by
+                   {:resource_name resource-name
+                    :link_relation link-relation
+                    :href href}}}
                  (discoverable-resource-create resource-name
-                                    link-relation
-                                    href)))))
+                                               link-relation
+                                               href)))))
 
 
 (run-specs)
