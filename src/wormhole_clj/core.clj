@@ -11,11 +11,6 @@
 
 (declare discoverable-resources)
 
-(def ^{:private true} nil-persisted-entity {:link-relation "" :href "" :resource-name ""})
-(def persisted-entity (atom nil-persisted-entity))
-(defn reset-persisted-entity! []
-  (reset! persisted-entity nil-persisted-entity))
-
 (defdb db dbspec)
 
 (defn link-href-build [path]

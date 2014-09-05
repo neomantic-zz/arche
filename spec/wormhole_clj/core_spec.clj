@@ -49,16 +49,6 @@
  (it "return the correct status code"
     (should= 404 (:status (request "random/path")))))
 
-(describe
- "persisted entity"
- (it "returns an empty entity"
-     (should= @(atom {:link-relation "" :href "" :resource-name ""}) @persisted-entity))
- (it "resets the enity"
-     (do
-       (reset! persisted-entity "something")
-       (reset-persisted-entity!)
-       (should= @(atom {:link-relation "" :href "" :resource-name ""}) @persisted-entity))))
-
 (let [resource-name "studies"
       link-relation "http://localhost/alps/studies"
       href "http://localhost/studies"]
