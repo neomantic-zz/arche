@@ -38,7 +38,7 @@
          :link-relation link-relation
          :href href}))))
 
-(defroutes wormhole-app
+(defroutes wormhole-routes
   (context "/v2" []
            (GET "/discoverable_resources/:resource-name" [resource-name]
                 (discoverable-resource-get resource-name))
@@ -47,5 +47,5 @@
   (route/not-found "Not Found")) ;; TODO - this returns content-type text/html, should be text/plain
 
 (def handler
-  (-> wormhole-app
+  (-> wormhole-routes
       wrap-params))
