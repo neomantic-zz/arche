@@ -4,6 +4,7 @@
             [ring.middleware.params :refer [wrap-params]]
             [compojure.route :as route]
             [clojure.string :as str]
+            [cheshire.core :refer :all :as json]
             [environ.core :refer [env]]))
 
 (declare discoverable-resources)

@@ -9,6 +9,7 @@
                  [org.clojure/java.jdbc "0.3.5"]
                  [korma "0.4.0"]
                  [mysql/mysql-connector-java "5.1.25"]
+                 [cheshire "5.3.1"]
                  [clj-http "1.0.0"] ;; FIX - this is really a development dependency
                  [environ "1.0.0"]]
   :profiles {:uberjar {:aot :all}

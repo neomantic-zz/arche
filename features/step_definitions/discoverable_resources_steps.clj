@@ -2,6 +2,7 @@
   (:use wormhole-clj.core wormhole-clj.db cucumber.runtime.clj clojure.test)
   (:require [clojure.java.jdbc :as jdbc]
             [ring.adapter.jetty :as ring]
+            [cheshire.core :refer :all :as json]
             [clj-http.client :as client]))
 
 (defn table-to-map [table]
