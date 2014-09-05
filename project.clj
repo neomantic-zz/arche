@@ -13,8 +13,9 @@
                  [clj-http "1.0.0"] ;; FIX - this is really a development dependency
                  [environ "1.0.0"]]
   :profiles {:uberjar {:aot :all}
-             :spec {:dependencies [[speclj "3.1.0"]]}
-             :test {:dependencies [[speclj "3.1.0"]]}
+             :spec {:env {:base-uri "http://test.host/"}
+                    :dependencies [[speclj "3.1.0"]]}
+             :test {}
              :dev {:dependencies [[speclj "3.1.0"]]}}
   :plugins [[lein-cucumber "1.0.2"]
             [ring-serve "0.1.2"]

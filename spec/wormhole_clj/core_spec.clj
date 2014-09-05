@@ -98,4 +98,11 @@
                                                href)))))
 
 
+(describe
+ "creating hrefs"
+ (it "creates the correct map"
+     (should==
+      {:href "http://test.host/apath/of-stuff#shsnthsnth"}
+      (link-href-build "apath/of-stuff#shsnthsnth"))))
+
 (run-specs)
