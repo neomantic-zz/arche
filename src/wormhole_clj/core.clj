@@ -1,5 +1,5 @@
 (ns wormhole-clj.core
-  (:use compojure.core korma.db korma.core wormhole-clj.db)o
+  (:use compojure.core korma.db korma.core wormhole-clj.db)
   (:require [liberator.core :refer [resource defresource]]
             [ring.middleware.params :refer [wrap-params]]
             [compojure.route :as route]
