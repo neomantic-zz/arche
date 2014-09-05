@@ -52,6 +52,9 @@
 (defn location-header-build [url]
   {"Location" url})
 
+(defn accept-header-build [content-type]
+  {"Accept" content-type})
+
 (defresource discoverable-resource-entity [resource-name]
   :available-media-types ["application/vnd.hale+json"]
   :allowed-methods [:get]
@@ -63,7 +66,7 @@
                (ring-response
                 {:status 200
                  :headers (conj
-                           {"Accept" "application/vnd.hale+json"}
+                           (accept-header-build "application/vnd.hale+json")
                            (location-header-build
                             (discoverable-resource-entity-url (:resource_name entity))))
                  :body (discoverable-resource-representation entity)})))

@@ -125,4 +125,13 @@
               (discoverable-resource-entity-url "bad resource name")))
  )
 
+(describe
+ "building headers"
+ (it "returns a map with the correct key for the location header"
+     (should (contains? (location-header-build "a-url") "Location")))
+ (it "returns a map with the correct key for the accept header"
+     (should= {"Accept" "a-content-type"}
+              (accept-header-build "a-content-type"))))
+
+
 (run-specs)
