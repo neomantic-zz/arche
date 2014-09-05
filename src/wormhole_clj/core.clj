@@ -21,7 +21,7 @@
   :handle-ok (fn [_] (format "Returning All of them")))
 
 (defresource discoverable-resource-get [resource-name]
-  :available-media-types ["application/json"]
+  :available-media-types ["application/vnd.hale+json"]
   :handle-ok (fn [_] (format "Returning %s" resource-name)))
 
 (defn discoverable-resource-create [resource-name link-relation href]
