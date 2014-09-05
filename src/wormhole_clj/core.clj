@@ -36,19 +36,18 @@
   :available-media-types ["application/json"]
   :handle-ok (fn [_] (format "Returning All of them")))
 
+(defn discoverable-resource-entity-url [resource-name]
+  (:href (link-href-build
+          (format "%s/%s" "v2/discoverable_resources"
+                  (ring/url-encode resource-name)))))
+
 (defn discoverable-resource-representation [orm-hash-map]
   (json/generate-string
    (conj
     orm-hash-map
     {:_links
      {:self
-      (link-href-build (format "%s/%s" "discoverable_resource"
-                               (ring/url-encode (:resource_name orm-hash-map))))}})))
-
-(defn discoverable-resource-entity-url [resource-name]
-  (:href (link-href-build
-          (format "%s/%s" "v2/discoverable_resources"
-                  (ring/url-encode resource-name)))))
+      (link-href-build (discoverable-resource-entity-url (:resource_name orm-hash-map)))}})))
 
 (defn location-header-build [url]
   {"Location" url})
