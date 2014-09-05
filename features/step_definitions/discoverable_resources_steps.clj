@@ -11,6 +11,8 @@
 
 (declare last-response)
 
+;; borrowed from here.
+;;https://github.com/ring-clojure/ring/blob/master/ring-jetty-adapter/test/ring/adapter/test/jetty.clj#L25
 (defmacro with-server [app options & body]
   `(let [server# (ring/run-jetty ~app ~(assoc options :join? false))]
      (try
