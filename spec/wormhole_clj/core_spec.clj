@@ -28,9 +28,19 @@
    (clean-database)
    (factory-discoverable-resource-create "studies"))
   (it "supports /v2/discoverable_resources/ with a name"
-      (should-be successful? (request (format "%s%s" "/v2/discoverable_resources/" "studies")))))
+      (should-be successful? (request (format "%s%s" "/v2/discoverable_resources/" "studies"))))
+  (it "should have the correct accept header"
+                  (should= "application/vnd.hale+json"
+                           (get (:headers (request (format "%s%s" "/v2/discoverable_resources/" "studies"))) "Accept")))
+  (it "returns the correct location header"
+                  (should= "http://test.host/v2/discoverable_resources/studies"
+                           (get (:headers (request (format "%s%s" "/v2/discoverable_resources/" "studies"))) "Location")))
+  (it "returns have the correct accept header"
+                  (should= "application/vnd.hale+json"
+                           (get (:headers (request (format "%s%s" "/v2/discoverable_resources/" "studies"))) "Content-Type"))))
  (it "supports /v2/discoverable_resources/ without name"
      (should-be successful? (request "/v2/discoverable_resources/"))))
+
 
 (describe
  "unknown routes response"

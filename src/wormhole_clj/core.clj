@@ -1,6 +1,8 @@
 (ns wormhole-clj.core
   (:use compojure.core korma.db korma.core wormhole-clj.db)
-  (:require [liberator.core :refer [resource defresource]]
+  (:require [ring.util.codec :only [url-encode] :as ring]
+            [liberator.core :refer [resource defresource]]
+            [liberator.representation :as rep :refer [ring-response as-response]]
             [ring.middleware.params :refer [wrap-params]]
             [compojure.route :as route]
             [clojure.string :as str]
@@ -35,29 +37,37 @@
   :handle-ok (fn [_] (format "Returning All of them")))
 
 (defn discoverable-resource-representation [orm-hash-map]
-  (json/generate-string orm-hash-map)
-  ;; {:link_relation "what"
-  ;;  :href (:href orm-hash-map)
-  ;;  :resource_name (:resource_name orm-hash-map)
-  ;;  ;; :_links {:help (link-href-build "help/discoverable_resources")
-  ;;  ;;          :self {:href (location-url orm-hash-map)} ;; FIX - URI escape
-  ;;  ;;          :type (link-href-build (format "alps/DiscoverableResources#discoverable_resources"))
-  ;;  ;;          :profile (link-href-build "alps/DiscoverableResources")
-  ;;  ;;          }
-  ;;  }
-  )
+  (json/generate-string
+   (conj
+    orm-hash-map
+    {:_links
+     {:self
+      (link-href-build (format "%s/%s" "discoverable_resource"
+                               (ring/url-encode (:resource_name orm-hash-map))))}})))
+
+(defn discoverable-resource-entity-url [resource-name]
+  (:href (link-href-build
+          (format "%s/%s" "v2/discoverable_resources"
+                  (ring/url-encode resource-name)))))
+
+(defn location-header-build [url]
+  {"Location" url})
 
 (defresource discoverable-resource-entity [resource-name]
   :available-media-types ["application/vnd.hale+json"]
   :allowed-methods [:get]
   :exists? (fn [_]
              (if-let [existing (discoverable-resource-first resource-name)]
-               (reset! persisted-entity existing)
+               {::existing existing}
                false))
-  :handle-ok (fn [_]
-               (try ;; hack, to get the finally form
-                 (discoverable-resource-representation @persisted-entity)
-                 (finally (reset-persisted-entity!)))))
+  :handle-ok (fn [{entity ::existing}]
+               (ring-response
+                {:status 200
+                 :headers (conj
+                           {"Accept" "application/vnd.hale+json"}
+                           (location-header-build
+                            (discoverable-resource-entity-url (:resource_name entity))))
+                 :body (discoverable-resource-representation entity)})))
 
 
 (defn discoverable-resource-create [resource-name link-relation href]
