@@ -102,14 +102,6 @@
                                                link-relation
                                                href)))))
 
-
-(describe
- "creating hrefs"
- (it "creates the correct map"
-     (should==
-      {:href "http://test.host/apath/of-stuff#shsnthsnth"}
-      (link-href-build "apath/of-stuff#shsnthsnth"))))
-
 (describe
  "entity url"
  (it "creates the correct discoverable resource entity url"
@@ -117,7 +109,6 @@
               (discoverable-resource-entity-url "studies")))
  (it "creates the correct discoverable resource entity url with url encoding"
      (should= "http://test.host/v2/discoverable_resources/bad%20resource%20name"
-              (discoverable-resource-entity-url "bad resource name")))
- )
+              (discoverable-resource-entity-url "bad resource name"))))
 
 (run-specs)

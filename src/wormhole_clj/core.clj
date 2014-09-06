@@ -18,8 +18,8 @@
 (defn base-uri []
   (env :base-uri))
 
-(defn link-href-build [path]
-  {:href (format "%s%s" (base-uri) path)})
+(defn app-uri-for [path]
+  (format "%s%s" (base-uri) path))
 
 (defentity discoverable-resources
   (pk :id)
@@ -37,17 +37,15 @@
   :handle-ok (fn [_] (format "Returning All of them")))
 
 (defn discoverable-resource-entity-url [resource-name]
-  (:href (link-href-build
-          (format "%s/%s" "v2/discoverable_resources"
-                  (ring/url-encode resource-name)))))
+  (app-uri-for (format "%s/%s" "v2/discoverable_resources"
+                       (ring/url-encode resource-name))))
 
 (defn discoverable-resource-representation [orm-hash-map]
   (json/generate-string
    (conj
     orm-hash-map
     {media/keyword-links
-     {media/link-relation-self
-      (link-href-build (discoverable-resource-entity-url (:resource_name orm-hash-map)))}})))
+     (media/self-link-relation (discoverable-resource-entity-url (:resource_name orm-hash-map)))})))
 
 (defresource discoverable-resource-entity [resource-name]
   :available-media-types [media/hale-media-type]
