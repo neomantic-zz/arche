@@ -7,6 +7,7 @@
             [compojure.route :as route]
             [clojure.string :as str]
             [cheshire.core :refer :all :as json]
+            [wormhole-clj.http :as http-helper]
             [environ.core :refer [env]]))
 
 (declare discoverable-resources)
@@ -47,12 +48,6 @@
      {:self
       (link-href-build (discoverable-resource-entity-url (:resource_name orm-hash-map)))}})))
 
-(defn location-header-build [url]
-  {"Location" url})
-
-(defn accept-header-build [content-type]
-  {"Accept" content-type})
-
 (defresource discoverable-resource-entity [resource-name]
   :available-media-types ["application/vnd.hale+json"]
   :allowed-methods [:get]
@@ -64,8 +59,8 @@
                (ring-response
                 {:status 200
                  :headers (conj
-                           (accept-header-build "application/vnd.hale+json")
-                           (location-header-build
+                           (http-helper/header-accept "application/vnd.hale+json")
+                           (http-helper/header-location
                             (discoverable-resource-entity-url (:resource_name entity))))
                  :body (discoverable-resource-representation entity)})))
 
