@@ -8,9 +8,6 @@
 (defn table-to-map [table]
   (into {} (map vec (.raw table))))
 
-(defn table-to-list [table]
-  (into () (map vec (.raw table))))
-
 (def test-port 57767)
 
 (def last-response (atom nil))
