@@ -21,6 +21,11 @@
    (format "%s%s" "http://factory/" resource-name)))
 
 (describe
+ "environment"
+ (it "returns the correct base-uri"
+     (should-not-be-nil (base-uri))))
+
+(describe
  "routes to GET discoverable resources"
  (describe
   "when item exists"

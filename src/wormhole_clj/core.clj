@@ -13,8 +13,11 @@
 
 (defdb db dbspec)
 
+(defn base-uri []
+  (env :base-uri))
+
 (defn link-href-build [path]
-  {:href (format "%s%s"(env :base-uri) path)})
+  {:href (format "%s%s" (base-uri) path)})
 
 (defentity discoverable-resources
   (pk :id)
