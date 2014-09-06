@@ -8,6 +8,7 @@
             [clojure.string :as str]
             [cheshire.core :refer :all :as json]
             [wormhole-clj.http :as http-helper]
+            [wormhole-clj.media :as media]
             [environ.core :refer [env]]))
 
 (declare discoverable-resources)
@@ -44,12 +45,12 @@
   (json/generate-string
    (conj
     orm-hash-map
-    {:_links
-     {:self
+    {media/keyword-links
+     {media/link-relation-self
       (link-href-build (discoverable-resource-entity-url (:resource_name orm-hash-map)))}})))
 
 (defresource discoverable-resource-entity [resource-name]
-  :available-media-types ["application/vnd.hale+json"]
+  :available-media-types [media/hale-media-type]
   :allowed-methods [:get]
   :exists? (fn [_]
              (if-let [existing (discoverable-resource-first resource-name)]
@@ -59,7 +60,7 @@
                (ring-response
                 {:status 200
                  :headers (conj
-                           (http-helper/header-accept "application/vnd.hale+json")
+                           (http-helper/header-accept media/hale-media-type)
                            (http-helper/header-location
                             (discoverable-resource-entity-url (:resource_name entity))))
                  :body (discoverable-resource-representation entity)})))
