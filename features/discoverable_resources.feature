@@ -18,7 +18,4 @@ Scenario: A client reads a discoverable resource as hale+json
     | resource_name | studies                          |
     And the resource representation should have exactly the following links:
     | link_relation | href                                                                |
-    | profile       | http://example.org/alps/DiscoverableResources                       |
-    | self          | http://example.org/discoverable_resources/studies                   |
-    | type          | http://example.org/alps/DiscoverableResources#discoverable_resource |
-    | help          | http://example.org/help/discoverable_resources                      |
+    | self          | http://example.org/v2/discoverable_resources/studies                   |

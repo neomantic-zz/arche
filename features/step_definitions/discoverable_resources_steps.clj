@@ -8,9 +8,15 @@
 (defn table-to-map [table]
   (into {} (map vec (.raw table))))
 
+(defn table-to-list [table]
+  (into () (map vec (.raw table))))
+
 (def test-port 57767)
 
-(declare last-response)
+(def last-response (atom nil))
+(defn last-response-set! [new-response]
+  (reset! last-response new-response))
+
 
 ;; borrowed from here.
 ;;https://github.com/ring-clojure/ring/blob/master/ring-jetty-adapter/test/ring/adapter/test/jetty.clj#L25
@@ -21,6 +27,7 @@
        (finally (.stop server#)))))
 
 (After []
+       (reset! last-response nil)
        (jdbc/db-do-commands dbspec "TRUNCATE TABLE discoverable_resources;"))
 
 (Given #"^a discoverable resource exists with the following attributes:$" [table]
@@ -32,14 +39,33 @@
 
 (When #"^I invoke the uniform interface method GET to \"([^\"]*)\" accepting \"([^\"]*)\"$" [path media-type]
       (with-server handler {:port test-port}
-        (def last-response (client/get (format "%s:%d/%s" "http://localhost" test-port path)
-                                       {:headers {"Accept" media-type}}))))
+        (last-response-set!
+         (client/get (format "%s:%d/%s" "http://localhost" test-port path)
+                     {:headers {"Accept" media-type}}))))
 
 (Then #"^I should get a status of (\d+)$" [status]
-      (assert (= (:status last-response) status)))
+      (is (= (:status @last-response) (read-string status))))
 
-(Then #"^the resource representation should have exactly the following properties:$" [arg1]
-      (is (= (:body last-response) "what")))
+(Then #"^the resource representation should have exactly the following properties:$" [table]
+      (let [actual (into {} (remove (fn [[key item]] (= key :_links))
+                                    (json/parse-string (:body @last-response) true)))
+            map-of-table (table-to-map table)
+            expected (zipmap
+                      (map keyword (keys map-of-table))
+                      (vals map-of-table))]
+        (is (= expected actual))))
 
-(Then #"^the resource representation should have exactly the following links:$" [arg1]
-      (is (= (:body last-response) "what")))
+(Then #"^the resource representation should have exactly the following links:$" [table]
+      (let [actual-links (get (json/parse-string (:body @last-response)) "_links")
+            expected-links (into {} (rest (table-to-map table)))]
+        (is (= (count expected-links)
+               (count actual-links)))
+        (is (= (keys expected-links)
+               (keys actual-links)))
+        (doall
+         (map (fn [link]
+                (let [[link-relation href] link]
+                  (= (get actual-links link-relation)
+                     href)))
+              expected-links))
+        ))
