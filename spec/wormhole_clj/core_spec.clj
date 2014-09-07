@@ -40,14 +40,6 @@
                   (should= "application/vnd.hale+json"
                            (get (:headers (request (format "%s%s" "/v2/discoverable_resources/" "studies"))) "Content-Type")))))
 
-
-(describe
- "unknown routes response"
- (it "return the correct error message"
-     (should= "Not Found" (:body (request "random/path"))))
- (it "return the correct status code"
-    (should= 404 (:status (request "random/path")))))
-
 (let [resource-name "studies"
       link-relation "http://localhost/alps/studies"
       href "http://localhost/studies"]
