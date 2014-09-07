@@ -23,7 +23,8 @@ FIXME: listing of options this app accepts.
 ## Bugs
 
 ## Development
-To run unit tests: `lein with-profile spec,test specx`
+To run unit tests: `lein with-profile spec,test spec`
+To run cucumber: `lein with-profile test cucumber`
 
 ## License
 
