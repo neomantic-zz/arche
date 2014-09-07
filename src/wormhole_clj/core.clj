@@ -11,11 +11,16 @@
             [wormhole-clj.http :as http-helper]
             [wormhole-clj.media :as media]
             [wormhole-clj.app-state :as app]
+            [pandect.core :refer :all :as digest]
             [environ.core :refer [env]]))
 
 (declare discoverable-resources)
 
 (defdb db records/dbspec)
+
+(defn etag-make [entity-name record]
+  (digest/md5 (format "%s/%d-%d" (name entity-name) (:id record)
+                      (:updated_at record))))
 
 (defentity discoverable-resources
   (pk :id)
@@ -54,7 +59,8 @@
                (ring-response
                 {:status 200
                  :headers (into {}
-                                [(http-helper/cache-control-header-private-age (app/cache-expiry))
+                                [(http-helper/header-etag (etag-make "discoverable_resources" entity))
+                                 (http-helper/cache-control-header-private-age (app/cache-expiry))
                                  (http-helper/header-location
                                   (discoverable-resource-entity-url (:resource_name entity)))
                                  (http-helper/header-accept media/hale-media-type)])

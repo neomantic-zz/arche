@@ -5,6 +5,7 @@
             [wormhole-clj.core :refer :all]
             [environ.core :refer [env]]))
 
+
 (defn request [uri & params]
   (wormhole-routes {:request-method :get :uri uri :params (first params)}))
 
@@ -106,4 +107,13 @@
      (should= "http://test.host/v2/discoverable_resources/bad%20resource%20name"
               (discoverable-resource-entity-url "bad resource name"))))
 
+
+(describe
+ "etag"
+ (it "creates one"
+     (should-not-be-nil (etag-make "discoverable_resources" {:id 3
+                                                             :updated_at 3})))
+ (it "should be a string"
+     (should-be string? (etag-make "discoverable_resources" {:id 3
+                                                             :updated_at 3}))))
 (run-specs)
