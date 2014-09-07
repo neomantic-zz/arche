@@ -10,24 +10,12 @@
             [cheshire.core :refer :all :as json]
             [wormhole-clj.http :as http-helper]
             [wormhole-clj.media :as media]
+            [wormhole-clj.app-state :as app]
             [environ.core :refer [env]]))
 
 (declare discoverable-resources)
 
 (defdb db records/dbspec)
-
-(defn cache-expiry []
-  (if-let [expiry (env :cache-expiry)]
-    expiry
-    600))
-
-(defn base-uri []
-  (if-let [uri (env :base-uri)]
-    uri
-    (throw (Exception. "Missing base uri environmental variable"))))
-
-(defn app-uri-for [path]
-  (format "%s%s" (base-uri) path))
 
 (defentity discoverable-resources
   (pk :id)
@@ -45,7 +33,7 @@
   :handle-ok (fn [_] (format "Returning All of them")))
 
 (defn discoverable-resource-entity-url [resource-name]
-  (app-uri-for (format "%s/%s" "v2/discoverable_resources"
+  (app/app-uri-for (format "%s/%s" "v2/discoverable_resources"
                        (ring/url-encode resource-name))))
 
 (defn discoverable-resource-representation [representable-hash-map]
@@ -66,7 +54,7 @@
                (ring-response
                 {:status 200
                  :headers (into {}
-                                [(http-helper/cache-control-header-private-age 600)
+                                [(http-helper/cache-control-header-private-age (app/cache-expiry))
                                  (http-helper/header-location
                                   (discoverable-resource-entity-url (:resource_name entity)))
                                  (http-helper/header-accept media/hale-media-type)])

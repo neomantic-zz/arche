@@ -21,15 +21,6 @@
    (format "%s%s" "http://factory/" resource-name)))
 
 (describe
- "environment"
- (it "returns the correct base-uri"
-     (should-not-be-nil (base-uri))))
-
-(describe
- (it "returns a cache expiry value"
-     (should= 600 (cache-expiry))))
-
-(describe
  "routes to GET discoverable resources"
  (describe
   "when item exists"
