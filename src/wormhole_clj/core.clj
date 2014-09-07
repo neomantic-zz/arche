@@ -64,10 +64,11 @@
   :handle-ok (fn [{entity ::existing}]
                (ring-response
                 {:status 200
-                 :headers (conj
-                           (http-helper/header-accept media/hale-media-type)
-                           (http-helper/header-location
-                            (discoverable-resource-entity-url (:resource_name entity))))
+                 :headers (into {}
+                                [(http-helper/cache-control-header-private-age 600)
+                                 (http-helper/header-location
+                                  (discoverable-resource-entity-url (:resource_name entity)))
+                                 (http-helper/header-accept media/hale-media-type)])
                  :body (discoverable-resource-representation entity)})))
 
 
