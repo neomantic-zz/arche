@@ -11,7 +11,8 @@
                  [mysql/mysql-connector-java "5.1.25"]
                  [cheshire "5.3.1"]
                  [clj-http "1.0.0"] ;; FIX - this is really a development dependency
-                 [environ "1.0.0"]]
+                 [environ "1.0.0"]
+                 [clj-time "0.8.0"]]
   :profiles {:uberjar {:aot :all}
              :spec {:env {:base-uri "http://test.host/"}
                     :dependencies [[speclj "3.1.0"]]}
