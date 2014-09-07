@@ -53,7 +53,7 @@
    (conj
     representable-hash-map
     {media/keyword-links
-     (media/self-link-relation (discoverable-resource-entity-url (:resource_name orm-hash-map)))})))
+     (media/self-link-relation (discoverable-resource-entity-url (:resource_name representable-hash-map)))})))
 
 (defresource discoverable-resource-entity [resource-name]
   :available-media-types [media/hale-media-type]
