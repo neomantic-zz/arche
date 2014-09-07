@@ -1,5 +1,8 @@
 (ns step-definitions.discoverable-resources-steps
-  (:use wormhole-clj.core wormhole-clj.db cucumber.runtime.clj clojure.test)
+  (:use wormhole-clj.core
+        wormhole-clj.db
+        cucumber.runtime.clj
+        clojure.test)
   (:require [clojure.java.jdbc :as jdbc]
             [ring.adapter.jetty :as ring]
             [wormhole-clj.media :as media]
@@ -8,6 +11,10 @@
 
 (defn table-to-map [table]
   (into {} (map vec (.raw table))))
+
+(defn table-rows-map [table]
+  (into {} (rest (table-to-map table))))
+
 
 (def test-port 57767)
 
@@ -78,7 +85,7 @@
 
 (Then #"^the resource representation should have exactly the following links:$" [table]
       (let [actual-links (get (json/parse-string (:body @last-response)) (name media/keyword-links))
-            expected-links (into {} (rest (table-to-map table)))]
+            expected-links (table-rows-map table)]
         (is (= (count expected-links)
                (count actual-links)))
         (is (= (keys expected-links)
@@ -91,6 +98,11 @@
               expected-links))
         ))
 
-(Then #"^the response should have the following header fields:$" [arg1]
-      (comment  Express the Regexp above with the code you wish you had  )
-      (throw (cucumber.runtime.PendingException.)))
+(Then #"^the response should have the following header fields:$" [table]
+      (let [received-headers (:headers @last-response)
+            expected-headers (table-rows-map table)]
+        (doall
+         (map (fn [header]
+                (let [[field value] header]
+                  (is (= (get received-headers field) value))))
+              expected-headers))))
