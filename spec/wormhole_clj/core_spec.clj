@@ -26,6 +26,10 @@
      (should-not-be-nil (base-uri))))
 
 (describe
+ (it "returns a cache expiry value"
+     (should= 600 (cache-expiry))))
+
+(describe
  "routes to GET discoverable resources"
  (describe
   "when item exists"

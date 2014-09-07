@@ -15,6 +15,11 @@
 
 (defdb db dbspec)
 
+(defn cache-expiry []
+  (if-let [expiry (env :cache-expiry)]
+    expiry
+    600))
+
 (defn base-uri []
   (if-let [uri (env :base-uri)]
     uri
