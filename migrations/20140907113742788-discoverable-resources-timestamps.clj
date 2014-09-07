@@ -5,4 +5,4 @@
 
 (defn down []
   ["ALTER TABLE discoverable_resources DROP COLUMN created_at"
-   "ALTER TABLE discoverable_resources DROP COLUMN created_at"])
+   "ALTER TABLE discoverable_resources DROP COLUMN updated_at"])
