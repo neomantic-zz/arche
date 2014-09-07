@@ -33,10 +33,6 @@
           discoverable-resources
           (where {:resource_name resource-name}))))
 
-(defresource discoverable-resource-collection []
-  :available-media-types ["application/json"]
-  :handle-ok (fn [_] (format "Returning All of them")))
-
 (defn discoverable-resource-entity-url [resource-name]
   (app/app-uri-for (format "%s/%s" "v2/discoverable_resources"
                        (ring/url-encode resource-name))))
@@ -80,9 +76,7 @@
 (defroutes wormhole-routes
   (context "/v2" []
            (GET "/discoverable_resources/:resource-name" [resource-name]
-                (discoverable-resource-entity resource-name))
-           (GET "/discoverable_resources/" []
-                (discoverable-resource-collection)))
+                (discoverable-resource-entity resource-name)))
   (route/not-found "Not Found")) ;; TODO - this returns content-type text/html, should be text/plain
 
 (def handler

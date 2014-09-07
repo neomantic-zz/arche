@@ -38,9 +38,7 @@
                            (get (:headers (request (format "%s%s" "/v2/discoverable_resources/" "studies"))) "Location")))
   (it "returns have the correct accept header"
                   (should= "application/vnd.hale+json"
-                           (get (:headers (request (format "%s%s" "/v2/discoverable_resources/" "studies"))) "Content-Type"))))
- (it "supports /v2/discoverable_resources/ without name"
-     (should-be successful? (request "/v2/discoverable_resources/"))))
+                           (get (:headers (request (format "%s%s" "/v2/discoverable_resources/" "studies"))) "Content-Type")))))
 
 
 (describe
