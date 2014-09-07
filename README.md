@@ -26,6 +26,15 @@ FIXME: listing of options this app accepts.
 To run unit tests: `lein with-profile spec,test spec`
 To run cucumber: `lein with-profile test cucumber`
 
+## Production
+### 12 factorization enviroment variables
+
+* `BASE_URI`
+* `DATABASE_PASSWORD`
+* `DATABASE_USER`
+* `DATABASE_SUBNAME`
+* `CACHE_EXPIRY`
+
 ## License
 
 Copyright © 2014 Chad Albers
