@@ -83,7 +83,6 @@
                (count actual-links)))
         (is (= (keys expected-links)
                (keys actual-links)))
-        (prn actual-links)
         (doall
          (map (fn [link]
                 (let [[link-relation href] link]
