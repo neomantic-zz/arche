@@ -16,7 +16,9 @@
 (defdb db dbspec)
 
 (defn base-uri []
-  (env :base-uri))
+  (if-let [uri (env :base-uri)]
+    uri
+    (throw (Exception. "Missing base uri environmental variable"))))
 
 (defn app-uri-for [path]
   (format "%s%s" (base-uri) path))
