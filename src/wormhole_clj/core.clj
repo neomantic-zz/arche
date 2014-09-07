@@ -1,10 +1,11 @@
 (ns wormhole-clj.core
-  (:use compojure.core korma.db korma.core wormhole-clj.db)
+  (:use compojure.core korma.db korma.core)
   (:require [ring.util.codec :only [url-encode] :as ring]
             [liberator.core :refer [resource defresource]]
             [liberator.representation :as rep :refer [ring-response as-response]]
             [ring.middleware.params :refer [wrap-params]]
             [compojure.route :as route]
+            [wormhole-clj.db :as records]
             [clojure.string :as str]
             [cheshire.core :refer :all :as json]
             [wormhole-clj.http :as http-helper]
@@ -13,7 +14,7 @@
 
 (declare discoverable-resources)
 
-(defdb db dbspec)
+(defdb db records/dbspec)
 
 (defn cache-expiry []
   (if-let [expiry (env :cache-expiry)]
@@ -75,9 +76,11 @@
 (defn discoverable-resource-create [resource-name link-relation href]
   (if-let [existing (discoverable-resource-first resource-name)]
     {:errors {:taken-by existing}}
-    (let [attributes {:resource_name resource-name
-                      :link_relation link-relation
-                      :href href}]
+    (let [attributes (conj
+                      (records/new-record-timestamps)
+                      {:resource_name resource-name
+                       :link_relation link-relation
+                       :href href})]
       (conj attributes (insert discoverable-resources (values attributes))))))
 
 (defroutes wormhole-routes
