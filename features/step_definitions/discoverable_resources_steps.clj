@@ -6,6 +6,7 @@
   (:require [clojure.java.jdbc :as jdbc]
             [ring.adapter.jetty :as ring]
             [wormhole-clj.media :as media]
+            [wormhole-clj.app-state :as app]
             [cheshire.core :refer :all :as json]
             [clj-http.client :as client]))
 
@@ -29,7 +30,7 @@
 (defn verify-app-url [url]
   (when-let [result (re-matches
                    (re-pattern
-                    (format "\\A%s(.*)" (java.util.regex.Pattern/quote (base-uri))))
+                    (format "\\A%s(.*)" (java.util.regex.Pattern/quote (app/base-uri))))
                    url)]
     (let [response (execute-get-request
                     (let [path (nth result 1)]
