@@ -90,3 +90,7 @@
                   (verify-app-url href)))
               expected-links))
         ))
+
+(Then #"^the response should have the following header fields:$" [arg1]
+      (comment  Express the Regexp above with the code you wish you had  )
+      (throw (cucumber.runtime.PendingException.)))
