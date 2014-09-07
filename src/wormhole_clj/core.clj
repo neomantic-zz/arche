@@ -48,10 +48,10 @@
   (app-uri-for (format "%s/%s" "v2/discoverable_resources"
                        (ring/url-encode resource-name))))
 
-(defn discoverable-resource-representation [orm-hash-map]
+(defn discoverable-resource-representation [representable-hash-map]
   (json/generate-string
    (conj
-    orm-hash-map
+    representable-hash-map
     {media/keyword-links
      (media/self-link-relation (discoverable-resource-entity-url (:resource_name orm-hash-map)))})))
 
