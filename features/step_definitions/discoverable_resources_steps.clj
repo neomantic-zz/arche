@@ -105,5 +105,7 @@
         (doall
          (map (fn [header]
                 (let [[field value] header]
-                  (is (= (get received-headers field) value))))
+                  (if (= value "anything")
+                    (is (not (nil? value)))
+                    (is (= (get received-headers field) value)))))
               expected-headers))))
