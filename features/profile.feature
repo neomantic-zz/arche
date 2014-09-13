@@ -3,9 +3,6 @@ Feature: Profile
   As an API client
   I want receive a machine parsable alps descriptor document
 
-
-@PB31416-01
-@Review[SQA]
 Scenario: A client should be able to receive a profile of entry in application/alps+json
    Given a discoverable resource exists with the following attributes:
    | link_relation | https://www.mydomain.com/alps/study |
@@ -46,8 +43,6 @@ Scenario: A client should be able to receive a profile of entry in application/a
    }
    """
 
-@PB31416-01
-@Review[SQA]
 Scenario: A client should be able to receive the correct headers of a profile response
    Given a discoverable resource exists with the following attributes:
    | link_relation | https://www.mydomain.com/alps/study |
