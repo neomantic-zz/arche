@@ -16,3 +16,12 @@
  "paths"
  (it "returns the correct string for the alps path"
      (should= "alps" alps-path)))
+
+(describe
+ "creating urls"
+ (it "creates the correct url for an alps profile"
+     (should= "http://test.host/v2/alps/FooBars"
+              (alps-profile-url "FooBars")))
+ (it "creates the correct url for an alps profile when resource name needs to be escaped"
+     (should= "http://test.host/v2/alps/Foo%20Bars"
+              (alps-profile-url "Foo Bars"))))

@@ -3,6 +3,7 @@
   (:require [speclj.core :refer :all]
             [clojure.java.jdbc :as jdbc]
             [wormhole-clj.core :refer :all]
+            [wormhole-clj.resources.profiles :refer :all :as profile]
             [environ.core :refer [env]]))
 
 
@@ -95,13 +96,7 @@
               (discoverable-resource-entity-url "studies")))
  (it "creates the correct discoverable resource entity url with url encoding"
      (should= "http://test.host/v2/discoverable_resources/bad%20resource%20name"
-              (discoverable-resource-entity-url "bad resource name")))
- (it "creates the correct url for an alps profile"
-     (should= "http://test.host/v2/alps/FooBars"
-              (alps-profile-url "FooBars")))
- (it "creates the correct url for an alps profile when resource name needs to be escaped"
-     (should= "http://test.host/v2/alps/Foo%20Bars"
-              (alps-profile-url "Foo Bars"))))
+              (discoverable-resource-entity-url "bad resource name"))))
 
 
 (describe
@@ -150,4 +145,10 @@
                          :type "self"}]
                  :doc {:value "Describes the semantics, states and state transitions associated with DiscoverableResources."}}}
                (discoverable-resource-alps-representation))))
+
+(describe
+ "registered profiles"
+ (it "has registered discovered resources profile"
+     (should-not-be-nil (registered-profile-get :discoverable-resources))))
+
 (run-specs)

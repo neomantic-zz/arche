@@ -12,6 +12,7 @@
             [wormhole-clj.media :as media]
             [wormhole-clj.alps :as alps]
             [wormhole-clj.app-state :as app]
+            [wormhole-clj.resources.profiles :as profile]
             [pandect.core :refer :all :as digest]
             [environ.core :refer [env]]
             [inflections.core :refer :all :as inflect]))
@@ -23,9 +24,6 @@
 (defn entity-etag-make [entity-type record]
   (digest/md5 (format "%s/%d-%d" (name entity-type) (:id record)
                       (:updated_at record))))
-
-(defn body-etag-make [body]
-  (digest/md5 body))
 
 (defentity discoverable-resources
   (pk :id)
@@ -41,9 +39,6 @@
 (defn discoverable-resource-entity-url [resource-name]
   (app/app-uri-for (format "v2/discoverable_resources/%s"
                            (ring/url-encode resource-name))))
-
-(defn alps-profile-url [resource-name]
-  (app/app-uri-for (format "v2/%s/%s" app/alps-path (ring/url-encode resource-name))))
 
 (defn discoverable-resource-representation [representable-hash-map]
   (json/generate-string
@@ -86,11 +81,11 @@
         alps/keyword-type alps/type-value-semantic
         alps/keyword-id return-type
         alps/keyword-link
-        [{alps/keyword-href (format "%s#%s" (alps-profile-url entity-type) return-type)
+        [{alps/keyword-href (format "%s#%s" (app/alps-profile-url entity-type) return-type)
           alps/keyword-rel (name media/link-relation-self)}]
         alps/keyword-doc {alps/keyword-value "A Resource that can be discovered via an entry point"}}]
       alps/keyword-link
-      [{alps/keyword-href (alps-profile-url entity-type)
+      [{alps/keyword-href (app/alps-profile-url entity-type)
         alps/keyword-type (name media/link-relation-self)}]
       alps/keyword-doc
       {alps/keyword-value "Describes the semantics, states and state transitions associated with DiscoverableResources."}})))
@@ -113,26 +108,6 @@
                                  (http-helper/header-accept media/hale-media-type)])
                  :body (discoverable-resource-representation entity)})))
 
-(def supported-profiles #{"DiscoverableResources"})
-
-(defresource alps-profiles [resource-name]
-  :available-media-types [alps/json-media-type]
-  :allowed-mehods [:get]
-  :exists? (fn [_]
-             (if (get supported-profiles resource-name) true false))
-  :handle-ok (fn [_]
-               (let [body (json/generate-string
-                                (discoverable-resource-alps-representation))]
-                 (ring-response
-                  {:status 200
-                   :headers (into {}
-                                  [(http-helper/header-etag (body-etag-make body))
-                                   (http-helper/cache-control-header-private-age (app/cache-expiry))
-                                   (http-helper/header-accept alps/json-media-type)
-                                   (http-helper/header-location (alps-profile-url resource-name))])
-                   :body body}))))
-
-
 (defn discoverable-resource-create [resource-name link-relation href]
   (if-let [existing (discoverable-resource-first resource-name)]
     {:errors {:taken-by existing}}
@@ -143,10 +118,13 @@
                        :href href})]
       (conj attributes (insert discoverable-resources (values attributes))))))
 
+(profile/profile-register!
+ {:discoverable-resources discoverable-resource-alps-representation})
+
 (defroutes wormhole-routes
   (context "/v2" []
            (GET (format "/%s/:resource-name" app/alps-path) [resource-name]
-                (alps-profiles resource-name))
+                (profile/alps-profiles (inflect/hyphenate resource-name)))
            (GET "/discoverable_resources/:resource-name" [resource-name]
                 (discoverable-resource-entity resource-name)))
   (route/not-found "Not Found")) ;; TODO - this returns content-type text/html, should be text/plain
