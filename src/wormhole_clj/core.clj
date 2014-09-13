@@ -127,7 +127,7 @@
                 (profile/alps-profiles (inflect/hyphenate resource-name)))
            (GET "/discoverable_resources/:resource-name" [resource-name]
                 (discoverable-resource-entity resource-name)))
-  (route/not-found "Not Found")) ;; TODO - this returns content-type text/html, should be text/plain
+  (route/not-found "Not Found"))
 
 (def handler
   (-> wormhole-routes
