@@ -10,6 +10,7 @@
             [cheshire.core :refer :all :as json]
             [wormhole-clj.http :as http-helper]
             [wormhole-clj.media :as media]
+            [wormhole-clj.alps :as alps]
             [wormhole-clj.app-state :as app]
             [pandect.core :refer :all :as digest]
             [environ.core :refer [env]]))
@@ -44,6 +45,25 @@
     {media/keyword-links
      (media/self-link-relation (discoverable-resource-entity-url (:resource_name representable-hash-map)))})))
 
+(defn discoverable-resource-alps-representation []
+  (alps/document-hash-map
+   {alps/keyword-descriptor
+    [{alps/keyword-href alps/schema-url
+      alps/keyword-type alps/type-value-semantic
+      alps/keyword-id "link_relation"
+      alps/keyword-doc
+      {alps/keyword-value "The LinkRelation of the DiscoverableResource"}}
+     {alps/keyword-href alps/schema-url
+      alps/keyword-type alps/type-value-semantic
+      alps/keyword-id "href"
+      alps/keyword-doc
+      {alps/keyword-value "The HREF to the entry point of the DiscoverableResource"}}
+     {alps/keyword-href alps/schema-text
+      alps/keyword-type alps/type-value-semantic
+      alps/keyword-id "resource_name"
+      alps/keyword-doc
+      {alps/keyword-value "The name of the DiscoverableResource"}}]}))
+
 (defresource discoverable-resource-entity [resource-name]
   :available-media-types [media/hale-media-type]
   :allowed-methods [:get]
@@ -62,6 +82,22 @@
                                  (http-helper/header-accept media/hale-media-type)])
                  :body (discoverable-resource-representation entity)})))
 
+(def supported-profiles #{"DiscoverableResources"})
+
+(defresource alps-profiles [resource-name]
+  :available-media-types [alps/json-media-type]
+  :allowed-mehods [:get]
+  :exists? (fn [_]
+             (if (get supported-profiles resource-name) true false))
+  :handle-ok (fn [_]
+               (ring-response
+                {:status 200
+                 :headers (into {}
+                                [(http-helper/cache-control-header-private-age (app/cache-expiry))
+                                 (http-helper/header-accept alps/json-media-type)])
+                 :body (json/generate-string
+                        (discoverable-resource-alps-representation))})))
+
 
 (defn discoverable-resource-create [resource-name link-relation href]
   (if-let [existing (discoverable-resource-first resource-name)]
@@ -75,6 +111,8 @@
 
 (defroutes wormhole-routes
   (context "/v2" []
+           (GET "/alps/:resource-name" [resource-name]
+                (alps-profiles resource-name))
            (GET "/discoverable_resources/:resource-name" [resource-name]
                 (discoverable-resource-entity resource-name)))
   (route/not-found "Not Found")) ;; TODO - this returns content-type text/html, should be text/plain

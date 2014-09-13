@@ -106,4 +106,23 @@
  (it "should be a string"
      (should-be string? (etag-make "discoverable_resources" {:id 3
                                                              :updated_at 3}))))
+
+(describe
+ "alps"
+ (it "creates the correct representation of an alps document"
+     (should== {:alps
+                {:descriptor
+                 [{:href "http://alps.io/schema.org/URL"
+                   :type "semantic"
+                   :id "link_relation"
+                   :doc {:value "The LinkRelation of the DiscoverableResource"}}
+                  {:href "http://alps.io/schema.org/URL"
+                   :type "semantic"
+                   :id "href"
+                   :doc {:value "The HREF to the entry point of the DiscoverableResource"}}
+                  {:href "http://alps.io/schema.org/Text"
+                   :type "semantic"
+                   :id "resource_name"
+                   :doc {:value "The name of the DiscoverableResource"}}]}}
+               (discoverable-resource-alps-representation))))
 (run-specs)
