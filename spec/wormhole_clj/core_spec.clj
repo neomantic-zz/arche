@@ -129,6 +129,9 @@
                   {:href "http://alps.io/schema.org/Text"
                    :type "semantic"
                    :id "resource_name"
-                   :doc {:value "The name of the DiscoverableResource"}}]}}
+                   :doc {:value "The name of the DiscoverableResource"}}]
+                 :link [{:href "http://test.host/v2/alps/DiscoverableResources"
+                         :type "self"}]
+                 :doc {:value "Describes the semantics, states and state transitions associated with DiscoverableResources."}}}
                (discoverable-resource-alps-representation))))
 (run-specs)

@@ -39,6 +39,13 @@ Scenario: A client should be able to receive a profile of entry in application/a
               }
           }
        ]
+       "link": [
+          {
+           "href": "http://test.host/alps/DiscoverableResources",
+           "rel": "self"
+       ],
+       "doc": {
+         "value": "Describes the semantics, states and state transitions associated with DiscoverableResources."
      }
    }
    """

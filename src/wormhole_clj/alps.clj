@@ -10,6 +10,7 @@
 (def keyword-doc   :doc)
 (def keyword-id    :id)
 (def keyword-value :value)
+(def keyword-link :link)
 
 (def type-value-semantic "semantic")
 (def schema-url "http://alps.io/schema.org/URL")

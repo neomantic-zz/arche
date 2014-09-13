@@ -26,7 +26,6 @@
 (defn body-etag-make [body]
   (digest/md5 body))
 
-
 (defentity discoverable-resources
   (pk :id)
   (table :discoverable_resources)
@@ -69,7 +68,12 @@
       alps/keyword-type alps/type-value-semantic
       alps/keyword-id "resource_name"
       alps/keyword-doc
-      {alps/keyword-value "The name of the DiscoverableResource"}}]}))
+      {alps/keyword-value "The name of the DiscoverableResource"}}]
+    alps/keyword-link
+    [{alps/keyword-href (alps-profile-url "DiscoverableResources")
+      alps/keyword-type (name media/link-relation-self)}]
+    alps/keyword-doc
+    {alps/keyword-value "Describes the semantics, states and state transitions associated with DiscoverableResources."}}))
 
 (defresource discoverable-resource-entity [resource-name]
   :available-media-types [media/hale-media-type]

@@ -5,23 +5,25 @@
 
 (describe
  "media types"
- (it "returns to correct value for json"
+ (it "returns the correct value for json media type"
      (should= "application/alps+json" json-media-type)))
 
 (describe
  "alps reserved key words"
- (it "returns correct keyword for alps"
+ (it "returns the correct keyword for alps"
      (should= :alps keyword-alps))
- (it "returns correct keyword for href"
+ (it "returns the correct keyword for href"
      (should= :href keyword-href))
- (it "returns correct keyword for type"
+ (it "returns the correct keyword for type"
      (should= :type keyword-type))
- (it "returns correct keyword for doc"
+ (it "returns the correct keyword for doc"
      (should= :doc keyword-doc))
- (it "returns correct keyword for id"
+ (it "returns the correct keyword for id"
      (should= :id keyword-id))
- (it "returns correct keyword for value"
-     (should= :value keyword-value)))
+ (it "returns the correct keyword for value"
+     (should= :value keyword-value))
+ (it "returns the correct keyword for link"
+     (should= :link keyword-link)))
 
 (describe
  "alps reserved values"
