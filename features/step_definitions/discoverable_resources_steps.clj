@@ -98,14 +98,3 @@
                   (verify-app-url href)))
               expected-links))
         ))
-
-(Then #"^the response should have the following header fields:$" [table]
-      (let [received-headers (:headers @last-response)
-            expected-headers (table-rows-map table)]
-        (doall
-         (map (fn [header]
-                (let [[field value] header]
-                  (if (= value "anything")
-                    (is (not (nil? value)))
-                    (is (= (get received-headers field) value)))))
-              expected-headers))))

@@ -45,3 +45,17 @@ Scenario: A client should be able to receive a profile of entry in application/a
      }
    }
    """
+
+@PB31416-01
+@Review[SQA]
+Scenario: A client should be able to receive the correct headers of a profile response
+   Given a discoverable resource exists with the following attributes:
+   | link_relation | https://www.mydomain.com/alps/study |
+   | href          | https://service.com/study           |
+   | resource_name | studies                             |
+   And I invoke the uniform interface method GET to "v2/alps/DiscoverableResources" accepting "application/alps+json"
+    And the response should have the following header fields:
+    | field         | field_contents                                 |
+    | Cache-Control | max-age=600, private                           |
+    | ETag          | anything                                       |
+    | Location      | http://test.host/v2/alps/DiscoverableResources |

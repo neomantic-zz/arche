@@ -1,6 +1,6 @@
 (ns wormhole-clj.app-state
-  (:require
-   [environ.core :refer [env]]))
+  (:require [environ.core :refer [env]]
+            [wormhole-clj.alps :only [keyword-alps] :as alps]))
 
 (defn cache-expiry []
   (if-let [expiry (env :cache-expiry)]
@@ -14,3 +14,5 @@
 
 (defn app-uri-for [path]
   (format "%s%s" (base-uri) path))
+
+(def alps-path (name alps/keyword-alps))

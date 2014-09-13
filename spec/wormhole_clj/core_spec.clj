@@ -89,22 +89,28 @@
                                                href)))))
 
 (describe
- "entity url"
+ "creating urls"
  (it "creates the correct discoverable resource entity url"
      (should= "http://test.host/v2/discoverable_resources/studies"
               (discoverable-resource-entity-url "studies")))
  (it "creates the correct discoverable resource entity url with url encoding"
      (should= "http://test.host/v2/discoverable_resources/bad%20resource%20name"
-              (discoverable-resource-entity-url "bad resource name"))))
+              (discoverable-resource-entity-url "bad resource name")))
+ (it "creates the correct url for an alps profile"
+     (should= "http://test.host/v2/alps/FooBars"
+              (alps-profile-url "FooBars")))
+ (it "creates the correct url for an alps profile when resource name needs to be escaped"
+     (should= "http://test.host/v2/alps/Foo%20Bars"
+              (alps-profile-url "Foo Bars"))))
 
 
 (describe
  "etag"
  (it "creates one"
-     (should-not-be-nil (etag-make "discoverable_resources" {:id 3
+     (should-not-be-nil (entity-etag-make "discoverable_resources" {:id 3
                                                              :updated_at 3})))
  (it "should be a string"
-     (should-be string? (etag-make "discoverable_resources" {:id 3
+     (should-be string? (entity-etag-make "discoverable_resources" {:id 3
                                                              :updated_at 3}))))
 
 (describe

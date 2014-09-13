@@ -19,9 +19,13 @@
 
 (defdb db records/dbspec)
 
-(defn etag-make [entity-name record]
-  (digest/md5 (format "%s/%d-%d" (name entity-name) (:id record)
+(defn entity-etag-make [entity-type record]
+  (digest/md5 (format "%s/%d-%d" (name entity-type) (:id record)
                       (:updated_at record))))
+
+(defn body-etag-make [body]
+  (digest/md5 body))
+
 
 (defentity discoverable-resources
   (pk :id)
@@ -35,8 +39,11 @@
           (where {:resource_name resource-name}))))
 
 (defn discoverable-resource-entity-url [resource-name]
-  (app/app-uri-for (format "%s/%s" "v2/discoverable_resources"
-                       (ring/url-encode resource-name))))
+  (app/app-uri-for (format "v2/discoverable_resources/%s"
+                           (ring/url-encode resource-name))))
+
+(defn alps-profile-url [resource-name]
+  (app/app-uri-for (format "v2/%s/%s" app/alps-path (ring/url-encode resource-name))))
 
 (defn discoverable-resource-representation [representable-hash-map]
   (json/generate-string
@@ -75,7 +82,7 @@
                (ring-response
                 {:status 200
                  :headers (into {}
-                                [(http-helper/header-etag (etag-make "discoverable_resources" entity))
+                                [(http-helper/header-etag (entity-etag-make "discoverable_resources" entity))
                                  (http-helper/cache-control-header-private-age (app/cache-expiry))
                                  (http-helper/header-location
                                   (discoverable-resource-entity-url (:resource_name entity)))
@@ -90,13 +97,16 @@
   :exists? (fn [_]
              (if (get supported-profiles resource-name) true false))
   :handle-ok (fn [_]
-               (ring-response
-                {:status 200
-                 :headers (into {}
-                                [(http-helper/cache-control-header-private-age (app/cache-expiry))
-                                 (http-helper/header-accept alps/json-media-type)])
-                 :body (json/generate-string
-                        (discoverable-resource-alps-representation))})))
+               (let [body (json/generate-string
+                                (discoverable-resource-alps-representation))]
+                 (ring-response
+                  {:status 200
+                   :headers (into {}
+                                  [(http-helper/header-etag (body-etag-make body))
+                                   (http-helper/cache-control-header-private-age (app/cache-expiry))
+                                   (http-helper/header-accept alps/json-media-type)
+                                   (http-helper/header-location (alps-profile-url resource-name))])
+                   :body body}))))
 
 
 (defn discoverable-resource-create [resource-name link-relation href]
@@ -111,7 +121,7 @@
 
 (defroutes wormhole-routes
   (context "/v2" []
-           (GET "/alps/:resource-name" [resource-name]
+           (GET (format "/%s/:resource-name" app/alps-path) [resource-name]
                 (alps-profiles resource-name))
            (GET "/discoverable_resources/:resource-name" [resource-name]
                 (discoverable-resource-entity resource-name)))
