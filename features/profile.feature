@@ -37,11 +37,45 @@ Scenario: A client should be able to receive a profile of entry in application/a
               "doc": {
                   "value": "The name of the DiscoverableResource"
               }
-          }
+          },
+          {
+              "rt": "discoverable_resource",
+              "type": "safe",
+              "id": "show",
+              "doc": {
+                  "value": "Returns an individual DiscoverableResource"
+              }
+          },
+           "descriptor": [
+                    {
+                        "href": "link_relation"
+                    },
+                    {
+                        "href": "href"
+                    },
+                    {
+                        "href": "resource_name"
+                    },
+                    {
+                        "href": "show"
+                    }
+                ],
+           "type": "semantic",
+           "id": "discoverable_resource",
+           "link": [
+               {
+                  "href": "http://test-host/v2/alps/DiscoverableResources#discoverable_resource",
+                 "rel": "self"
+               }
+            ],
+            "doc": {
+               "value": "A Resource that can be discovered via an entry point"
+            }
+         }
        ]
        "link": [
           {
-           "href": "http://test.host/alps/DiscoverableResources",
+           "href": "http://test.host/v2/alps/DiscoverableResources",
            "rel": "self"
        ],
        "doc": {

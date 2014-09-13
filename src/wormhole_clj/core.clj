@@ -52,28 +52,44 @@
      (media/self-link-relation (discoverable-resource-entity-url (:resource_name representable-hash-map)))})))
 
 (defn discoverable-resource-alps-representation []
-  (alps/document-hash-map
-   {alps/keyword-descriptor
-    [{alps/keyword-href alps/schema-url
-      alps/keyword-type alps/type-value-semantic
-      alps/keyword-id "link_relation"
-      alps/keyword-doc
-      {alps/keyword-value "The LinkRelation of the DiscoverableResource"}}
-     {alps/keyword-href alps/schema-url
-      alps/keyword-type alps/type-value-semantic
-      alps/keyword-id "href"
-      alps/keyword-doc
-      {alps/keyword-value "The HREF to the entry point of the DiscoverableResource"}}
-     {alps/keyword-href alps/schema-text
-      alps/keyword-type alps/type-value-semantic
-      alps/keyword-id "resource_name"
-      alps/keyword-doc
-      {alps/keyword-value "The name of the DiscoverableResource"}}]
-    alps/keyword-link
-    [{alps/keyword-href (alps-profile-url "DiscoverableResources")
-      alps/keyword-type (name media/link-relation-self)}]
-    alps/keyword-doc
-    {alps/keyword-value "Describes the semantics, states and state transitions associated with DiscoverableResources."}}))
+  (let [link-relation "link_relation"
+        href "href"
+        resource-name "resource_name"]
+ (alps/document-hash-map
+           {alps/keyword-descriptor
+            [{alps/keyword-href alps/schema-url
+              alps/keyword-type alps/type-value-semantic
+              alps/keyword-id link-relation
+              alps/keyword-doc
+              {alps/keyword-value "The LinkRelation of the DiscoverableResource"}}
+             {alps/keyword-href alps/schema-url
+              alps/keyword-type alps/type-value-semantic
+              alps/keyword-id href
+              alps/keyword-doc
+              {alps/keyword-value "The HREF to the entry point of the DiscoverableResource"}}
+             {alps/keyword-href alps/schema-text
+              alps/keyword-type alps/type-value-semantic
+              alps/keyword-id resource-name
+              alps/keyword-doc
+              {alps/keyword-value "The name of the DiscoverableResource"}}
+             {alps/keyword-type alps/type-value-safe
+              alps/keyword-rt "discoverable_resource"
+              alps/keyword-id "show"
+              alps/keyword-doc {alps/keyword-value "Returns an individual DiscoverableResource"}}
+             {alps/keyword-descriptor
+              (into []
+                    (map (fn [prop] {alps/keyword-href prop}) [link-relation href resource-name "show"]))
+              alps/keyword-type alps/type-value-semantic
+              alps/keyword-id "discoverable_resource"
+              alps/keyword-link
+              [{alps/keyword-href (format "%s#%s" (alps-profile-url "DiscoverableResources") "discoverable_resource")
+                alps/keyword-rel (name media/link-relation-self)}]
+              alps/keyword-doc {alps/keyword-value "A Resource that can be discovered via an entry point"}}]
+            alps/keyword-link
+            [{alps/keyword-href (alps-profile-url "DiscoverableResources")
+              alps/keyword-type (name media/link-relation-self)}]
+            alps/keyword-doc
+            {alps/keyword-value "Describes the semantics, states and state transitions associated with DiscoverableResources."}})))
 
 (defresource discoverable-resource-entity [resource-name]
   :available-media-types [media/hale-media-type]

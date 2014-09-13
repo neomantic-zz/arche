@@ -129,7 +129,23 @@
                   {:href "http://alps.io/schema.org/Text"
                    :type "semantic"
                    :id "resource_name"
-                   :doc {:value "The name of the DiscoverableResource"}}]
+                   :doc {:value "The name of the DiscoverableResource"}}
+                  {:rt "discoverable_resource"
+                   :type "safe"
+                   :id   "show"
+                   :doc {:value "Returns an individual DiscoverableResource"}}
+                  {:descriptor
+                   [{:href "link_relation"}
+                    {:href "href"}
+                    {:href "resource_name"}
+                    {:href "show"}]
+                   :type "semantic"
+                   :id "discoverable_resource"
+                   :link
+                   [{:href "http://test.host/v2/alps/DiscoverableResources#discoverable_resource"
+                     :rel "self"}]
+                   :doc
+                   {:value "A Resource that can be discovered via an entry point"}}]
                  :link [{:href "http://test.host/v2/alps/DiscoverableResources"
                          :type "self"}]
                  :doc {:value "Describes the semantics, states and state transitions associated with DiscoverableResources."}}}

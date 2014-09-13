@@ -23,12 +23,18 @@
  (it "returns the correct keyword for value"
      (should= :value keyword-value))
  (it "returns the correct keyword for link"
-     (should= :link keyword-link)))
+     (should= :link keyword-link))
+ (it "returns the correct keyword for rt"
+     (should= :rt keyword-rt))
+ (it "returns the correct keyword for rel"
+     (should= :rel keyword-rel)))
 
 (describe
  "alps reserved values"
  (it "returns correct string for semantic"
-     (should= "semantic" type-value-semantic)))
+     (should= "semantic" type-value-semantic))
+ (it "returns correct string for semantic"
+     (should= "safe" type-value-safe)))
 
 (describe
  "alps schemas"
