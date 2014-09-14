@@ -3,9 +3,6 @@ Feature: API for discoverable resources
   As an API client
   I want read a catalogue of available resource to discover
 
-# TODO Add profile, type, and help link
-@PB31415-02
-@Review[SQA]
 Scenario: A client reads a discoverable resource as hale+json
     Given a discoverable resource exists with the following attributes:
     | link_relation | https://www.mydomain.com/studies |
