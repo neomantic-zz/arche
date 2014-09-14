@@ -86,7 +86,7 @@
         alps/keyword-doc {alps/keyword-value "A Resource that can be discovered via an entry point"}}]
       alps/keyword-link
       [{alps/keyword-href (app/alps-profile-url entity-type)
-        alps/keyword-type (name media/link-relation-self)}]
+        alps/keyword-rel (name media/link-relation-self)}]
       alps/keyword-doc
       {alps/keyword-value "Describes the semantics, states and state transitions associated with DiscoverableResources."}})))
 
