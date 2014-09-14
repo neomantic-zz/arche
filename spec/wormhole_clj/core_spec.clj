@@ -142,7 +142,7 @@
                    :doc
                    {:value "A Resource that can be discovered via an entry point"}}]
                  :link [{:href "http://test.host/v2/alps/DiscoverableResources"
-                         :type "self"}]
+                         :rel "self"}]
                  :doc {:value "Describes the semantics, states and state transitions associated with DiscoverableResources."}}}
                (discoverable-resource-alps-representation))))
 
