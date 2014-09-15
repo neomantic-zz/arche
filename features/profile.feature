@@ -12,74 +12,73 @@ Scenario: A client should be able to receive a profile of entry in application/a
    Then I should receive the following "application/alps+json" response:
    """
    {
-    "alps": {
+     "alps": {
        "descriptor": [
-          {
-              "href": "http://alps.io/schema.org/URL",
-              "type": "semantic",
-              "id": "link_relation",
-              "doc": {
-                  "value": "The LinkRelation of the DiscoverableResource"
-              }
-          },
-          {
-              "href": "http://alps.io/schema.org/URL",
-              "type": "semantic",
-              "id": "href",
-              "doc": {
-                  "value": "The HREF to the entry point of the DiscoverableResource"
-              }
-          },
-          {
-              "href": "http://alps.io/schema.org/Text",
-              "type": "semantic",
-              "id": "resource_name",
-              "doc": {
-                  "value": "The name of the DiscoverableResource"
-              }
-          },
-          {
-              "rt": "discoverable_resource",
-              "type": "safe",
-              "id": "show",
-              "doc": {
-                  "value": "Returns an individual DiscoverableResource"
-              }
-          },
-           "descriptor": [
-                    {
-                        "href": "link_relation"
-                    },
-                    {
-                        "href": "href"
-                    },
-                    {
-                        "href": "resource_name"
-                    },
-                    {
-                        "href": "show"
-                    }
-                ],
+         {
+           "doc": {
+             "value": "The LinkRelation of the DiscoverableResource"
+           },
+           "id": "link_relation",
            "type": "semantic",
+           "href": "http://alps.io/schema.org/URL"
+         },
+         {
+           "doc": {
+             "value": "The HREF to the entry point of the DiscoverableResource"
+           },
+           "id": "href",
+           "type": "semantic",
+           "href": "http://alps.io/schema.org/URL"
+         },
+         {
+           "doc": {
+             "value": "The name of the DiscoverableResource"
+           },
+           "id": "resource_name",
+           "type": "semantic",
+           "href": "http://alps.io/schema.org/Text"
+         },
+         {
+           "doc": {
+             "value": "Returns an individual DiscoverableResource"
+           },
+           "id": "show",
+           "rt": "discoverable_resource",
+           "type": "safe"
+         },
+         {
+           "doc": {
+             "value": "A Resource that can be discovered via an entry point"
+           },
+           "link": {
+               "rel": "self",
+               "href": "http://example.org/v2/alps/DiscoverableResources#discoverable_resource"
+           },
            "id": "discoverable_resource",
-           "link": [
-               {
-                  "href": "http://test-host/v2/alps/DiscoverableResources#discoverable_resource",
-                 "rel": "self"
-               }
-            ],
-            "doc": {
-               "value": "A Resource that can be discovered via an entry point"
-            }
+           "type": "semantic",
+           "descriptor": [
+             {
+               "href": "link_relation"
+             },
+             {
+               "href": "href"
+             },
+             {
+               "href": "resource_name"
+             },
+             {
+               "href": "show"
+             }
+           ]
          }
-       ]
-       "link": [
-          {
-           "href": "http://test.host/v2/alps/DiscoverableResources",
-           "rel": "self"
        ],
        "doc": {
          "value": "Describes the semantics, states and state transitions associated with DiscoverableResources."
+       },
+       "link": {
+           "rel": "self",
+           "href": "http://example.org/v2/alps/DiscoverableResources"
+       }
      }
    }
    """

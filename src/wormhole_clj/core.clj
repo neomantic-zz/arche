@@ -81,12 +81,12 @@
         alps/keyword-type alps/type-value-semantic
         alps/keyword-id return-type
         alps/keyword-link
-        [{alps/keyword-href (format "%s#%s" (app/alps-profile-url entity-type) return-type)
-          alps/keyword-rel (name media/link-relation-self)}]
+        {alps/keyword-href (format "%s#%s" (app/alps-profile-url entity-type) return-type)
+         alps/keyword-rel (name media/link-relation-self)}
         alps/keyword-doc {alps/keyword-value "A Resource that can be discovered via an entry point"}}]
       alps/keyword-link
-      [{alps/keyword-href (app/alps-profile-url entity-type)
-        alps/keyword-rel (name media/link-relation-self)}]
+      {alps/keyword-href (app/alps-profile-url entity-type)
+       alps/keyword-rel (name media/link-relation-self)}
       alps/keyword-doc
       {alps/keyword-value "Describes the semantics, states and state transitions associated with DiscoverableResources."}})))
 

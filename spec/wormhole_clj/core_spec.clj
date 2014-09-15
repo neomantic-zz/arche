@@ -138,12 +138,12 @@
                    :type "semantic"
                    :id "discoverable_resource"
                    :link
-                   [{:href "http://example.org/v2/alps/DiscoverableResources#discoverable_resource"
-                     :rel "self"}]
+                   {:href "http://example.org/v2/alps/DiscoverableResources#discoverable_resource"
+                    :rel "self"}
                    :doc
                    {:value "A Resource that can be discovered via an entry point"}}]
-                 :link [{:href "http://example.org/v2/alps/DiscoverableResources"
-                         :rel "self"}]
+                 :link {:href "http://example.org/v2/alps/DiscoverableResources"
+                        :rel "self"}
                  :doc {:value "Describes the semantics, states and state transitions associated with DiscoverableResources."}}}
                (discoverable-resource-alps-representation))))
 
