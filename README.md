@@ -1,24 +1,12 @@
 # wormhole-clj
 
-FIXME: description
 
-## Installation
+## Dependencies
+Clojure
+Leinigen
 
-Download from http://example.com/FIXME.
-
-## Usage
-
-FIXME: explanation
-
-    $ java -jar wormhole-clj-0.1.0-standalone.jar [args]
-
-## Options
-
-FIXME: listing of options this app accepts.
-
-## Examples
-
-...
+## Running
+`lein with-profile dev ring server-headless`
 
 ## Bugs
 
@@ -27,7 +15,7 @@ To run unit tests: `lein with-profile spec,test spec`
 To run cucumber: `lein with-profile test cucumber`
 
 ## Production
-### 12 factorization enviroment variables
+### Eenviroment variables
 
 * `BASE_URI`
 * `DATABASE_PASSWORD`

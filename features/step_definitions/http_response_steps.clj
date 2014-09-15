@@ -11,5 +11,5 @@
                 (let [[field value] header]
                   (if (= value "anything")
                     (is (not (nil? value)))
-                    (is (= (get received-headers field) value)))))
+                    (is (= value (get received-headers field))))))
               expected-headers))))
