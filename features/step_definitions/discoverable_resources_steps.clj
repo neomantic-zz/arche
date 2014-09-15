@@ -88,7 +88,13 @@
             expected (zipmap
                       (map keyword (keys map-of-table))
                       (vals map-of-table))]
-        (is (= expected actual))))
+        (is (= (count expected) (count actual)))
+        (is (= (into #{} (keys expected)) (into #{} (keys actual))))
+        (doall
+         (map (fn [pair]
+                (let [[key value] pair]
+                  (is (= value (key actual)))))
+              expected))))
 
 (Then #"^the resource representation should have exactly the following links:$" [table]
       (let [actual-links (get (json/parse-string (:body @last-response)) (name media/keyword-links))
@@ -96,7 +102,7 @@
         ;; make sure the same number of links are present
         (is (= (count expected-links) (count actual-links)))
         ;; make sure the same links relations are there
-        (is (= (keys expected-links) (keys actual-links)))
+        (is (= (into #{} (keys expected-links)) (into #{} (keys actual-links))))
         ;; check the hrefs
         (doall
          (map (fn [link]
