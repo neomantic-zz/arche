@@ -2,6 +2,7 @@
   (:use wormhole-clj.db)
   (:require [speclj.core :refer :all]
             [clojure.java.jdbc :as jdbc]
+            [wormhole-clj.app-state :refer :all :as app]
             [wormhole-clj.core :refer :all]
             [environ.core :refer [env]]))
 
@@ -34,15 +35,15 @@
                   (should= "application/vnd.hale+json"
                            (get (:headers (request (format "%s%s" "/v2/discoverable_resources/" "studies"))) "Accept")))
   (it "returns the correct location header"
-                  (should= "http://test.host/v2/discoverable_resources/studies"
+                  (should= (format "%s/v2/discoverable_resources/studies" (app/base-uri))
                            (get (:headers (request (format "%s%s" "/v2/discoverable_resources/" "studies"))) "Location")))
   (it "returns have the correct accept header"
                   (should= "application/vnd.hale+json"
                            (get (:headers (request (format "%s%s" "/v2/discoverable_resources/" "studies"))) "Content-Type")))))
 
 (let [resource-name "studies"
-      link-relation "http://localhost/alps/studies"
-      href "http://localhost/studies"]
+      link-relation "http://example.org/alps/studies"
+      href "http://example.org/studies"]
   (describe
    "finding one discoverable resources"
    (before (clean-database)
@@ -56,8 +57,8 @@
         (discoverable-resource-first resource-name)))))
 
 (let [resource-name "studies"
-      link-relation "http://localhost/alps/studies"
-      href "http://localhost/studies"]
+      link-relation "http://example.org/alps/studies"
+      href "http://example.org/studies"]
   (describe
    "creates a discoverable resource"
    (before (clean-database))
@@ -91,10 +92,10 @@
 (describe
  "entity url"
  (it "creates the correct discoverable resource entity url"
-     (should= "http://test.host/v2/discoverable_resources/studies"
+     (should= (format "%s/v2/discoverable_resources/studies" (app/base-uri))
               (discoverable-resource-entity-url "studies")))
  (it "creates the correct discoverable resource entity url with url encoding"
-     (should= "http://test.host/v2/discoverable_resources/bad%20resource%20name"
+     (should= (format "%s%s" (app/base-uri) "/v2/discoverable_resources/bad%20resource%20name")
               (discoverable-resource-entity-url "bad resource name"))))
 
 

@@ -18,6 +18,7 @@ Scenario: A client reads a discoverable resource as hale+json
     | link_relation | href                                                 |
     | self          | http://example.org/v2/discoverable_resources/studies |
     And the response should have the following header fields:
-    | field         | field_contents       |
-    | Cache-Control | max-age=600, private |
-    | ETag          | anything             |
+    | field         | field_contents                                       |
+    | Cache-Control | max-age=600, private                                 |
+    | ETag          | anything                                             |
+    | Location      | http://example.org/v2/discoverable_resources/studies |

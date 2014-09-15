@@ -13,12 +13,13 @@
                  [clj-http "1.0.0"] ;; FIX - this is really a development dependency
                  [environ "1.0.0"]
                  [clj-time "0.8.0"]
+                 [clojurewerkz/urly "1.0.0"]
                  [pandect "0.3.4"]]
   :profiles {:uberjar {:aot :all}
-             :spec {:env {:base-uri "http://test.host/"}
+             :spec {:env {:base-uri "http://example.org"}
                     :dependencies [[speclj "3.1.0"]]}
-             :test {:env {:base-uri "http://test.host/"}}
-             :dev {:env {:base-uri "http://localhost:3000/"}
+             :test {:env {:base-uri "http://example.org"}}
+             :dev {:env {:base-uri "http://localhost:3000"}
                    :dependencies [[speclj "3.1.0"]]}}
   :plugins [[lein-cucumber "1.0.2"]
             [ring-serve "0.1.2"]
