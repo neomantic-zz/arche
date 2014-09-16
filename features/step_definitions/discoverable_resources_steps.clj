@@ -6,7 +6,8 @@
         clojure.test)
   (:refer-clojure :exclude [resolve])
   (:require [clojure.java.jdbc :as jdbc]
-            [ring.adapter.jetty :as ring]
+            [ring.adapter.jetty :as jetty]
+            [ring.util.response :as ring]
             [wormhole-clj.media :as media]
             [clojurewerkz.urly.core :as urly]
             [wormhole-clj.app-state :as app]
@@ -44,20 +45,23 @@
   (get-in links [link-relation-type (name media/keyword-href)]))
 
 (defn execute-get-request [path headers]
-  (client/get (url-to-test path) {:headers headers}))
+  (client/get (url-to-test path) {:throw-exceptions false
+                                  :headers headers}))
 
-(defn verify-app-url [url]
+(defn verify-app-url [url accept-type]
   (when (= (urly/host-of url) (urly/host-of (app/base-uri)))
     (let [path (urly/path-of (urly/url-like url))
-          response (execute-get-request path {"Accept" media/hal-media-type})]
-      (is (= 200 (:status response))))))
+          response (execute-get-request path {"Accept" accept-type})]
+      (if (= 406 (:status response))
+        (verify-app-url url (ring/get-header response "Accept"))
+        (is (= 200 (:status response)))))))
 
 (def server (atom nil))
 
 (defn server-start []
   (if @server
     (throw (IllegalStateException. "Server already started."))
-    (reset! server (ring/run-jetty handler
+    (reset! server (jetty/run-jetty handler
                                    {:port test-port
                                     :join? false}))))
 
@@ -116,5 +120,5 @@
          (map (fn [link]
                 (let [[link-relation href] link]
                   (is (= (URI. (link-href-get link-relation actual-links)) (URI. href)))
-                  (verify-app-url href)))
+                  (verify-app-url href media/hal-media-type)))
               expected-links))))

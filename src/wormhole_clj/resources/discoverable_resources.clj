@@ -33,7 +33,9 @@
    (conj
     representable-hash-map
     {media/keyword-links
-     (media/self-link-relation (discoverable-resource-entity-url (:resource_name representable-hash-map)))})))
+     (conj
+      (media/profile-link-relation (app/alps-profile-url "DiscoverableResources"))
+      (media/self-link-relation (discoverable-resource-entity-url (:resource_name representable-hash-map))))})))
 
 (defn discoverable-resource-alps-representation []
   (let [link-relation "link_relation"
