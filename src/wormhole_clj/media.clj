@@ -6,12 +6,11 @@
 (def link-relation-self :self)
 (def link-relation-profile :profile)
 
-(defn link-relation-value [link-relation-type uri]
-  {link-relation-type
-   (hash-map keyword-href uri)})
+(defn- link-relation-value [link-relation-type]
+  (fn [uri]
+    {link-relation-type
+     (hash-map keyword-href uri)}))
 
-(defn self-link-relation [uri]
-  (link-relation-value link-relation-self uri))
+(def self-link-relation (link-relation-value link-relation-self))
 
-(defn profile-link-relation [uri]
-  (link-relation-value link-relation-profile uri))
+(def profile-link-relation (link-relation-value link-relation-profile))

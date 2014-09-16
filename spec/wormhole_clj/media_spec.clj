@@ -21,6 +21,6 @@
  (it "returns map for self link relation value"
      (should= {:self {:href "uri"}}
              (self-link-relation "uri")))
- (it "returns a map for any link relation"
-     (should= {"blah-blah" {:href "something"}}
-              (link-relation-value "blah-blah" "something"))))
+ (it "returns map for profile link relation value"
+     (should= {:profile {:href "uri"}}
+              (profile-link-relation "uri"))))
