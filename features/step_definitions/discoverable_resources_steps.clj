@@ -49,7 +49,7 @@
 (defn verify-app-url [url]
   (when (= (urly/host-of url) (urly/host-of (app/base-uri)))
     (let [path (urly/path-of (urly/url-like url))
-          response (execute-get-request path {"Accept" "application/vnd.hale+json"})]
+          response (execute-get-request path {"Accept" media/hal-media-type})]
       (is (= 200 (:status response))))))
 
 (def server (atom nil))

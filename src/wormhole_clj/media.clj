@@ -2,7 +2,7 @@
 
 (def keyword-links :_links)
 (def keyword-href :href)
-(def hale-media-type "application/vnd.hale+json")
+(def hal-media-type "application/hal+json")
 (def link-relation-self :self)
 
 (defn link-relation-value [link-relation-type uri]

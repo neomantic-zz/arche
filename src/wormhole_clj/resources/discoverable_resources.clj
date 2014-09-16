@@ -94,7 +94,7 @@
       (conj attributes (insert discoverable-resources (values attributes))))))
 
 (defresource discoverable-resource-entity [resource-name]
-  :available-media-types [media/hale-media-type]
+  :available-media-types [media/hal-media-type]
   :allowed-methods [:get]
   :exists? (fn [_]
              (if-let [existing (discoverable-resource-first resource-name)]
@@ -108,7 +108,7 @@
                                  (http-helper/cache-control-header-private-age (app/cache-expiry))
                                  (http-helper/header-location
                                   (discoverable-resource-entity-url (:resource_name entity)))
-                                 (http-helper/header-accept media/hale-media-type)])
+                                 (http-helper/header-accept media/hal-media-type)])
                  :body (discoverable-resource-representation entity)})))
 
 (profile/profile-register!
