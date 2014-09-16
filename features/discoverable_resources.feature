@@ -8,7 +8,7 @@ Scenario: A client reads a discoverable resource as hale+json
     | link_relation | https://www.mydomain.com/studies |
     | href          | https://a-service.io/studies     |
     | resource_name | studies                          |
-    When I invoke the uniform interface method GET to "/discoverable_resources/studies" accepting "application/vnd.hale+json"
+    When I invoke the uniform interface method GET to "/discoverable_resources/studies" accepting "application/hal+json"
     Then I should get a status of 200
     And the resource representation should have exactly the following properties:
     | link_relation | https://www.mydomain.com/studies |

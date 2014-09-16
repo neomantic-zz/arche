@@ -44,29 +44,29 @@
         return-type (inflect/underscore (inflect/singular entity-type))]
     (alps/document-hash-map
      {alps/keyword-descriptor
-      [{alps/keyword-href alps/schema-url
+      [{alps/keyword-href (:url alps/schemas)
         alps/keyword-type alps/type-value-semantic
         alps/keyword-id link-relation
         alps/keyword-doc
         {alps/keyword-value (format "The LinkRelation of the %s" singular)}}
-       {alps/keyword-href alps/schema-url
+       {alps/keyword-href (:semantic apls/types)
         alps/keyword-type alps/type-value-semantic
         alps/keyword-id href
         alps/keyword-doc
         {alps/keyword-value (format "The HREF to the entry point of the %s" singular)}}
-       {alps/keyword-href alps/schema-text
-        alps/keyword-type alps/type-value-semantic
+       {alps/keyword-href (:text alps/schemas)
+        alps/keyword-type (:semantic alps/types)
         alps/keyword-id resource-name
         alps/keyword-doc
         {alps/keyword-value (format "The name of the %s" singular)}}
-       {alps/keyword-type alps/type-value-safe
+       {alps/keyword-type (:safe apls/types)
         alps/keyword-rt (inflect/underscore singular)
         alps/keyword-id "show"
         alps/keyword-doc {alps/keyword-value (format "Returns an individual %s" singular)}}
        {alps/keyword-descriptor
         (into []
               (map (fn [prop] {alps/keyword-href prop}) [link-relation href resource-name "show"]))
-        alps/keyword-type alps/type-value-semantic
+        alps/keyword-type (:semantic alps/types)
         alps/keyword-id return-type
         alps/keyword-link
         {alps/keyword-href (format "%s#%s" (app/alps-profile-url entity-type) return-type)

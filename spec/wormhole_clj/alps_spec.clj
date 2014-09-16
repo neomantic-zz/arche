@@ -32,13 +32,13 @@
 (describe
  "alps reserved values"
  (it "returns correct string for semantic"
-     (should= "semantic" type-value-semantic))
+     (should= "semantic" (:semantic types)))
  (it "returns correct string for semantic"
-     (should= "safe" type-value-safe)))
+     (should= "safe" (:safe types))))
 
 (describe
  "alps schemas"
  (it "returns correct value for the URL schema"
-     (should= "http://alps.io/schema.org/URL" schema-url))
+     (should= "http://alps.io/schema.org/URL" (:url schemas)))
  (it "returns correct value for the Text schema"
-     (should= "http://alps.io/schema.org/Text" schema-text)))
+     (should= "http://alps.io/schema.org/Text" (:text schemas))))
