@@ -114,6 +114,6 @@
         (doall
          (map (fn [link]
                 (let [[link-relation href] link]
-                  (is (= (link-href-get link-relation actual-links) href))
+                  (is (= (URI. (link-href-get link-relation actual-links)) (URI. href)))
                   (verify-app-url href)))
               expected-links))))
