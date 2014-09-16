@@ -19,6 +19,12 @@
 
 (defresource alps-profiles [resource-name]
   :available-media-types [alps/json-media-type]
+  :handle-not-acceptable (fn [_]
+                           (ring-response
+                            {:status 406
+                             :headers (http-helper/header-accept alps/json-media-type)
+                             :body "Unsupported media-type. Supported media type listed in Accept header."}))
+
   :allowed-mehods [:get]
   :exists? (fn [_]
              (if-let [profile-thunk (registered-profile-get (keyword resource-name))]

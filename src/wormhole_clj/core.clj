@@ -10,9 +10,9 @@
 
 (defroutes wormhole-routes
   (GET (format "/%s/:resource-name" app/alps-path) [resource-name]
-                (profile/alps-profiles (inflect/hyphenate resource-name)))
+       (profile/alps-profiles (inflect/hyphenate resource-name)))
   (GET "/discoverable_resources/:resource-name" [resource-name]
-                (discoverable-resource-entity resource-name))
+       (discoverable-resource-entity resource-name))
   (route/not-found "Not Found"))
 
 (def handler

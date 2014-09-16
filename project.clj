@@ -16,6 +16,7 @@
                  [pandect "0.3.4"]
                  [inflections "0.9.9"]
                  [clojurewerkz/urly "1.0.0"]
+                 [ring-mock "0.1.5"]
                  [pandect "0.3.4"]]
   :profiles {:uberjar {:aot :all}
              :spec {:env {:base-uri "http://example.org"}
