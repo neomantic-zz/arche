@@ -12,13 +12,15 @@
 (def keyword-value :value)
 (def keyword-link  :link)
 (def keyword-rt    :rt)
-(def keyword-rel    :rel)
+(def keyword-rel   :rel)
 
-(def type-value-semantic "semantic")
-(def type-value-safe "safe")
+(def types
+  {:safe "safe"
+   :semantic "semantic"})
 
-(def schema-url "http://alps.io/schema.org/URL")
-(def schema-text "http://alps.io/schema.org/Text")
+(def schemas
+  {:url "http://alps.io/schema.org/URL"
+   :text "http://alps.io/schema.org/Text"})
 
 (defn document-hash-map [elements]
   {keyword-alps elements})
