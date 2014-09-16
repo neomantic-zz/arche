@@ -1,6 +1,7 @@
 (ns step-definitions.discoverable-resources-steps
   (:use wormhole-clj.core
         wormhole-clj.db
+        wormhole-clj.resources.discoverable-resources
         cucumber.runtime.clj
         clojure.test)
   (:refer-clojure :exclude [resolve])
