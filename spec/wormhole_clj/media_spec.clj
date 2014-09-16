@@ -14,7 +14,7 @@
 (describe
  "media types"
  (it "returns the correct string for hale+json"
-     (should= "application/vnd.hale+json" hale-media-type)))
+     (should= "application/hal+json" hal-media-type)))
 
 (describe
  "link relation"
