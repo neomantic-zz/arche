@@ -113,3 +113,16 @@
          :link_relation link-relation
          :href href}
         (discoverable-resource-first resource-name)))))
+
+(describe
+ "name management"
+ (it "returns titlized name"
+     (should= "DiscoverableResources" (:titleized names)))
+ (it "returns routable name"
+     (should= "discoverable_resources" (:routable names)))
+ (it "returns tabelized name"
+     (should= :discoverable_resources (:tableized names)))
+ (it "returns singular name"
+     (should= "discoverable_resource" (:singular names)))
+ (it "returns keywordified name"
+     (should= :discoverable-resources (:keyword names))))
