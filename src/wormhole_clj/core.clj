@@ -37,8 +37,7 @@
           (where {:resource_name resource-name}))))
 
 (defn discoverable-resource-entity-url [resource-name]
-  (app/app-uri-for (format "/discoverable_resources/%s"
-                           (ring/url-encode resource-name))))
+  (app/app-uri-for (format "/discoverable_resources/%s" resource-name)))
 
 (defn discoverable-resource-representation [representable-hash-map]
   (json/generate-string
