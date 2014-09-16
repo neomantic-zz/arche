@@ -1,18 +1,34 @@
-(ns wormhole-clj.alps)
+(ns wormhole-clj.alps
+  (:refer-clojure :exclude [type]))
 
 (def json-media-type "application/alps+json")
 
-;; TODO Use a macro
-(def keyword-descriptor :descriptor)
-(def keyword-alps  :alps)
-(def keyword-href  :href)
-(def keyword-type  :type)
+(defmacro defalps [alps-element]
+  `(do
+     (def ~(symbol (format "keyword-%s" alps-element))
+       (keyword '~alps-element))
+     (defn ~alps-element [~'value ~'descriptor]
+      (conj
+       ~'descriptor
+       (hash-map (keyword '~alps-element) ~'value)))))
+
 (def keyword-doc   :doc)
-(def keyword-id    :id)
 (def keyword-value :value)
-(def keyword-link  :link)
-(def keyword-rt    :rt)
-(def keyword-rel   :rel)
+
+(defalps descriptor)
+(defalps alps)
+(defalps href)
+(defalps type)
+(defalps id)
+(defalps rt)
+(defalps link)
+(defalps rel)
+
+(defn doc [documentation descriptor]
+  (conj
+   descriptor
+   {keyword-doc
+    {keyword-value documentation}}))
 
 (def types
   {:safe "safe"
@@ -24,3 +40,10 @@
 
 (defn document-hash-map [elements]
   {keyword-alps elements})
+
+(defn- descriptor-type [type-key]
+  (fn []
+    (type (type-key types) {})))
+
+(def descriptor-type-safe (descriptor-type :safe))
+(def descriptor-type-semantic (descriptor-type :semantic))

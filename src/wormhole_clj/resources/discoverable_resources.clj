@@ -53,34 +53,46 @@
         resource-name "resource_name"]
     (alps/document-hash-map
      {alps/keyword-descriptor
-      [{alps/keyword-href (:url alps/schemas)
-        alps/keyword-type (:semantic alps/types)
-        alps/keyword-id link-relation
-        alps/keyword-doc
-        {alps/keyword-value (format "The LinkRelation of the %s" singular)}}
-       {alps/keyword-href (:url alps/schemas)
-        alps/keyword-type (:semantic alps/types)
-        alps/keyword-id href
-        alps/keyword-doc
-        {alps/keyword-value (format "The HREF to the entry point of the %s" singular)}}
-       {alps/keyword-href (:text alps/schemas)
-        alps/keyword-type (:semantic alps/types)
-        alps/keyword-id resource-name
-        alps/keyword-doc
-        {alps/keyword-value (format "The name of the %s" singular)}}
-       {alps/keyword-type (:safe alps/types)
-        alps/keyword-rt (:singular names)
-        alps/keyword-id "show"
-        alps/keyword-doc {alps/keyword-value (format "Returns an individual %s" singular)}}
-       {alps/keyword-descriptor
-        (into []
-              (map (fn [prop] {alps/keyword-href prop}) [link-relation href resource-name "show"]))
-        alps/keyword-type (:semantic alps/types)
-        alps/keyword-id (:singular names)
-        alps/keyword-link
-        {alps/keyword-href (format "%s#%s" (app/alps-profile-url (:titleized names)) (ring/url-encode (:singular names)))
-         alps/keyword-rel (name media/link-relation-self)}
-        alps/keyword-doc {alps/keyword-value "A Resource that can be discovered via an entry point"}}]
+      [(alps/doc
+        (format "The LinkRelation of the %s" singular)
+        (alps/href
+         (:url alps/schemas)
+         (alps/id
+          link-relation
+          (alps/descriptor-type-semantic))))
+       (alps/doc
+        (format "The HREF to the entry point of the %s" singular)
+        (alps/id
+         href
+         (alps/href
+          (:url alps/schemas)
+          (alps/descriptor-type-semantic))))
+       (alps/doc
+        (format "The name of the %s" singular)
+        (alps/id
+         resource-name
+         (alps/href
+          (:text alps/schemas)
+          (alps/descriptor-type-semantic))))
+       (alps/doc
+        (format "Returns an individual %s" singular)
+        (alps/rt
+         (:singular names)
+         (alps/id
+          "show"
+          (alps/descriptor-type-safe))))
+       (alps/link
+        (conj
+         {alps/keyword-rel (name media/link-relation-self)}
+         {alps/keyword-href (format "%s#%s" (app/alps-profile-url (:titleized names)) (ring/url-encode (:singular names)))})
+        (alps/descriptor
+         (into []
+               (map (fn [prop] {alps/keyword-href prop}) [link-relation href resource-name "show"]))
+         (alps/doc
+          "A Resource that can be discovered via an entry point"
+          (alps/id
+           (:singular names)
+           (alps/descriptor-type-semantic)))))]
       alps/keyword-link
       {alps/keyword-href (app/alps-profile-url (:titleized names))
        alps/keyword-rel (name media/link-relation-self)}
