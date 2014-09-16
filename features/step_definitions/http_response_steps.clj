@@ -4,7 +4,7 @@
         clojure.test))
 
 (Then #"^the response should have the following header fields:$" [table]
-      (let [received-headers (:headers @last-response)
+      (let [received-headers (last-response-headers)
             expected-headers (table-rows-map table)]
         (doall
          (map (fn [header]

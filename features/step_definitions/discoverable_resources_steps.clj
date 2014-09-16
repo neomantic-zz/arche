@@ -32,6 +32,13 @@
 (defn last-response-set! [new-response]
   (reset! last-response new-response))
 
+(defn last-response-property [property]
+  (fn [] (get @last-response property)))
+
+(def last-response-body (last-response-property :body))
+(def last-response-headers (last-response-property :headers))
+(def last-response-status (last-response-property :status))
+
 (defn link-href-get [link-relation-type links]
   (get-in links [link-relation-type (name media/keyword-href)]))
 
@@ -79,11 +86,11 @@
        (execute-get-request path {"Accept" media-type})))
 
 (Then #"^I should get a status of (\d+)$" [status]
-      (is (= (:status @last-response) (read-string status))))
+      (is (= (last-response-status) (read-string status))))
 
 (Then #"^the resource representation should have exactly the following properties:$" [table]
       (let [actual (into {} (remove (fn [[key item]] (= key media/keyword-links))
-                                    (json/parse-string (:body @last-response) true)))
+                                    (json/parse-string (last-response-body) true)))
             map-of-table (table-to-map table)
             expected (zipmap
                       (map keyword (keys map-of-table))
@@ -97,7 +104,7 @@
               expected))))
 
 (Then #"^the resource representation should have exactly the following links:$" [table]
-      (let [actual-links (get (json/parse-string (:body @last-response)) (name media/keyword-links))
+      (let [actual-links (get (json/parse-string (last-response-body)) (name media/keyword-links))
             expected-links (table-rows-map table)]
         ;; make sure the same number of links are present
         (is (= (count expected-links) (count actual-links)))
