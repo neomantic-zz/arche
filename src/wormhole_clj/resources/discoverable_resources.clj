@@ -45,12 +45,12 @@
     (alps/document-hash-map
      {alps/keyword-descriptor
       [{alps/keyword-href (:url alps/schemas)
-        alps/keyword-type alps/type-value-semantic
+        alps/keyword-type (:semantic alps/types)
         alps/keyword-id link-relation
         alps/keyword-doc
         {alps/keyword-value (format "The LinkRelation of the %s" singular)}}
-       {alps/keyword-href (:semantic apls/types)
-        alps/keyword-type alps/type-value-semantic
+       {alps/keyword-href (:url alps/schemas)
+        alps/keyword-type (:semantic alps/types)
         alps/keyword-id href
         alps/keyword-doc
         {alps/keyword-value (format "The HREF to the entry point of the %s" singular)}}
@@ -59,7 +59,7 @@
         alps/keyword-id resource-name
         alps/keyword-doc
         {alps/keyword-value (format "The name of the %s" singular)}}
-       {alps/keyword-type (:safe apls/types)
+       {alps/keyword-type (:safe alps/types)
         alps/keyword-rt (inflect/underscore singular)
         alps/keyword-id "show"
         alps/keyword-doc {alps/keyword-value (format "Returns an individual %s" singular)}}
