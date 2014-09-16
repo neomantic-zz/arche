@@ -8,7 +8,7 @@ Scenario: A client reads a discoverable resource as hale+json
     | link_relation | https://www.mydomain.com/studies |
     | href          | https://a-service.io/studies     |
     | resource_name | studies                          |
-    When I invoke the uniform interface method GET to "v2/discoverable_resources/studies" accepting "application/vnd.hale+json"
+    When I invoke the uniform interface method GET to "/discoverable_resources/studies" accepting "application/vnd.hale+json"
     Then I should get a status of 200
     And the resource representation should have exactly the following properties:
     | link_relation | https://www.mydomain.com/studies |
@@ -16,9 +16,9 @@ Scenario: A client reads a discoverable resource as hale+json
     | resource_name | studies                          |
     And the resource representation should have exactly the following links:
     | link_relation | href                                                 |
-    | self          | http://example.org/v2/discoverable_resources/studies |
+    | self          | http://example.org/discoverable_resources/studies    |
     And the response should have the following header fields:
     | field         | field_contents                                       |
     | Cache-Control | max-age=600, private                                 |
     | ETag          | anything                                             |
-    | Location      | http://example.org/v2/discoverable_resources/studies |
+    | Location      | http://example.org/discoverable_resources/studies    |

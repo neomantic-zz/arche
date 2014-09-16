@@ -8,7 +8,7 @@ Scenario: A client should be able to receive a profile of entry in application/a
    | link_relation | https://www.mydomain.com/alps/study |
    | href          | https://service.com/study           |
    | resource_name | studies                             |
-   And I invoke the uniform interface method GET to "v2/alps/DiscoverableResources" accepting "application/alps+json"
+   And I invoke the uniform interface method GET to "/alps/DiscoverableResources" accepting "application/alps+json"
    Then I should receive the following "application/alps+json" response:
    """
    {
@@ -52,7 +52,7 @@ Scenario: A client should be able to receive a profile of entry in application/a
            },
            "link": {
                "rel": "self",
-               "href": "http://example.org/v2/alps/DiscoverableResources#discoverable_resource"
+               "href": "http://example.org/alps/DiscoverableResources#discoverable_resource"
            },
            "id": "discoverable_resource",
            "type": "semantic",
@@ -77,7 +77,7 @@ Scenario: A client should be able to receive a profile of entry in application/a
        },
        "link": {
            "rel": "self",
-           "href": "http://example.org/v2/alps/DiscoverableResources"
+           "href": "http://example.org/alps/DiscoverableResources"
        }
      }
    }
@@ -88,9 +88,9 @@ Scenario: A client should be able to receive the correct headers of a profile re
    | link_relation | https://www.mydomain.com/alps/study |
    | href          | https://service.com/study           |
    | resource_name | studies                             |
-   And I invoke the uniform interface method GET to "v2/alps/DiscoverableResources" accepting "application/alps+json"
+   And I invoke the uniform interface method GET to "alps/DiscoverableResources" accepting "application/alps+json"
     And the response should have the following header fields:
     | field         | field_contents                                   |
     | Cache-Control | max-age=600, private                             |
     | ETag          | anything                                         |
-    | Location      | http://example.org/v2/alps/DiscoverableResources |
+    | Location      | http://example.org/alps/DiscoverableResources    |

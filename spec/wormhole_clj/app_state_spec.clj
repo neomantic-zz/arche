@@ -20,8 +20,8 @@
 (describe
  "creating urls"
  (it "creates the correct url for an alps profile"
-     (should= "http://example.org/v2/alps/FooBars"
+     (should= "http://example.org/alps/FooBars"
               (alps-profile-url "FooBars")))
  (it "creates the correct url for an alps profile when resource name needs to be escaped"
-     (should= "http://example.org/v2/alps/Foo%20Bars"
+     (should= "http://example.org/alps/Foo%20Bars"
               (alps-profile-url "Foo Bars"))))

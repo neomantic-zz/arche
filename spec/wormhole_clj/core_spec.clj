@@ -30,17 +30,17 @@
   (before
    (clean-database)
    (factory-discoverable-resource-create "studies"))
-  (it "supports /v2/discoverable_resources/ with a name"
-      (should-be successful? (request (format "%s%s" "/v2/discoverable_resources/" "studies"))))
+  (it "supports /discoverable_resources/ with a name"
+      (should-be successful? (request (format "%s%s" "/discoverable_resources/" "studies"))))
   (it "should have the correct accept header"
                   (should= "application/vnd.hale+json"
-                           (get (:headers (request (format "%s%s" "/v2/discoverable_resources/" "studies"))) "Accept")))
+                           (get (:headers (request (format "%s%s" "/discoverable_resources/" "studies"))) "Accept")))
   (it "returns the correct location header"
-                  (should= (format "%s/v2/discoverable_resources/studies" (app/base-uri))
-                           (get (:headers (request (format "%s%s" "/v2/discoverable_resources/" "studies"))) "Location")))
+                  (should= (format "%s/discoverable_resources/studies" (app/base-uri))
+                           (get (:headers (request (format "%s%s" "/discoverable_resources/" "studies"))) "Location")))
   (it "returns have the correct accept header"
                   (should= "application/vnd.hale+json"
-                           (get (:headers (request (format "%s%s" "/v2/discoverable_resources/" "studies"))) "Content-Type")))))
+                           (get (:headers (request (format "%s%s" "/discoverable_resources/" "studies"))) "Content-Type")))))
 
 (let [resource-name "studies"
       link-relation "http://example.org/alps/studies"
@@ -93,10 +93,10 @@
 (describe
  "creating urls"
  (it "creates the correct discoverable resource entity url"
-     (should= (format "%s/v2/discoverable_resources/studies" (app/base-uri))
+     (should= (format "%s/discoverable_resources/studies" (app/base-uri))
               (discoverable-resource-entity-url "studies")))
  (it "creates the correct discoverable resource entity url with url encoding"
-     (should= (format "%s%s" (app/base-uri) "/v2/discoverable_resources/bad%20resource%20name")
+     (should= (format "%s%s" (app/base-uri) "/discoverable_resources/bad%20resource%20name")
               (discoverable-resource-entity-url "bad resource name"))))
 
 
@@ -138,11 +138,11 @@
                    :type "semantic"
                    :id "discoverable_resource"
                    :link
-                   {:href "http://example.org/v2/alps/DiscoverableResources#discoverable_resource"
+                   {:href "http://example.org/alps/DiscoverableResources#discoverable_resource"
                     :rel "self"}
                    :doc
                    {:value "A Resource that can be discovered via an entry point"}}]
-                 :link {:href "http://example.org/v2/alps/DiscoverableResources"
+                 :link {:href "http://example.org/alps/DiscoverableResources"
                         :rel "self"}
                  :doc {:value "Describes the semantics, states and state transitions associated with DiscoverableResources."}}}
                (discoverable-resource-alps-representation))))

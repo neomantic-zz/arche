@@ -19,4 +19,4 @@
 (def alps-path (name alps/keyword-alps))
 
 (defn alps-profile-url [resource-name]
-  (app-uri-for (format "/v2/%s/%s" alps-path (ring/url-encode resource-name))))
+  (app-uri-for (format "/%s/%s" alps-path (ring/url-encode resource-name))))

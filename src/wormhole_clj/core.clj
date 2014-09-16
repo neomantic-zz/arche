@@ -37,7 +37,7 @@
           (where {:resource_name resource-name}))))
 
 (defn discoverable-resource-entity-url [resource-name]
-  (app/app-uri-for (format "/v2/discoverable_resources/%s"
+  (app/app-uri-for (format "/discoverable_resources/%s"
                            (ring/url-encode resource-name))))
 
 (defn discoverable-resource-representation [representable-hash-map]
@@ -122,11 +122,10 @@
  {:discoverable-resources discoverable-resource-alps-representation})
 
 (defroutes wormhole-routes
-  (context "/v2" []
-           (GET (format "/%s/:resource-name" app/alps-path) [resource-name]
+  (GET (format "/%s/:resource-name" app/alps-path) [resource-name]
                 (profile/alps-profiles (inflect/hyphenate resource-name)))
-           (GET "/discoverable_resources/:resource-name" [resource-name]
-                (discoverable-resource-entity resource-name)))
+  (GET "/discoverable_resources/:resource-name" [resource-name]
+                (discoverable-resource-entity resource-name))
   (route/not-found "Not Found"))
 
 (def handler
