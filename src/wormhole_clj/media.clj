@@ -4,6 +4,7 @@
 (def keyword-href :href)
 (def hal-media-type "application/hal+json")
 (def link-relation-self :self)
+(def link-relation-profile :profile)
 
 (defn link-relation-value [link-relation-type uri]
   {link-relation-type
@@ -11,3 +12,6 @@
 
 (defn self-link-relation [uri]
   (link-relation-value link-relation-self uri))
+
+(defn profile-link-relation [uri]
+  (link-relation-value link-relation-profile uri))
