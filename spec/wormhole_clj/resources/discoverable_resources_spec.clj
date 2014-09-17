@@ -126,3 +126,11 @@
      (should= "discoverable_resource" (:singular names)))
  (it "returns keywordified name"
      (should= :discoverable-resources (:keyword names))))
+
+(describe
+ "getting all discoverables"
+ (before
+  (clean-database)
+  (discoverable-resource-create "studies" "http://link-relation.io" "http://test.host/url/studies"))
+ (it "returns a correct number of discoverables"
+     (should= 1 (count (discoverable-resources-all)))))

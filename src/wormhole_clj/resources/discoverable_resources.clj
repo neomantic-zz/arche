@@ -92,6 +92,9 @@
           discoverable-resources
           (where {:resource_name resource-name}))))
 
+(defn discoverable-resources-all []
+  (select discoverable-resources))
+
 (defn discoverable-resource-create [resource-name link-relation href]
   (if-let [existing (discoverable-resource-first resource-name)]
     {:errors {:taken-by existing}}

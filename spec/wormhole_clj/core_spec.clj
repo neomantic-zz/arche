@@ -74,4 +74,15 @@
    (it "returns the correct accept type in the response header"
        (should= "application/alps+json" (ring/get-header response "Accept")))))
 
+(let [response (wormhole-routes
+                (header (ring-mock/request :get "/")
+                        "Accept" "application/hal+json"))
+      actual-status (:status response)]
+  (describe
+   "entry point routes"
+   (it "is successful"
+       (should-be successful? response))
+   (it "returns the correct accept header"
+       (should= "application/hal+json" (ring/get-header response "Accept")))))
+
 (run-specs)
