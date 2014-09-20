@@ -1,13 +1,43 @@
 (ns wormhole-clj.resources.entry-points
-  (:use wormhole-clj.resources.discoverable-resources)
   (:require  [liberator.core :refer [resource defresource]]
+             [wormhole-clj.resources.discoverable-resources :only (discoverable-resources-all) :as d]
              [wormhole-clj.media :as media]
              [wormhole-clj.http :as http-helper]
              [wormhole-clj.app-state :as app]
+             [cheshire.core :refer :all :as json]
+             [clojurewerkz.urly.core :as urly]
              [liberator.representation :as rep :refer [ring-response as-response]]))
 
-(defn entry-points-representation []
-  true)
+(def names
+  (let [base-name "entry_points"]
+    {:titleized "EntryPoints"
+     :alps-type base-name}))
+
+(def route "/")
+
+(defn profile-url []
+  (app/alps-profile-url (:titleized names)))
+
+(defn type-url []
+  (format "%s#%s" (profile-url) (:alps-type names)))
+
+(defn self-url []
+  (.toString (.mutatePath
+              (urly/url-like (app/base-uri))
+              route)))
+
+(defn entry-points-map []
+  (let [discoverable-resources (d/discoverable-resources-all)]
+    {media/keyword-links
+     (apply conj
+            (concat
+             [(media/profile-link-relation (profile-url))
+              (media/type-link-relation (type-url))
+              (media/self-link-relation (self-url))]
+             (map (fn [discoverable]
+                    {(keyword (:resource_name discoverable))
+                     {media/keyword-href (:href discoverable)}})
+                  discoverable-resources)))}))
 
 (defresource entry-points []
   :available-media-types [media/hal-media-type]
@@ -18,4 +48,5 @@
                  :headers (into {}
                                 [(http-helper/cache-control-header-private-age (app/cache-expiry))
                                  (http-helper/header-accept media/hal-media-type)])
-                 :body (entry-points-representation)})))
+                 :body (json/generate-string
+                        (entry-points-map))})))
