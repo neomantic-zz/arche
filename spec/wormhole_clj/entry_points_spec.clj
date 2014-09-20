@@ -38,7 +38,9 @@
  (it "returns the correct string for titleized"
      (should= "EntryPoints" (:titleized names)))
  (it "returns the correct value for the alps type"
-     (should= "entry_points" (:alps-type names))))
+     (should= "entry_points" (:alps-type names)))
+ (it "returns the correct value for the keyword"
+     :entry-points (:keyword names)))
 
 (let [subject (entry-points-map)
       get-href-value (fn [link-relation]
@@ -100,6 +102,7 @@
     (it "includes a keyword for the discoverable resource"
         (should-contain (keyword test-resource-name)
                         (link-relations (entry-points-map))))
+
     (it "includes the correct href value for the discoverable resource"
         (let [resource (record/discoverable-resource-first test-resource-name)]
           (if resource

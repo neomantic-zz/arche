@@ -24,11 +24,6 @@
 
 (def test-port 57767)
 
-(defn url-to-test [path]
-  (let [url (urly/url-like "http://localhost")
-        with-port (.mutatePort url test-port)]
-    (.toString (.mutatePath with-port path))))
-
 (def last-response (atom nil))
 
 (defn last-response-set! [new-response]
@@ -44,6 +39,11 @@
 (defn link-href-get [link-relation-type links]
   (get-in links [link-relation-type (name media/keyword-href)]))
 
+(defn url-to-test [path]
+  (let [url (urly/url-like "http://localhost")
+        with-port (.mutatePort url test-port)]
+    (.toString (.mutatePath with-port path))))
+
 (defn execute-get-request [path headers]
   (client/get (url-to-test path) {:throw-exceptions false
                                   :headers headers}))
@@ -54,7 +54,11 @@
           response (execute-get-request path {"Accept" accept-type})]
       (if (= 406 (:status response))
         (verify-app-url url (ring/get-header response "Accept"))
-        (is (= 200 (:status response)))))))
+        (is (= 200 (:status response))
+            (format "expected successful response from %s: got %d, with body '%s'"
+                    url
+                    (:status response)
+                    (:body response)))))))
 
 (def server (atom nil))
 
@@ -64,7 +68,6 @@
     (reset! server (jetty/run-jetty handler
                                    {:port test-port
                                     :join? false}))))
-
 (defn server-stop []
   (if (nil? @server)
     (throw (IllegalStateException. "Server already stopped."))
@@ -72,12 +75,17 @@
       (.stop @server)
       (reset! server nil))))
 
-(Before [] (server-start))
+(defn database-truncate []
+  (jdbc/db-do-commands dbspec "TRUNCATE TABLE discoverable_resources;"))
+
+(Before []
+        (server-start)
+        (database-truncate))
 
 (After []
        (reset! last-response nil)
        (server-stop)
-       (jdbc/db-do-commands dbspec "TRUNCATE TABLE discoverable_resources;"))
+       (database-truncate))
 
 (Given #"^a discoverable resource exists with the following attributes:$" [table]
        (let [table-map (table-to-map table)]
@@ -107,18 +115,3 @@
                 (let [[key value] pair]
                   (is (= value (key actual)))))
               expected))))
-
-(Then #"^the resource representation should have exactly the following links:$" [table]
-      (let [actual-links (get (json/parse-string (last-response-body)) (name media/keyword-links))
-            expected-links (table-rows-map table)]
-        ;; make sure the same number of links are present
-        (is (= (count expected-links) (count actual-links)))
-        ;; make sure the same links relations are there
-        (is (= (into #{} (keys expected-links)) (into #{} (keys actual-links))))
-        ;; check the hrefs
-        (doall
-         (map (fn [link]
-                (let [[link-relation href] link]
-                  (is (= (URI. (link-href-get link-relation actual-links)) (URI. href)))
-                  (verify-app-url href media/hal-media-type)))
-              expected-links))))
