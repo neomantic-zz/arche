@@ -6,6 +6,7 @@
              [wormhole-clj.app-state :as app]
              [cheshire.core :refer :all :as json]
              [clojurewerkz.urly.core :as urly]
+             [clojure.string :as str]
              [inflections.core :only (dasherize) :as inflect]
              [wormhole-clj.resources.profiles :as profile]
              [liberator.representation :as rep :refer [ring-response as-response]]))
@@ -47,7 +48,7 @@
 (defresource entry-points []
   :available-media-types [media/hal-media-type]
   :allowed-methods [:get]
-  :handle-ok (fn [_]
+  :handle-ok (fn [ctx]
                (let [body (json/generate-string (entry-points-map))]
                  (ring-response
                   {:status 200
@@ -55,7 +56,8 @@
                                   [(http-helper/header-etag (http-helper/body-etag-make body))
                                    (http-helper/header-location (self-url))
                                    (http-helper/cache-control-header-private-age (app/cache-expiry))
-                                   (http-helper/header-accept media/hal-media-type)])
+                                   (http-helper/header-accept
+                                    (str/join ", " ((get-in ctx [:resource :available-media-types]))))])
                    :body body}))))
 
 (profile/profile-register!
