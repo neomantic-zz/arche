@@ -48,7 +48,7 @@
 (defresource entry-points []
   :available-media-types [media/hal-media-type]
   :allowed-methods [:get]
-  :handle-ok (fn [ctx]
+  :handle-ok (fn [{resource :resource}]
                (let [body (json/generate-string (entry-points-map))]
                  (ring-response
                   {:status 200
@@ -57,7 +57,7 @@
                                    (http-helper/header-location (self-url))
                                    (http-helper/cache-control-header-private-age (app/cache-expiry))
                                    (http-helper/header-accept
-                                    (str/join ", " ((get-in ctx [:resource :available-media-types]))))])
+                                    (str/join ", " ((:available-media-types resource))))])
                    :body body}))))
 
 (profile/profile-register!
