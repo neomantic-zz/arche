@@ -44,21 +44,30 @@
         with-port (.mutatePort url test-port)]
     (.toString (.mutatePath with-port path))))
 
+(defn unexpected-response-message [url response]
+  (format "expected successful response from %s: got %d, with body '%s'"
+          url
+          (:status response)
+          (:body response)))
+
 (defn execute-get-request [path headers]
   (client/get (url-to-test path) {:throw-exceptions false
                                   :headers headers}))
 
+(defn call-app-url [url accept-type]
+  (if (= (urly/host-of url) (urly/host-of (app/base-uri)))
+    (let [path (urly/path-of (urly/url-like url))]
+      (execute-get-request path {"Accept" accept-type}))
+    (throw (Exception. (format "That wasn't an app url from the base-uri %s: %s"
+                               (app/base-uri)
+                               url)))))
+
 (defn verify-app-url [url accept-type]
-  (when (= (urly/host-of url) (urly/host-of (app/base-uri)))
-    (let [path (urly/path-of (urly/url-like url))
-          response (execute-get-request path {"Accept" accept-type})]
-      (if (= 406 (:status response))
-        (verify-app-url url (ring/get-header response "Accept"))
-        (is (= 200 (:status response))
-            (format "expected successful response from %s: got %d, with body '%s'"
-                    url
-                    (:status response)
-                    (:body response)))))))
+  (let [{status :status :as response} (call-app-url url accept-type)]
+    (if (= 406 status)
+      (verify-app-url url (ring/get-header response "Accept"))
+      (is (= 200 status)
+          (unexpected-response-message url response)))))
 
 (def server (atom nil))
 
