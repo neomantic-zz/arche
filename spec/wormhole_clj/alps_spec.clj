@@ -9,6 +9,11 @@
      (should= "application/alps+json" json-media-type)))
 
 (describe
+ "document"
+ (it "returns the correct version"
+     (should= "1.0" document-version)))
+
+(describe
  "alps reserved key words"
  (it "returns the correct keyword for alps"
      (should= :alps keyword-alps))
@@ -27,7 +32,9 @@
  (it "returns the correct keyword for rt"
      (should= :rt keyword-rt))
  (it "returns the correct keyword for rel"
-     (should= :rel keyword-rel)))
+     (should= :rel keyword-rel))
+ (it "returns the correct keyword for version"
+     (should= :version keyword-version)))
 
 (describe
  "alps reserved values"
@@ -79,9 +86,12 @@
  (it "returns correct link map"
      (should== {:link {:rel "self" :href "url"}}
                (link :self "url")))
- (it "returns the correct desciptor map"
+ (it "returns the correct descriptor map"
      (should== {:descriptor {}}
-               (descriptor {}))))
+               (descriptor {})))
+ (it "returns the correct version map"
+     (should== {:version {}}
+               (version {}))))
 
 (describe
  "alps schemas"

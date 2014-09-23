@@ -1,6 +1,8 @@
 (ns wormhole-clj.alps
   (:refer-clojure :exclude [resolve]))
 
+(def document-version "1.0")
+
 (def json-media-type "application/alps+json")
 
 (def keyword-doc        :doc)
@@ -13,6 +15,7 @@
 (def keyword-rt         :rt)
 (def keyword-rel        :rel)
 (def keyword-link       :link)
+(def keyword-version    :version)
 
 (defn alps-element [keyword]
   (fn [value] (hash-map keyword value)))
@@ -23,6 +26,7 @@
 (def id (alps-element keyword-id))
 (def rt (alps-element keyword-rt))
 (def rel (alps-element keyword-rel))
+(def version (alps-element keyword-version))
 
 (defn doc [documentation]
   {keyword-doc
