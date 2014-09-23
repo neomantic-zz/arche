@@ -26,7 +26,7 @@
             (format "expected links for %s; got %s" expected-links actual-links))
         ;; make sure the same links relations are there
         (is (= (into #{} (keys expected-links)) (into #{} (keys actual-links)))
-            "receive incorrect link relations")
+            "received incorrect link relations")
         ;; check the hrefs
         (doseq  [expected-link expected-links]
           (let [[link-relation href] expected-link]
