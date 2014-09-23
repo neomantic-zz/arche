@@ -54,6 +54,36 @@
                 (rel "q")))))
 
 (describe
+ "building descriptor elements"
+ (it "returns correct map for id"
+     (should== {:id "g"}
+               (id "g")))
+ (it "returns correct map for alps"
+     (should== {:alps "g"}
+               (alps "g")))
+ (it "returns correct map for href"
+     (should== {:href "g"}
+               (href "g")))
+ (it "returns correct map for type"
+     (should== {:type "g"}
+               (type "g")))
+ (it "returns correct map for rt"
+     (should== {:rt "g"}
+               (rt "g")))
+ (it "returns correct map for rel"
+     (should== {:rel "g"}
+               (rel "g")))
+ (it "returns correct map for doc"
+     (should== {:doc {:value "documentation"}}
+               (doc "documentation")))
+ (it "returns correct link map"
+     (should== {:link {:rel "self" :href "url"}}
+               (link :self "url")))
+ (it "returns the correct desciptor map"
+     (should== {:descriptor {}}
+               (descriptor {}))))
+
+(describe
  "alps schemas"
  (it "returns correct value for the URL schema"
      (should= "http://alps.io/schema.org/URL" (:url schemas)))

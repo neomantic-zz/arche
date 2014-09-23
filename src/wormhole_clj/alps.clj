@@ -1,4 +1,5 @@
-(ns wormhole-clj.alps)
+(ns wormhole-clj.alps
+  (:refer-clojure :exclude [resolve]))
 
 (def json-media-type "application/alps+json")
 
@@ -16,7 +17,6 @@
 (defn alps-element [keyword]
   (fn [value] (hash-map keyword value)))
 
-(def descriptor (alps-element keyword-descriptor))
 (def alps (alps-element keyword-alps))
 (def href (alps-element keyword-href))
 (def type (alps-element keyword-type))
@@ -30,8 +30,12 @@
 
 (defn link [link-relation url]
   {keyword-link
-   (conj (rel link-relation)
+   (conj (rel (name link-relation))
          (href url))})
+
+(defn descriptor [descriptions]
+  ((alps-element keyword-descriptor)
+   descriptions))
 
 (def descriptor-types
   {:safe "safe"
