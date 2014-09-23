@@ -46,46 +46,50 @@
       (media/profile-link-relation (app/alps-profile-url (:titleized names)))
       (media/self-link-relation (discoverable-resource-entity-url (:resource_name representable-hash-map))))})))
 
+
 (defn discoverable-resource-alps-representation []
   (let [link-relation "link_relation"
         href "href"
         singular (inflect/singular (:titleized names))
-        resource-name "resource_name"]
+        resource-name "resource_name"
+        base-descriptors [(alps/descriptor-semantic
+                           (alps/id link-relation)
+                           (alps/doc (format "The LinkRelation of the %s" singular))
+                           (alps/href (:url alps/schemas)))
+                          (alps/descriptor-semantic
+                           (alps/id href)
+                           (alps/doc (format "The HREF to the entry point of the %s" singular))
+                           (alps/href (:url alps/schemas)))
+                          (alps/descriptor-semantic
+                           (alps/id resource-name)
+                           (alps/doc (format "The name of the %s" singular))
+                           (alps/href (:text alps/schemas)))
+                          (alps/descriptor-safe
+                           (alps/id "show")
+                           (alps/doc (format "Returns an individual %s" singular))
+                           (alps/rt (:singular names)))]]
     (alps/document-hash-map
-     {alps/keyword-descriptor
-      [{alps/keyword-href (:url alps/schemas)
-        alps/keyword-type (:semantic alps/types)
-        alps/keyword-id link-relation
-        alps/keyword-doc
-        {alps/keyword-value (format "The LinkRelation of the %s" singular)}}
-       {alps/keyword-href (:url alps/schemas)
-        alps/keyword-type (:semantic alps/types)
-        alps/keyword-id href
-        alps/keyword-doc
-        {alps/keyword-value (format "The HREF to the entry point of the %s" singular)}}
-       {alps/keyword-href (:text alps/schemas)
-        alps/keyword-type (:semantic alps/types)
-        alps/keyword-id resource-name
-        alps/keyword-doc
-        {alps/keyword-value (format "The name of the %s" singular)}}
-       {alps/keyword-type (:safe alps/types)
-        alps/keyword-rt (:singular names)
-        alps/keyword-id "show"
-        alps/keyword-doc {alps/keyword-value (format "Returns an individual %s" singular)}}
-       {alps/keyword-descriptor
-        (into []
-              (map (fn [prop] {alps/keyword-href prop}) [link-relation href resource-name "show"]))
-        alps/keyword-type (:semantic alps/types)
-        alps/keyword-id (:singular names)
-        alps/keyword-link
-        {alps/keyword-href (format "%s#%s" (app/alps-profile-url (:titleized names)) (ring/url-encode (:singular names)))
-         alps/keyword-rel (name media/link-relation-self)}
-        alps/keyword-doc {alps/keyword-value "A Resource that can be discovered via an entry point"}}]
-      alps/keyword-link
-      {alps/keyword-href (app/alps-profile-url (:titleized names))
-       alps/keyword-rel (name media/link-relation-self)}
-      alps/keyword-doc
-      {alps/keyword-value (format "Describes the semantics, states and state transitions associated with %s." (:titleized names))}})))
+      (merge
+       (alps/descriptor
+        (merge
+         base-descriptors
+         (merge
+          (alps/descriptor
+           (map (fn [descriptor]
+                   {alps/keyword-href (alps/keyword-id descriptor)})
+                base-descriptors))
+          (alps/descriptor-semantic
+           (alps/id (:singular names))
+           (alps/doc "A Resource that can be discovered via an entry point")
+           (alps/link
+            media/link-relation-self
+            (format "%s#%s" (app/alps-profile-url (:titleized names)) (ring/url-encode (:singular names))))))))
+       (merge
+        (alps/link
+         media/link-relation-self
+         (app/alps-profile-url (:titleized names)))
+        (alps/doc
+         (format "Describes the semantics, states and state transitions associated with %s." (:titleized names))))))))
 
 (defn discoverable-resource-first [resource-name]
   (first (select

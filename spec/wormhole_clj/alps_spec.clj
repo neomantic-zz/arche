@@ -32,9 +32,56 @@
 (describe
  "alps reserved values"
  (it "returns correct string for semantic"
-     (should= "semantic" (:semantic types)))
+     (should= "semantic" (:semantic descriptor-types)))
  (it "returns correct string for semantic"
-     (should= "safe" (:safe types))))
+     (should= "safe" (:safe descriptor-types))))
+
+(describe
+ "making descriptors"
+ (it "returns the correct map for a safe descriptor"
+     (should== {:type "safe"
+                :id "g"
+                :rel "q"}
+               (descriptor-safe
+                (id "g")
+                (rel "q"))))
+ (it "returns the correct map for a semantic descriptor"
+     (should== {:type "semantic"
+                :id "g"
+                :rel "q"}
+               (descriptor-semantic
+                (id "g")
+                (rel "q")))))
+
+(describe
+ "building descriptor elements"
+ (it "returns correct map for id"
+     (should== {:id "g"}
+               (id "g")))
+ (it "returns correct map for alps"
+     (should== {:alps "g"}
+               (alps "g")))
+ (it "returns correct map for href"
+     (should== {:href "g"}
+               (href "g")))
+ (it "returns correct map for type"
+     (should== {:type "g"}
+               (type "g")))
+ (it "returns correct map for rt"
+     (should== {:rt "g"}
+               (rt "g")))
+ (it "returns correct map for rel"
+     (should== {:rel "g"}
+               (rel "g")))
+ (it "returns correct map for doc"
+     (should== {:doc {:value "documentation"}}
+               (doc "documentation")))
+ (it "returns correct link map"
+     (should== {:link {:rel "self" :href "url"}}
+               (link :self "url")))
+ (it "returns the correct desciptor map"
+     (should== {:descriptor {}}
+               (descriptor {}))))
 
 (describe
  "alps schemas"
