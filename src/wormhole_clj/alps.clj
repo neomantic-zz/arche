@@ -16,6 +16,7 @@
 (def keyword-rel        :rel)
 (def keyword-link       :link)
 (def keyword-version    :version)
+(def keyword-name       :name)
 
 (defn alps-element [keyword]
   (fn [value] (hash-map keyword value)))

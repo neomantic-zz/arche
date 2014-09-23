@@ -33,6 +33,8 @@
      (should= :rt keyword-rt))
  (it "returns the correct keyword for rel"
      (should= :rel keyword-rel))
+ (it "returns the correct keyword for name"
+     (should= :name keyword-name))
  (it "returns the correct keyword for version"
      (should= :version keyword-version)))
 

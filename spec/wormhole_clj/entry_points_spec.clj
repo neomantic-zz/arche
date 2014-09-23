@@ -4,7 +4,7 @@
             [wormhole-clj.core-spec :only (factory-discoverable-resource-create
                                            clean-database) :as support]
             [wormhole-clj.resources.discoverable-resources
-             :only (discoverable-resource-first)
+             :only (discoverable-resource-first discoverable-resources-all)
              :as record]
             [clojurewerkz.urly.core :as urly]
             [wormhole-clj.media :as media]
@@ -73,8 +73,8 @@
      (should= expected-type-url (type-url))))
 
 (let [default-link-relations #{media/link-relation-self
-                                media/link-relation-type
-                                media/link-relation-profile}
+                               media/link-relation-type
+                               media/link-relation-profile}
       link-relations (fn [map]
                        (media/keyword-links map))
       test-resource-name "studies"]
@@ -86,7 +86,7 @@
     "empty entry-points map"
     (it "has correct default links and nothing more"
         (should== default-link-relations
-         (into #{} (keys (link-relations (entry-points-map))))))))
+                  (into #{} (keys (link-relations (entry-points-map))))))))
   (context
    "with something to discover"
    (describe
@@ -109,3 +109,91 @@
             (should= (:href resource)
                      (media/keyword-href (get (link-relations (entry-points-map)) (keyword test-resource-name))))
             (should-not-be-nil resource)))))))
+
+(describe
+   "profile when there are no entry points"
+   (before
+    (support/clean-database))
+   (it "creates the correct alps map"
+        (should== {:alps {
+                          :version "1.0"
+                          :doc {
+                                :value "Describes the semantics, states and state transitions associated with Entry Points."
+                                }
+                          :link [
+                                 {:href "http://example.org/alps/EntryPoints"
+                                  :rel "self"}
+                                 ]
+                          :descriptor [{
+                                        :id "entry_points"
+                                        :type "semantic"
+                                        :doc  {
+                                               :value "A collection of link relations to find resources of a specific type"
+                                               }
+                                        :descriptor [
+                                                     {:href "#list"}
+                                                     ]}
+                                       {
+                                        :id "list"
+                                        :name "self"
+                                        :type "safe"
+                                        :rt "http://example.org/alps/EntryPoints#entry_points"
+                                        :doc {:value "Returns a list of entry points"}}]}
+
+                   }
+                  (alps-profile-map))))
+(let [default-link-relations #{media/link-relation-self
+                               media/link-relation-type
+                               media/link-relation-profile}
+      link-relations (fn [map]
+                       (media/keyword-links map))
+      test-resource-name "studies"]
+  (describe
+   "profile where there are entry points"
+   (before
+    (support/factory-discoverable-resource-create test-resource-name))
+   (after
+    (support/clean-database))
+   (it "creates the correct map"
+       (should==
+        {:alps {
+                :version "1.0"
+                :doc {
+                      :value "Describes the semantics, states and state transitions associated with Entry Points."
+                      }
+                :link [
+                       {:href "http://example.org/alps/EntryPoints"
+                        :rel "self"}
+                       ]
+                :descriptor [{
+                              :id "entry_points"
+                              :type "semantic"
+                              :doc  {
+                                     :value "A collection of link relations to find resources of a specific type"
+                                     }
+                              :descriptor [ {:href "#list"}
+                                            {:href (str "#" test-resource-name)}]
+                              }
+                             {
+                              :id "list"
+                              :name "self"
+                              :type "safe"
+                              :rt "http://example.org/alps/EntryPoints#entry_points"
+                              :doc {:value "Returns a list of entry points"}
+                              }
+                             {:id test-resource-name
+                              :name test-resource-name
+                              :type "safe"
+                              :rt (:link_relation (record/discoverable-resource-first test-resource-name))
+                              :doc {
+                                    :value (format
+                                            "Returns a resource of the type '%s' as described by its profile"
+                                            test-resource-name)
+                                    }
+                              :link {
+                                     :rel "profile"
+                                     :href (:link_relation (record/discoverable-resource-first test-resource-name))
+                                     }}]}
+
+         }
+        (alps-profile-map)))))
