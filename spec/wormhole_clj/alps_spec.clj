@@ -32,9 +32,26 @@
 (describe
  "alps reserved values"
  (it "returns correct string for semantic"
-     (should= "semantic" (:semantic types)))
+     (should= "semantic" (:semantic descriptor-types)))
  (it "returns correct string for semantic"
-     (should= "safe" (:safe types))))
+     (should= "safe" (:safe descriptor-types))))
+
+(describe
+ "making descriptors"
+ (it "returns the correct map for a safe descriptor"
+     (should== {:type "safe"
+                :id "g"
+                :rel "q"}
+               (descriptor-safe
+                (id "g")
+                (rel "q"))))
+ (it "returns the correct map for a semantic descriptor"
+     (should== {:type "semantic"
+                :id "g"
+                :rel "q"}
+               (descriptor-semantic
+                (id "g")
+                (rel "q")))))
 
 (describe
  "alps schemas"

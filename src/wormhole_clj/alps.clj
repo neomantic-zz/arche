@@ -1,36 +1,39 @@
-(ns wormhole-clj.alps
-  (:refer-clojure :exclude [type]))
+(ns wormhole-clj.alps)
 
 (def json-media-type "application/alps+json")
 
-(defmacro defalps [alps-element]
-  `(do
-     (def ~(symbol (format "keyword-%s" alps-element))
-       (keyword '~alps-element))
-     (defn ~alps-element [~'value ~'descriptor]
-      (conj
-       ~'descriptor
-       (hash-map (keyword '~alps-element) ~'value)))))
+(def keyword-doc        :doc)
+(def keyword-value      :value)
+(def keyword-descriptor :descriptor)
+(def keyword-alps       :alps)
+(def keyword-href       :href)
+(def keyword-type       :type)
+(def keyword-id         :id)
+(def keyword-rt         :rt)
+(def keyword-rel        :rel)
+(def keyword-link       :link)
 
-(def keyword-doc   :doc)
-(def keyword-value :value)
+(defn alps-element [keyword]
+  (fn [value] (hash-map keyword value)))
 
-(defalps descriptor)
-(defalps alps)
-(defalps href)
-(defalps type)
-(defalps id)
-(defalps rt)
-(defalps link)
-(defalps rel)
+(def descriptor (alps-element keyword-descriptor))
+(def alps (alps-element keyword-alps))
+(def href (alps-element keyword-href))
+(def type (alps-element keyword-type))
+(def id (alps-element keyword-id))
+(def rt (alps-element keyword-rt))
+(def rel (alps-element keyword-rel))
 
-(defn doc [documentation descriptor]
-  (conj
-   descriptor
-   {keyword-doc
-    {keyword-value documentation}}))
+(defn doc [documentation]
+  {keyword-doc
+    {keyword-value documentation}})
 
-(def types
+(defn link [link-relation url]
+  {keyword-link
+   (conj (rel link-relation)
+         (href url))})
+
+(def descriptor-types
   {:safe "safe"
    :semantic "semantic"})
 
@@ -41,9 +44,10 @@
 (defn document-hash-map [elements]
   {keyword-alps elements})
 
-(defn- descriptor-type [type-key]
-  (fn []
-    (type (type-key types) {})))
+(defn descriptor-make [type]
+  (fn [& descriptors]
+    (merge {keyword-type ((keyword type) descriptor-types)}
+           (into {} descriptors))))
 
-(def descriptor-type-safe (descriptor-type :safe))
-(def descriptor-type-semantic (descriptor-type :semantic))
+(def descriptor-safe (descriptor-make "safe"))
+(def descriptor-semantic (descriptor-make "semantic"))

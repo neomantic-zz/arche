@@ -46,58 +46,51 @@
       (media/profile-link-relation (app/alps-profile-url (:titleized names)))
       (media/self-link-relation (discoverable-resource-entity-url (:resource_name representable-hash-map))))})))
 
+
 (defn discoverable-resource-alps-representation []
   (let [link-relation "link_relation"
         href "href"
         singular (inflect/singular (:titleized names))
-        resource-name "resource_name"]
+        resource-name "resource_name"
+        base-descriptors [(alps/descriptor-semantic
+                           (alps/doc (format "The LinkRelation of the %s" singular))
+                           (alps/href (:url alps/schemas))
+                           (alps/id link-relation))
+                          (alps/descriptor-semantic
+                           (alps/href (:url alps/schemas))
+                           (alps/id href)
+                           (alps/doc (format "The HREF to the entry point of the %s" singular)))
+                          (alps/descriptor-semantic
+                           (alps/href (:text alps/schemas))
+                           (alps/id resource-name)
+                           (alps/doc (format "The name of the %s" singular)))
+                          (alps/descriptor-safe
+                           (alps/id "show")
+                           (alps/rt (:singular names))
+                           (alps/doc (format "Returns an individual %s" singular)))
+                          ]]
     (alps/document-hash-map
      {alps/keyword-descriptor
-      [(alps/doc
-        (format "The LinkRelation of the %s" singular)
-        (alps/href
-         (:url alps/schemas)
-         (alps/id
-          link-relation
-          (alps/descriptor-type-semantic))))
-       (alps/doc
-        (format "The HREF to the entry point of the %s" singular)
-        (alps/id
-         href
-         (alps/href
-          (:url alps/schemas)
-          (alps/descriptor-type-semantic))))
-       (alps/doc
-        (format "The name of the %s" singular)
-        (alps/id
-         resource-name
-         (alps/href
-          (:text alps/schemas)
-          (alps/descriptor-type-semantic))))
-       (alps/doc
-        (format "Returns an individual %s" singular)
-        (alps/rt
-         (:singular names)
-         (alps/id
-          "show"
-          (alps/descriptor-type-safe))))
-       (alps/link
-        (conj
-         {alps/keyword-rel (name media/link-relation-self)}
-         {alps/keyword-href (format "%s#%s" (app/alps-profile-url (:titleized names)) (ring/url-encode (:singular names)))})
-        (alps/descriptor
-         (into []
-               (map (fn [prop] {alps/keyword-href prop}) [link-relation href resource-name "show"]))
-         (alps/doc
-          "A Resource that can be discovered via an entry point"
-          (alps/id
-           (:singular names)
-           (alps/descriptor-type-semantic)))))]
+      (merge
+        base-descriptors
+        (merge
+         {alps/keyword-descriptor
+          (map (fn [descriptor]
+                  {alps/keyword-href (alps/keyword-id descriptor)})
+                base-descriptors)}
+         (alps/descriptor-semantic
+           (alps/id (:singular names))
+          (alps/doc "A Resource that can be discovered via an entry point")
+          (alps/link
+           (name media/link-relation-self)
+           (format "%s#%s" (app/alps-profile-url (:titleized names)) (ring/url-encode (:singular names)))))))
       alps/keyword-link
-      {alps/keyword-href (app/alps-profile-url (:titleized names))
-       alps/keyword-rel (name media/link-relation-self)}
+      (into {}
+            [(alps/rel (name media/link-relation-self))
+             (alps/href (app/alps-profile-url (:titleized names)))])
       alps/keyword-doc
-      {alps/keyword-value (format "Describes the semantics, states and state transitions associated with %s." (:titleized names))}})))
+      {alps/keyword-value
+      (format "Describes the semantics, states and state transitions associated with %s." (:titleized names))}})))
 
 (defn discoverable-resource-first [resource-name]
   (first (select
