@@ -52,28 +52,24 @@ Scenario: A client can receive an alps profile describing the link relations of 
   And the "application/alps+json" document should have the following links:
   | rel    | href                                |
   | self   | http://example.org/alps/EntryPoints |
-  | profil | "what                               |
-  And the "application/alps+json" document should have the following descriptor:
-  | property | attribute                                                           |
-  | id       | entry_points                                                        |
+  And the "application/alps+json" document should have a "entry_points" descriptor with the following properties:
+  | property | value                                                               |
   | type     | semantic                                                            |
   | doc      | A collection of link relations to find resources of a specific type |
-  And the "application/alps+json" document should have the following descriptor:
-  | property | attribute                                        |
-  | id       | list                                             |
+  And the "application/alps+json" document should have a "list" descriptor with the following properties:
+  | property | value                                            |
   | name     | self                                             |
   | type     | safe                                             |
   | doc      | Returns a list of entry points                   |
   | rt       | http://example.org/alps/EntryPoints#entry_points |
-  And the descriptor with id "entry_points" should have the following descriptors:
-  | href      |
-  | #list     |
+  And the "entry_points" descriptor should have the following descriptors:
+  | href   |
+  | #list  |
   And the response should have the following header fields:
-  | field         | field_contents        |
-  | Cache-Control | max-age=600, private  |
-  | ETag          | anything              |
-  | Location      | http://example.org/   |
-  | Content-Type  | application/alps+json |
+  | field         | field_contents                      |
+  | Cache-Control | max-age=600, private                |
+  | ETag          | anything                            |
+  | Location      | http://example.org/alps/EntryPoints |
 
 Scenario: A client can receive an alps profile describing the link relations of entry points when there are some
   Given a discoverable resource exists with the following attributes:
@@ -90,34 +86,31 @@ Scenario: A client can receive an alps profile describing the link relations of 
   And the "application/alps+json" document should have the following links:
   | rel  | href                                |
   | self | http://example.org/alps/EntryPoints |
-  And the "application/alps+json" document should have the following descriptor:
+  And the "application/alps+json" document should have a "entry_points" descriptor with the following properties:
   | property | attribute                                                           |
   | id       | entry_points                                                        |
   | type     | semantic                                                            |
   | doc      | A collection of link relations to find resources of a specific type |
-  And the descriptor with id "entry_points" should have the following descriptors:
+  And the "entry_points" descriptor should have the following descriptors:
   | href     |
   | #list    |
   | #studies |
-  And the "application/alps+json" document should have the following descriptor:
+  And the "application/alps+json" document should have a "list" descriptor with the following properties:
   | property | attribute                                        |
-  | id       | list                                             |
   | name     | self                                             |
   | type     | safe                                             |
   | doc      | Returns a list of entry points                   |
   | rt       | http://example.org/alps/EntryPoints#entry_points |
-  And the "application/alps+json" document should have the following descriptor:
+  And the "application/alps+json" document should have a "studies" descriptor with the following properties:
   | property | attribute                                                            |
-  | id       | studies                                                              |
   | type     | safe                                                                 |
   | doc      | Returns a resource of the type 'studies' as described by its profile |
   | rt       | https://www.mydomain.com/alps/study                                  |
-  And the descriptor with id should have the following link:
+  And the "studies" descriptor should have the following link:
   | rel     | href                                |
-  | profile | http://example.org/alps/EntryPoints |
+  | profile | https://www.mydomain.com/alps/study |
   And the response should have the following header fields:
-  | field         | field_contents        |
-  | Cache-Control | max-age=600, private  |
-  | ETag          | anything              |
-  | Location      | http://example.org/   |
-  | Content-Type  | application/alps+json |
+  | field         | field_contents                      |
+  | Cache-Control | max-age=600, private                |
+  | ETag          | anything                            |
+  | Location      | http://example.org/alps/EntryPoints |
