@@ -1,9 +1,9 @@
-(ns wormhole-clj.resources.profiles
-  (:require [wormhole-clj.alps :as alps]
+(ns arche.resources.profiles
+  (:require [arche.alps :as alps]
             [cheshire.core :refer :all :as json]
             [liberator.core :refer [resource defresource]]
-            [wormhole-clj.http :as http-helper]
-            [wormhole-clj.app-state :as app]
+            [arche.http :as http-helper]
+            [arche.app-state :as app]
             [inflections.core :only [:camel-case] :as inflect]
             [liberator.representation :as rep :refer [ring-response as-response]]))
 

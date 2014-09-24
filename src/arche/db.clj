@@ -1,4 +1,4 @@
-(ns wormhole-clj.db
+(ns arche.db
   (:require [environ.core :refer [env]]
             [clj-time.core :as time]
             [clj-time.coerce :as coerce]))

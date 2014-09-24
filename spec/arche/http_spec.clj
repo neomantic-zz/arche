@@ -1,6 +1,6 @@
-(ns wormhole-clj.http-spec
+(ns arche.http-spec
   (:require [speclj.core :refer :all]
-            [wormhole-clj.http :refer :all]))
+            [arche.http :refer :all]))
 
 
 (describe

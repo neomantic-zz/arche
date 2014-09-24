@@ -1,19 +1,19 @@
-(ns wormhole-clj.core-spec
-  (:use wormhole-clj.db
-        wormhole-clj.resources.discoverable-resources)
+(ns arche.core-spec
+  (:use arche.db
+        arche.resources.discoverable-resources)
   (:require [clojure.java.jdbc :as jdbc]
             [speclj.core :refer :all]
-            [wormhole-clj.app-state :refer :all :as app]
-            [wormhole-clj.media :refer :all :as media]
-            [wormhole-clj.core :refer :all]
+            [arche.app-state :refer :all :as app]
+            [arche.media :refer :all :as media]
+            [arche.core :refer :all]
             [ring.mock.request :refer :all :as ring-mock]
             [ring.util.response :only [:get-header] :as ring]
             [clojurewerkz.urly.core :as urly]
-            [wormhole-clj.resources.profiles :refer :all :as profile]
+            [arche.resources.profiles :refer :all :as profile]
             [environ.core :refer [env]]))
 
-(defn wormhole-request [uri & params]
-  (wormhole-routes {:request-method :get :uri uri :params (first params)}))
+(defn arche-request [uri & params]
+  (app-routes {:request-method :get :uri uri :params (first params)}))
 
 (defn successful? [response]
   (= (:status response) 200))
@@ -35,32 +35,32 @@
    (clean-database)
    (factory-discoverable-resource-create "studies"))
   (it "supports /discoverable_resources/ with a name"
-      (should-be successful? (wormhole-request (format "%s%s" "/discoverable_resources/" "studies"))))
+      (should-be successful? (arche-request (format "%s%s" "/discoverable_resources/" "studies"))))
   (it "should have the correct accept header"
                   (should= media/hal-media-type
-                           (get (:headers (wormhole-request (format "%s%s" "/discoverable_resources/" "studies"))) "Accept")))
+                           (get (:headers (arche-request (format "%s%s" "/discoverable_resources/" "studies"))) "Accept")))
   (it "returns the correct location header"
                   (should= (format "%s/discoverable_resources/studies" (app/base-uri))
-                           (get (:headers (wormhole-request (format "%s%s" "/discoverable_resources/" "studies"))) "Location")))
+                           (get (:headers (arche-request (format "%s%s" "/discoverable_resources/" "studies"))) "Location")))
   (it "returns have the correct accept header"
                   (should= "application/hal+json"
-                           (get (:headers (wormhole-request (format "%s%s" "/discoverable_resources/" "studies"))) "Content-Type")))))
+                           (get (:headers (arche-request (format "%s%s" "/discoverable_resources/" "studies"))) "Content-Type")))))
 
 (describe
  "routes profiles"
  (it "supports the apls/DiscoverableResources route"
-     (should-be successful? (wormhole-request "/alps/DiscoverableResources")))
+     (should-be successful? (arche-request "/alps/DiscoverableResources")))
  (it "should have the correct accept header"
      (should= "application/alps+json"
-              (get (:headers (wormhole-request "/alps/DiscoverableResources")) "Accept")))
+              (get (:headers (arche-request "/alps/DiscoverableResources")) "Accept")))
 (it "should have the location header"
      (should= (.toString (.mutatePath (urly/url-like (app/base-uri))  "/alps/DiscoverableResources"))
-              (get (:headers (wormhole-request "/alps/DiscoverableResources")) "Location")))
+              (get (:headers (arche-request "/alps/DiscoverableResources")) "Location")))
  (it "should have the correct content type header"
      (should= "application/alps+json"
-              (get (:headers (wormhole-request "/alps/DiscoverableResources")) "Content-Type"))))
+              (get (:headers (arche-request "/alps/DiscoverableResources")) "Content-Type"))))
 
-(let [response (wormhole-routes
+(let [response (app-routes
                 (header (ring-mock/request :get "/alps/DIscoverableResources")
                         "Accept" "application/x-yaml"))
       actual-status (:status response)
@@ -74,7 +74,7 @@
    (it "returns the correct accept type in the response header"
        (should= "application/alps+json" (ring/get-header response "Accept")))))
 
-(let [response (wormhole-routes
+(let [response (app-routes
                 (header (ring-mock/request :get "/")
                         "Accept" "application/hal+json"))
       actual-status (:status response)]

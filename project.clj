@@ -1,4 +1,4 @@
-(defproject wormhole-clj "0.0.1-SNAPSHOT"
+(defproject arche "0.0.1-SNAPSHOT"
   :description "Resource Catalog Hypermedia Service"
   :url "http://bitbucket.org/calbers"
   :dependencies [[org.clojure/clojure "1.6.0"]
@@ -33,8 +33,8 @@
             [lein-pprint "1.1.1"]]
   :clj-sql-up {:database {:subprotocol "mysql"}
                :deps [[mysql/mysql-connector-java "5.1.25"]]}
-  :main ^:skip-aot wormhole-clj.core
-  :ring {:handler wormhole-clj.core/handler}
+  :main ^:skip-aot arche.core
+  :ring {:handler arche.core/handler}
   :test-paths ["spec"]
   :cucumber-feature-paths ["features/"]
   :target-path "target/%s"

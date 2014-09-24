@@ -1,5 +1,5 @@
-(ns wormhole-clj.alps-spec
-  (:use wormhole-clj.alps)
+(ns arche.alps-spec
+  (:use arche.alps)
   (:require [speclj.core :refer :all]))
 
 

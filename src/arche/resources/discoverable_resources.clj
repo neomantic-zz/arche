@@ -1,18 +1,18 @@
-(ns wormhole-clj.resources.discoverable-resources
+(ns arche.resources.discoverable-resources
   (:use korma.db
         korma.core)
   (:require [cheshire.core :refer :all :as json]
             [liberator.core :refer [resource defresource]]
             [liberator.representation :as rep :refer [ring-response as-response]]
-            [wormhole-clj.alps :as alps]
-            [wormhole-clj.media :as media]
-            [wormhole-clj.db :as records]
+            [arche.alps :as alps]
+            [arche.media :as media]
+            [arche.db :as records]
             [ring.util.codec :only [:url-encode] :as ring]
-            [wormhole-clj.app-state :as app]
-            [wormhole-clj.http :as http-helper]
+            [arche.app-state :as app]
+            [arche.http :as http-helper]
             [pandect.core :refer :all :as digest]
             [inflections.core :refer :all :as inflect]
-            [wormhole-clj.resources.profiles :as profile]))
+            [arche.resources.profiles :as profile]))
 
 (def ^{:private true} base-name "discoverable_resources")
 

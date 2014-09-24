@@ -1,5 +1,5 @@
-(ns wormhole-clj.db-spec
-  (:use wormhole-clj.db)
+(ns arche.db-spec
+  (:use arche.db)
   (:import java.util.Date java.sql.Timestamp)
   (:require [speclj.core :refer :all]
             [clj-time.coerce :as coerce]))

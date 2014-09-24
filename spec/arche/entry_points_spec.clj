@@ -1,14 +1,14 @@
-(ns wormhole-clj.entry-points-spec
-  (:use wormhole-clj.resources.entry-points)
+(ns arche.entry-points-spec
+  (:use arche.resources.entry-points)
   (:require [speclj.core :refer :all]
-            [wormhole-clj.core-spec :only (factory-discoverable-resource-create
+            [arche.core-spec :only (factory-discoverable-resource-create
                                            clean-database) :as support]
-            [wormhole-clj.resources.discoverable-resources
+            [arche.resources.discoverable-resources
              :only (discoverable-resource-first discoverable-resources-all)
              :as record]
             [clojurewerkz.urly.core :as urly]
-            [wormhole-clj.media :as media]
-            [wormhole-clj.app-state :as app]))
+            [arche.media :as media]
+            [arche.app-state :as app]))
 
 (def expected-profile-url
   (.toString

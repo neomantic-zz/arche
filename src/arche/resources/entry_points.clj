@@ -1,16 +1,16 @@
-(ns wormhole-clj.resources.entry-points
+(ns arche.resources.entry-points
   (:require  [liberator.core :refer [resource defresource]]
-             [wormhole-clj.resources.discoverable-resources :only (discoverable-resources-all) :as record]
-             [wormhole-clj.media :as media]
-             [wormhole-clj.http :as http-helper]
-             [wormhole-clj.app-state :as app]
-             [wormhole-clj.alps :as alps]
+             [arche.resources.discoverable-resources :only (discoverable-resources-all) :as record]
+             [arche.media :as media]
+             [arche.http :as http-helper]
+             [arche.app-state :as app]
+             [arche.alps :as alps]
              [cheshire.core :refer :all :as json]
              [clojurewerkz.urly.core :as urly]
              [ring.util.codec :only [:url-encode] :as ring]
              [clojure.string :as str]
              [inflections.core :only (dasherize) :as inflect]
-             [wormhole-clj.resources.profiles :as profile]
+             [arche.resources.profiles :as profile]
              [liberator.representation :as rep :refer [ring-response as-response]]))
 
 (def names

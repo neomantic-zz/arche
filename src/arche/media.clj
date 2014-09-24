@@ -1,4 +1,4 @@
-(ns wormhole-clj.media)
+(ns arche.media)
 
 (def keyword-links :_links)
 (def keyword-href :href)

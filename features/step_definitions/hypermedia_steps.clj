@@ -3,7 +3,7 @@
         cucumber.runtime.clj
         clojure.test)
   (:require [cheshire.core :only (parse-string) :as json]
-            [wormhole-clj.media :as media]
+            [arche.media :as media]
             [environ.core :refer [env]])
   (:import [java.net URI URL]))
 

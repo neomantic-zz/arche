@@ -1,4 +1,4 @@
-(ns wormhole-clj.alps
+(ns arche.alps
   (:refer-clojure :exclude [resolve]))
 
 (def document-version "1.0")

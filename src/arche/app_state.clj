@@ -1,6 +1,6 @@
-(ns wormhole-clj.app-state
+(ns arche.app-state
   (:require [environ.core :refer [env]]
-            [wormhole-clj.alps :only [keyword-alps] :as alps]
+            [arche.alps :only [keyword-alps] :as alps]
             [ring.util.codec :only [url-encode] :as ring]
             [clojurewerkz.urly.core :as urly])
   (:import [java.net URI URL]))

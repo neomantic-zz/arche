@@ -1,16 +1,16 @@
 (ns step-definitions.discoverable-resources-steps
-  (:use wormhole-clj.core
-        wormhole-clj.db
-        wormhole-clj.resources.discoverable-resources
+  (:use arche.core
+        arche.db
+        arche.resources.discoverable-resources
         cucumber.runtime.clj
         clojure.test)
   (:refer-clojure :exclude [resolve])
   (:require [clojure.java.jdbc :as jdbc]
             [ring.adapter.jetty :as jetty]
             [ring.util.response :as ring]
-            [wormhole-clj.media :as media]
+            [arche.media :as media]
             [clojurewerkz.urly.core :as urly]
-            [wormhole-clj.app-state :as app]
+            [arche.app-state :as app]
             [cheshire.core :refer :all :as json]
             [clj-http.client :as client])
   (:import [java.net URI URL]))

@@ -1,6 +1,6 @@
-(ns wormhole-clj.media-spec
+(ns arche.media-spec
   (:require [speclj.core :refer :all]
-            [wormhole-clj.media :refer :all]))
+            [arche.media :refer :all]))
 
 (describe
  "keywords"

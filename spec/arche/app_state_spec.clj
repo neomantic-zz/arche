@@ -1,5 +1,5 @@
-(ns wormhole-clj.app-state-spec
-  (:use wormhole-clj.app-state)
+(ns arche.app-state-spec
+  (:use arche.app-state)
   (:require [speclj.core :refer :all]))
 
 (describe

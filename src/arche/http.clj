@@ -1,4 +1,4 @@
-(ns wormhole-clj.http
+(ns arche.http
   (:require [pandect.core :refer :all :as digest]))
 
 (defn- make-header-fn [key]

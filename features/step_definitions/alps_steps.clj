@@ -3,8 +3,8 @@
         step-definitions.discoverable-resources-steps
         clojure.test)
   (:require [cheshire.core :only (parse-string) :as json]
-            [wormhole-clj.media :refer :all :as m]
-            [wormhole-clj.alps :only [keyword-link
+            [arche.media :refer :all :as m]
+            [arche.alps :only [keyword-link
                                       keyword-alps
                                       keyword-rel
                                       keyword-href] :as a]))

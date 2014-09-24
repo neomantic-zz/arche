@@ -1,9 +1,9 @@
-(ns wormhole-clj.resources.discoverable-resources-spec
-  (:use wormhole-clj.core-spec
-        wormhole-clj.resources.discoverable-resources
-        wormhole-clj.resources.profiles)
+(ns arche.resources.discoverable-resources-spec
+  (:use arche.core-spec
+        arche.resources.discoverable-resources
+        arche.resources.profiles)
   (:require [speclj.core :refer :all]
-            [wormhole-clj.app-state :refer :all :as app]))
+            [arche.app-state :refer :all :as app]))
 
 (let [resource-name "studies"
       link-relation "http://example.org/alps/studies"
