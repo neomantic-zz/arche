@@ -45,12 +45,10 @@
   (digest/md5 (format "%s/%d-%d" (name entity-type) (:id record)
                       (:updated_at record))))
 
-(defdb db records/dbspec)
-
 (defentity discoverable-resources
   (pk :id)
   (table (:tableized names))
-  (database db)
+  (database records/db)
   (entity-fields :resource_name :link_relation :href))
 
 (defn discoverable-resource-entity-url [resource-name]

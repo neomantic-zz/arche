@@ -18,16 +18,15 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (ns arche.db
-  (:require [environ.core :refer [env]]
+  (:require [korma.db :refer [defdb mysql]]
+            [environ.core :refer [env]]
             [clj-time.core :as time]
             [clj-time.coerce :as coerce]))
 
-(def dbspec {:classname "com.mysql.jdbc.Driver"
-             :subprotocol "mysql"
-             :user (env :database-user)
-             :password (env :database-password)
-             :delimiters "`"
-             :subname (env :database-subname)})
+(defdb db (mysql {:user (env :database-user)
+                  :password (env :database-password)
+                  :host (env :database-host)
+                  :db (env :database-name)}))
 
 (defn sql-timestamp-now []
   (coerce/to-sql-time (coerce/to-long (time/now))))
