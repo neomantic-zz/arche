@@ -24,9 +24,10 @@
             [compojure.route :as route]
             [arche.resources.discoverable-resources :only (names discoverable-resource-entity) :as discover]
             [arche.resources.entry-points :only (entry-points route) :as entry]
-            [clojure.string :as str]
-            [arche.app-state :as app]
             [arche.resources.profiles :as profile]
+            [arche.app-state :as app]
+            [ring.adapter.jetty :as jetty]
+            [environ.core :refer [env]]
             [inflections.core :refer :all :as inflect]))
 
 (defroutes app
