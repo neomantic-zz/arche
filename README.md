@@ -8,14 +8,23 @@ Leinigen
 ## Running
 `lein with-profile dev ring server-headless`
 
-## Bugs
+## Compilation
+`lein uberjar`
+
+## Source Code
+
+https://github.com/neomantic/arche/issues
+
+## Issues and Feature Requests
+
+https://github.com/neomantic/arche/issues
 
 ## Development
 To run unit tests: `lein with-profile spec,test spec`
 To run cucumber: `lein with-profile test cucumber`
 
 ## Production
-### Enviroment variables
+### Environmental variables
 
 * `PORT`
 * `BASE_URI`
@@ -24,6 +33,10 @@ To run cucumber: `lein with-profile test cucumber`
 * `DATABASE_HOST`
 * `DATABASE_NAME`
 * `CACHE_EXPIRY`
+
+## Author
+
+[Chad Albers](mailto:calbers@neomantic.com)
 
 ## Arche Licensing Information
 
