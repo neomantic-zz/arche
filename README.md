@@ -58,7 +58,7 @@ http://localhost:3000/`, you should see the following returned.
 
 ## Source Code
 
-https://github.com/neomantic/arche/issues
+https://github.com/neomantic/arche
 
 ## Issues and Feature Requests
 
@@ -85,9 +85,9 @@ To run cucumber: `lein with-profile test cucumber`
 
 [Chad Albers](mailto:calbers@neomantic.com)
 
-## Arche Licensing Information
+## License
 
-arche may be used under the terms of either the
+Arche may be used under the terms of either the
 
   * GNU Lesser General Public License (LGPL)
     http://www.gnu.org/licenses/lgpl.html
