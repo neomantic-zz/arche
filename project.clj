@@ -59,6 +59,7 @@
             [lein-pprint "1.1.1"]]
   :clj-sql-up {:database {:subprotocol "mysql"}
                :deps [[mysql/mysql-connector-java "5.1.25"]]}
+  :min-lein-version "2.0.0"
   :main ^:skip-aot arche.core
   :ring {:handler arche.core/handler}
   :test-paths ["spec"]
