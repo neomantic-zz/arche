@@ -18,7 +18,7 @@ values can either be assigned as exports in the shell or using a
 `profile.clj` file.  View [this file](example-profile.clj) as an
 example.
 
-Now run the app as follows:
+Now run the arche as follows:
 
 `lein with-profile dev ring server-headless`
 
@@ -36,9 +36,9 @@ variables: `java -cp target/uberjar/arche-standalone.jar clojure.main
 If everything has been setup correctly, you can test the app using
 curl.
 
-If your running the app on port 3000, with it's `BASE_URI` assigned to
-localhost, and excute `curl -H "application/hal+json"
-http://localhost:3000/`, you should see the following returned.
+If the arche is listening to port 3000 on localhost and its `BASE_URI`
+assigned to localhost, and excute `curl -H "application/hal+json"
+http://localhost:3000/`. The correct response is the following:
 
 ``` json
 {
