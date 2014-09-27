@@ -4,12 +4,57 @@
 ## Dependencies
 Clojure
 Leinigen
+mysql
 
-## Running
+# Setup
+
+1. Create a mysql database.
+2. `lein clj-sql-up migrate`
+
+## Running Locally
+Arche depends on values assigned to a number of environmental
+variables described below. For local development purposes, these
+values can either be assigned as exports in the shell or using a
+`profile.clj` file.  View [this file](example-profile.clj) as an
+example.
+
+Now run the app as follows:
+
 `lein with-profile dev ring server-headless`
 
-## Compilation
-`lein uberjar`
+## Standalone
+
+1. Compile the application: `lein uberjar`
+2. Assign all the environmental variables listed below in the shell
+that you will run the web application
+3. Execute the command in the same shell as the environmental
+variables: `java -cp target/uberjar/arche-standalone.jar clojure.main
+-m arche.core`
+
+## Testing the Running App
+
+If everything has been setup correctly, you can test the app using
+curl.
+
+If your running the app on port 3000, with it's `BASE_URI` assigned to
+localhost, and excute `curl -H "application/hal+json"
+http://localhost:3000/`, you should see the following returned.
+
+``` json
+{
+    "_links": {
+        "profile": {
+            "href": "http://localhost:3000/alps/EntryPoints"
+        },
+        "type": {
+            "href": "http://localhost:3000/alps/EntryPoints#entry_points"
+        },
+        "self": {
+            "href": "http://localhost:3000"
+        }
+    }
+}
+```
 
 ## Source Code
 
@@ -26,13 +71,15 @@ To run cucumber: `lein with-profile test cucumber`
 ## Production
 ### Environmental variables
 
-* `PORT`
-* `BASE_URI`
-* `DATABASE_PASSWORD`
-* `DATABASE_USER`
-* `DATABASE_HOST`
-* `DATABASE_NAME`
-* `CACHE_EXPIRY`
+* `PORT` - The port the app should listen to for incoming requests
+* `BASE_URI` - The URI that Arche use to construct links; e.g.,
+   "http://localhost:3000" or "http://www.neomantic.com"
+* `DATABASE_USER` - The mysql user who has access to the database
+* `DATABASE_PASSWORD` - The user's credentials to the database
+* `DATABASE_HOST` - The host of the mysql server
+* `DATABASE_NAME` - The name of the database
+* `CACHE_EXPIRY` - The number of seconds Arche assigns in the
+  Cache-Control response headers
 
 ## Author
 
