@@ -18,7 +18,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (ns arche.alps
-  (:refer-clojure :exclude [resolve]))
+  (:refer-clojure :exclude [resolve type]))
 
 (def document-version "1.0")
 
