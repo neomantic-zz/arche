@@ -15,12 +15,14 @@ To run unit tests: `lein with-profile spec,test spec`
 To run cucumber: `lein with-profile test cucumber`
 
 ## Production
-### Eenviroment variables
+### Enviroment variables
 
+* `PORT`
 * `BASE_URI`
 * `DATABASE_PASSWORD`
 * `DATABASE_USER`
-* `DATABASE_SUBNAME`
+* `DATABASE_HOST`
+* `DATABASE_NAME`
 * `CACHE_EXPIRY`
 
 ## Arche Licensing Information
