@@ -43,12 +43,12 @@
              :test {:env {:base-uri "http://example.org"}}
              :dev {:env {:base-uri "http://localhost:3000"}
                    :dependencies [[speclj "3.1.0"]]}}
- :license [{:name "Eclipse Public License - v 1.0"
-            :url "http://www.eclipse.org/legal/epl-v10.html"
-            :distribution :repo}
-           {:name "GNU Lesser Public License Version 3"
-            :url "http://www.gnu.org/licenses/lgpl.html"
-            :distribution :repo}]
+  :licenses [{:name "Eclipse Public License - v 1.0"
+              :url "http://www.eclipse.org/legal/epl-v10.html"
+              :distribution :repo}
+             {:name "GNU Lesser Public License Version 3"
+              :url "http://www.gnu.org/licenses/lgpl.html"
+              :distribution :repo}]
   :plugins [[lein-cucumber "1.0.2"]
             [ring-serve "0.1.2"]
             [lein-ring "0.8.11"]
