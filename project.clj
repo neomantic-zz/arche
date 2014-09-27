@@ -65,7 +65,4 @@
   :ring {:handler arche.core/handler}
   :test-paths ["spec"]
   :cucumber-feature-paths ["features/"]
-  :target-path "target/%s"
-  :pom-addition [:developers [:developer {:id "neomantic"}
-                              [:name "Chad Albers"]
-                              [:url "http://www.neomantic.com"]]])
+  :target-path "target/%s")
