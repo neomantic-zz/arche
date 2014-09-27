@@ -2,9 +2,9 @@
 
 
 ## Dependencies
-Clojure
-Leinigen
-mysql
+* [Clojure](http://clojure.org/)
+* [leiningen](http://leiningen.org/)
+* mysql
 
 # Setup
 
