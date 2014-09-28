@@ -28,10 +28,12 @@
                   :host (env :database-host)
                   :db (env :database-name)}))
 
+(def timestamp-fields
+  [:created_at :updated_at])
+
 (defn sql-timestamp-now []
   (coerce/to-sql-time (coerce/to-long (time/now))))
 
 (defn new-record-timestamps []
   (let [timestamp (sql-timestamp-now)]
-    {:created_at timestamp
-     :updated_at timestamp}))
+    (zipmap timestamp-fields [timestamp timestamp])))
