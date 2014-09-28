@@ -31,7 +31,8 @@
             [clojurewerkz.urly.core :as urly]
             [arche.app-state :as app]
             [cheshire.core :refer :all :as json]
-            [clj-http.client :as client])
+            [clj-http.client :as client]
+            [environ.core :refer [env]])
   (:import [java.net URI URL]))
 
 ;; cucumber helpers
@@ -102,6 +103,15 @@
     (do
       (.stop @server)
       (reset! server nil))))
+
+(def dbspec {:classname "com.mysql.jdbc.Driver"
+             :subprotocol "mysql"
+             :user (env :database-user)
+             :password (env :database-password)
+             :delimiters "`"
+             :subname (format "//%s:3306/%s"
+                              (env :database-host)
+                              (env :database-name))})
 
 (defn database-truncate []
   (jdbc/db-do-commands dbspec "TRUNCATE TABLE discoverable_resources;"))
