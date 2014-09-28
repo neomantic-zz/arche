@@ -19,6 +19,7 @@
 
 (ns arche.alps-spec
   (:use arche.alps)
+  (:refer-clojure :exclude [type])
   (:require [speclj.core :refer :all]))
 
 
