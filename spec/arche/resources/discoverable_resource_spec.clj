@@ -155,3 +155,46 @@
   (discoverable-resource-create "studies" "http://link-relation.io" "http://test.host/url/studies"))
  (it "returns a correct number of discoverables"
      (should= 1 (count (discoverable-resources-all)))))
+
+
+(describe
+ "correct representable map"
+ (before (clean-database))
+ (after (clean-database))
+ (it "produces the correct map to serialize"
+     (let [name "studies"
+           href   "http://test.host/url/studies"
+           link-relation  "http://link-relation.io"
+           mappable (discoverable-resource-create name link-relation href)]
+       (should==
+        {:link_relation link-relation
+         :href href
+         :resource_name name
+         :_links {
+                  :self {:href "http://example.org/discoverable_resources/studies"}
+                  :profile {:href "http://example.org/alps/DiscoverableResources"}
+                  }}
+        (hypermedia-map mappable))))
+ (it "removes timesstamp info"
+     (let [name "studies"
+           href   "http://test.host/url/studies"
+           link-relation  "http://link-relation.io"
+           mappable {:link_relation link-relation
+                     :href href
+                     :resource_name name
+                     :created_at "sometime"
+                     :updated_at "sometime"}]
+       (should==
+        {:link_relation link-relation
+         :href href
+         :resource_name name
+         :_links {
+                  :self {:href "http://example.org/discoverable_resources/studies"}
+                  :profile {:href "http://example.org/alps/DiscoverableResources"}
+                  }}
+        (hypermedia-map mappable)))))
+
+(describe
+ "properties"
+ (it "returns the required descriptor for response and requests"
+     (should= [:resource_name :link_relation :href] required-descriptors)))

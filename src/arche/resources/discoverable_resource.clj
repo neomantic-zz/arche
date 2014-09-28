@@ -44,6 +44,9 @@
   (digest/md5 (format "%s/%d-%d" (name entity-type) (:id record)
                       (:updated_at record))))
 
+(def required-descriptors
+  [:resource_name :link_relation :href])
+
 (defentity discoverable-resources
   (pk :id)
   (table (:tableized names))
@@ -56,13 +59,26 @@
 (def profile-url
   (app/alps-profile-url (:titleized names)))
 
+(defn hypermedia-map [representable-map]
+  (conj
+   (into {} (filter (fn [i]
+                      (some #(= (first i) %) required-descriptors)) representable-map))
+   {media/keyword-links
+    (conj
+     (media/profile-link-relation profile-url)
+     (media/self-link-relation
+      (discoverable-resource-entity-url (:resource_name representable-map))))}))
+
 (defn discoverable-resource-representation [representable-hash-map]
   (json/generate-string
    (conj
-    representable-hash-map
+    (apply dissoc (concat
+                   [representable-hash-map]
+                   [:generated_key]
+                   records/timestamp-fields))
     {media/keyword-links
      (conj
-      (media/profile-link-relation (app/alps-profile-url (:titleized names)))
+      (media/profile-link-relation profile-url)
       (media/self-link-relation (discoverable-resource-entity-url (:resource_name representable-hash-map))))})))
 
 
