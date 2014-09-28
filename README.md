@@ -65,7 +65,7 @@ https://github.com/neomantic/arche
 https://github.com/neomantic/arche/issues
 
 ## Development
-To run unit tests: `lein with-profile spec,test spec`
+To run unit tests: `lein with-profile test spec`
 To run cucumber: `lein with-profile test cucumber`
 
 ## Production
