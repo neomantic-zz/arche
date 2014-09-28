@@ -7,7 +7,7 @@
     :clj-sql-up {:database {:user "root"
                             :subname "//127.0.0.1:3306/arche_development"
                             :password ""}}}
-   :test {:env {:base-uri "http://example.org"
+   :test {:env {:base-uri "http://example.org" ;; warning: changing this value will break tests
                 :database-user "root"
                 :database-password ""
                 :database-host "localhost"
