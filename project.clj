@@ -29,7 +29,7 @@
                  [korma "0.4.0"]
                  [mysql/mysql-connector-java "5.1.25"]
                  [cheshire "5.3.1"]
-                 [clj-http "1.0.0"] ;; FIX - this is really a development dependency
+                 [clj-http "1.0.0"]
                  [environ "1.0.0"]
                  [clj-time "0.8.0"]
                  [pandect "0.3.4"]
