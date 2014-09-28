@@ -18,8 +18,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (ns arche.resources.discoverable-resources
-  (:use korma.db
-        korma.core)
+  (:use korma.core)
   (:require [cheshire.core :refer :all :as json]
             [liberator.core :refer [resource defresource]]
             [liberator.representation :as rep :refer [ring-response as-response]]
