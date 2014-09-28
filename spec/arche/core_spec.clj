@@ -32,13 +32,24 @@
             [environ.core :refer [env]]))
 
 (defn arche-request [uri & params]
-  (app-routes {:request-method :get :uri uri :params (first params)}))
+  (app {:request-method :get :uri uri :params (first params)}))
 
 (defn successful? [response]
   (= (:status response) 200))
 
+(def dbspec {:classname "com.mysql.jdbc.Driver"
+             :subprotocol "mysql"
+             :user (env :database-user)
+             :password (env :database-password)
+             :delimiters "`"
+             :subname (format "//%s:3306/%s"
+                              (env :database-host)
+                              (env :database-name))})
+
 (defn clean-database []
-  (jdbc/db-do-commands dbspec "TRUNCATE TABLE discoverable_resources;"))
+  (jdbc/db-do-commands
+   dbspec
+   "TRUNCATE TABLE discoverable_resources;"))
 
 (defn factory-discoverable-resource-create [resource-name]
   (discoverable-resource-create
@@ -79,7 +90,7 @@
      (should= "application/alps+json"
               (get (:headers (arche-request "/alps/DiscoverableResources")) "Content-Type"))))
 
-(let [response (app-routes
+(let [response (app
                 (header (ring-mock/request :get "/alps/DIscoverableResources")
                         "Accept" "application/x-yaml"))
       actual-status (:status response)
@@ -93,7 +104,7 @@
    (it "returns the correct accept type in the response header"
        (should= "application/alps+json" (ring/get-header response "Accept")))))
 
-(let [response (app-routes
+(let [response (app
                 (header (ring-mock/request :get "/")
                         "Accept" "application/hal+json"))
       actual-status (:status response)]
