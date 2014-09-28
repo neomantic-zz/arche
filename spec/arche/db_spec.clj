@@ -29,6 +29,11 @@
      (should-be-a java.sql.Timestamp (sql-timestamp-now))))
 
 (describe
+ "fields"
+ (it "returns a keys for its fields"
+     (should== #{:created_at :updated_at} (into #{} timestamp-fields))))
+
+(describe
  "time stamps for new records"
  (it "creates a map with the correct timestamps"
      (let [timestamps (new-record-timestamps)]
