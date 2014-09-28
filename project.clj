@@ -36,14 +36,12 @@
                  [inflections "0.9.9"]
                  [clojurewerkz/urly "1.0.0"]
                  [ring-mock "0.1.5"]
+                 [speclj "3.1.0"]
                  [pandect "0.3.4"]]
   :profiles {:uberjar {:aot :all}
              :production {:env {:production true}}
-             :spec {:env {:base-uri "http://example.org"}
-                    :dependencies [[speclj "3.1.0"]]}
              :test {:env {:base-uri "http://example.org"}}
-             :dev {:env {:base-uri "http://localhost:3000"}
-                   :dependencies [[speclj "3.1.0"]]}}
+             :dev {:env {:base-uri "http://localhost:3000"}}}
   :licenses [{:name "Eclipse Public License - v 1.0"
               :url "http://www.eclipse.org/legal/epl-v10.html"
               :distribution :repo}
