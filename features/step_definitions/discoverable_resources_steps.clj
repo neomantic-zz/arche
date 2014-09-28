@@ -20,7 +20,7 @@
 (ns step-definitions.discoverable-resources-steps
   (:use arche.core
         arche.db
-        arche.resources.discoverable-resources
+        arche.resources.discoverable-resource
         cucumber.runtime.clj
         clojure.test)
   (:refer-clojure :exclude [resolve])

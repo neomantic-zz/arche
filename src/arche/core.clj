@@ -22,7 +22,7 @@
             [compojure.core :refer [defroutes GET]]
             [compojure.handler :refer [api]]
             [compojure.route :as route]
-            [arche.resources.discoverable-resources :only (names discoverable-resource-entity) :as discover]
+            [arche.resources.discoverable-resource :only (names discoverable-resource-entity) :as discover]
             [arche.resources.entry-points :only (entry-points route) :as entry]
             [arche.resources.profiles :as profile]
             [arche.app-state :as app]

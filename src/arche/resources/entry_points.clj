@@ -19,7 +19,7 @@
 
 (ns arche.resources.entry-points
   (:require  [liberator.core :refer [resource defresource]]
-             [arche.resources.discoverable-resources :only (discoverable-resources-all) :as record]
+             [arche.resources.discoverable-resource :only (discoverable-resources-all) :as record]
              [arche.media :as media]
              [arche.http :as http-helper]
              [arche.app-state :as app]
