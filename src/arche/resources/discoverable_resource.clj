@@ -53,6 +53,9 @@
 (defn discoverable-resource-entity-url [resource-name]
   (app/app-uri-for (format "/%s/%s" (:routable names) resource-name)))
 
+(def profile-url
+  (app/alps-profile-url (:titleized names)))
+
 (defn discoverable-resource-representation [representable-hash-map]
   (json/generate-string
    (conj

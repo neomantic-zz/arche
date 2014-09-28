@@ -77,6 +77,8 @@
 
 (describe
  "alps"
+ (it "returns the correct profile url"
+     (should= profile-url (format "%s/alps/%s"(app/base-uri) "DiscoverableResources")))
  (it "creates the correct representation of an alps document"
      (should== {:alps
                 {:descriptor
