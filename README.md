@@ -8,17 +8,20 @@
 
 # Setup
 
-1. Create a mysql database.
-2. `lein clj-sql-up migrate`
+1. Save the example [profile.clj](example-profile.clj) file to the root
+of the project under the name "profile.clj".
+2. Edit the profile.clj file to match your mysql setup
+3. Create a mysql database whose name corresponds to the `database-name`
+in your custom `profile.clj` file.
+4. Create the tables by running: `lein clj-sql-up migrate`
 
 ## Running Locally
 Arche depends on values assigned to a number of environmental
-variables described below. For local development purposes, these
-values can either be assigned as exports in the shell or using a
-`profile.clj` file.  View [this file](example-profile.clj) as an
-example.
+variables described [below](#environmental-variables). For local
+development purposes, these values can either be assigned as exports
+in the shell or using a `profile.clj` file.
 
-Now run the arche as follows:
+To run a local version arche, use the following command:
 
 `lein with-profile dev ring server-headless`
 
