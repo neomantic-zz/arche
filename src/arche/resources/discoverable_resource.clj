@@ -69,19 +69,6 @@
      (media/self-link-relation
       (discoverable-resource-entity-url (:resource_name representable-map))))}))
 
-(defn discoverable-resource-representation [representable-hash-map]
-  (json/generate-string
-   (conj
-    (apply dissoc (concat
-                   [representable-hash-map]
-                   [:generated_key]
-                   records/timestamp-fields))
-    {media/keyword-links
-     (conj
-      (media/profile-link-relation profile-url)
-      (media/self-link-relation (discoverable-resource-entity-url (:resource_name representable-hash-map))))})))
-
-
 (defn discoverable-resource-alps-representation []
   (let [link-relation "link_relation"
         href "href"
@@ -160,7 +147,8 @@
                                  (http-helper/header-location
                                   (discoverable-resource-entity-url (:resource_name entity)))
                                  (http-helper/header-accept media/hal-media-type)])
-                 :body (discoverable-resource-representation entity)})))
+                 :body (json/generate-string
+                        (hypermedia-map entity))})))
 
 (profile/profile-register!
  {(:keyword names) discoverable-resource-alps-representation})
