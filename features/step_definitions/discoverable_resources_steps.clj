@@ -74,6 +74,11 @@
   (client/get (url-to-test path) {:throw-exceptions false
                                   :headers headers}))
 
+(defn execute-post-request [path headers body]
+  (client/post (url-to-test path) {:throw-exceptions false
+                                   :headers headers
+                                   :body body}))
+
 (defn call-app-url [url accept-type]
   (if (= (urly/host-of url) (urly/host-of (app/base-uri)))
     (let [path (urly/path-of (urly/url-like url))]
@@ -135,6 +140,17 @@
 (When #"^I invoke the uniform interface method GET to \"([^\"]*)\" accepting \"([^\"]*)\"$" [path media-type]
       (last-response-set!
        (execute-get-request path {"Accept" media-type})))
+
+
+(When #"^I invoke uniform interface method POST to \"([^\"]*)\" with the \"([^\"]*)\" body and accepting \"([^\"]*)\" responses:$" [path content-type accept-type body]
+      (execute-post-request path
+                            {"Accept" accept-type
+                             "Content-Type" content-type}
+                            (try
+                              (json/generate-string
+                               (json/parse-string body))
+                              (catch Exception e
+                                (prn "That wasn't json")))))
 
 (Then #"^I should get a status of (\d+)$" [status]
       (is (= (last-response-status) (read-string status))))
