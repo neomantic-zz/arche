@@ -25,7 +25,7 @@ Scenario: A client reads a discoverable resource as hale+json
     | Location      | http://example.org/discoverable_resources/studies    |
 
 Scenario: The client can successfully create a discoverable resource
-  When I invoke uniform interface method POST to "v2/discoverable_resources" with the "application/json" body and accepting "application/vnd.hale+json" responses:
+  When I invoke uniform interface method POST to "/discoverable_resources" with the "application/json" body and accepting "application/vnd.hale+json" responses:
   """
   {
    "link_relation": "https://www.mydomain.com/studies",
@@ -41,12 +41,12 @@ Scenario: The client can successfully create a discoverable resource
    | resource_name | studies                          |
   And the resource representation should have exactly the following links:
     | link_relation | href                                                                   |
-    | profile       | http://example.org/v2/alps/DiscoverableResources                       |
-    | self          | http://example.org/v2/discoverable_resources/studies                   |
-    | type          | http://example.org/v2/alps/DiscoverableResources#discoverable_resource |
+    | profile       | http://example.org/alps/DiscoverableResources                       |
+    | self          | http://example.org/discoverable_resources/studies                   |
+    | type          | http://example.org/alps/DiscoverableResources#discoverable_resource |
     | help          | http://example.org/help/discoverable_resources                         |
   And the response should have the following header fields:
     | field         | field_contents                                       |
     | Cache-Control | max-age=0, private                                   |
     | ETag          | anything                                             |
-    | Location      | http://example.org/v2/discoverable_resources/studies |
+    | Location      | http://example.org/discoverable_resources/studies    |
