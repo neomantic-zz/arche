@@ -25,7 +25,7 @@ Scenario: A client reads a discoverable resource as hale+json
     | Location      | http://example.org/discoverable_resources/studies    |
 
 Scenario: The client can successfully create a discoverable resource
-  When I invoke uniform interface method POST to "/discoverable_resources" with the "application/json" body and accepting "application/vnd.hale+json" responses:
+  When I invoke uniform interface method POST to "/discoverable_resources" with the "application/json" body and accepting "application/hal+json" responses:
   """
   {
    "link_relation": "https://www.mydomain.com/studies",
