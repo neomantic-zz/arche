@@ -22,7 +22,9 @@
         arche.resources.discoverable-resource
         arche.resources.profiles)
   (:require [speclj.core :refer :all]
+            [cheshire.core :refer :all :as json]
             [arche.db :refer [cache-key] :as record]
+            [arche.http :refer [etag-make] :as http-helper]
             [arche.app-state :refer :all :as app]))
 
 (let [resource-name "studies"
@@ -201,3 +203,21 @@
                       resource-name "http://example.org/alps/studies" "http://example.org/studies")
              found (discoverable-resource-first resource-name)]
          (should= (record/cache-key "discoverable_resources" created) (record/cache-key "discoverable_resources" found))))))
+
+
+(let [resource-name "studies"
+      record (discoverable-resource-create
+              resource-name "http://example.org/alps/studies" "http://example.org/studies")
+      test-response (:response (ring-response-json record 200))]
+  (describe
+  "response as json"
+  (it "returns the correct headers"
+      (should== {"ETag" (http-helper/etag-make (record/cache-key (:routable names) record))
+                 "Cache-Control" "max-age=600, private"
+                 "Accept" "application/hal+json"
+                 "Location" (discoverable-resource-entity-url resource-name)}
+                (:headers test-response)))
+  (it "returns parsable json"
+      (should-not-throw (json/parse-string (:body test-response))))
+  (it "returns the correct status code"
+      (should= 200 (:status test-response)))))
