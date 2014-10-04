@@ -29,10 +29,10 @@
             [arche.resources.core :refer :all :as generic]
             [arche.media :as media]))
 
-(defn method-supports-body? [ctx]
+(defn- method-supports-body? [ctx]
   (#{:put :post} (get-in ctx [:request :request-method])))
 
-(defn includes_required? [parsed]
+(defn- includes_required? [parsed]
   (not (#(some nil? %) (map #(get parsed %) entity/required-descriptors))))
 
 (def supported-content-types ["application/json"])
