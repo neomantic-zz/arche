@@ -129,18 +129,13 @@
                       {:resource_name resource-name
                        :link_relation link-relation
                        :href href})]
-      ;; work around from korma ugliness; it returns a only
-      ;; the id for the new record, but not as the primary key column
-      ;; name but as 'generated_key`. and it doesn't return the attributes
-      ;; it inserts, either
-      (let [record (insert discoverable-resources (values attributes))
-            id (:generated_key record)]
-        ;; ugly work around for the fact that the timestamps on the record
-        ;; are tiny milliseconds off from the timestamps that are persisted
-        ;; korma problem?
-        (first (select
-                discoverable-resources
-                (where {:resource_name resource-name})))))))
+      (insert discoverable-resources (values attributes))
+      ;; ugly work around for the fact that the timestamps on the record
+      ;; are tiny milliseconds off from the timestamps that are persisted
+      ;; korma problem?
+      (first (select
+              discoverable-resources
+              (where {:resource_name resource-name}))))))
 
 (defn ring-response-json [record status-code]
   (ring-response
