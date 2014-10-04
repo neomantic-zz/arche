@@ -142,7 +142,9 @@
   (ring-response
    {:status status-code
     :headers (into {}
-                   [(http-helper/header-etag (http-helper/etag-by-record (name (:tableized names)) record))
+                   [(-> (records/cache-key (name (:tableized names)) record)
+                        http-helper/etag-make
+                        http-helper/header-etag)
                     (http-helper/cache-control-header-private-age (app/cache-expiry))
                     (http-helper/header-location (discoverable-resource-entity-url (:resource_name record)))
                     (http-helper/header-accept media/hal-media-type)])

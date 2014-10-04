@@ -18,9 +18,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (ns arche.http
-  (:require [pandect.core :refer [md5]]
-            [clj-time.coerce :refer [to-long to-string]])
-  (:import [org.joda.time.format DateTimeFormat]))
+  (:require [pandect.core :refer [md5]]))
 
 (defn- make-header-fn [key]
   (fn [content]
@@ -34,19 +32,5 @@
 (defn cache-control-header-private-age [number]
   (header-cache-control (format "max-age=%d, private" number)))
 
-(defn- digest-make [string]
+(defn etag-make [string]
   (md5 string))
-
-(defn etag-by-body [body]
-  (digest-make body))
-
-(defn etag-by-record [table-name record]
-  ;; this duplicatios how RR creates etag
-  (let [formatter (. DateTimeFormat (forPattern  "YMdHmsS9"))
-        stamp-to-s (. formatter (print (-> record
-                                           :updated_at
-                                           to-long)))]
-    (digest-make (format "%s/%d-%s"
-                         table-name
-                         (:id record)
-                         (to-string (:updated_at record))))))

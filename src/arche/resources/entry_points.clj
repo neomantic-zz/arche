@@ -117,7 +117,7 @@
                  (ring-response
                   {:status 200
                    :headers (into {}
-                                  [(http-helper/header-etag (http-helper/etag-by-body body))
+                                  [(http-helper/header-etag (http-helper/etag-make body))
                                    (http-helper/header-location (self-url))
                                    (http-helper/cache-control-header-private-age (app/cache-expiry))
                                    (http-helper/header-accept
