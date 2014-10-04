@@ -18,8 +18,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (ns arche.http
-  (:require [pandect.core :refer :all :as digest]
-            [clj-time.coerce :refer :all :as coerce])
+  (:require [pandect.core :refer [md5]]
+            [clj-time.coerce :refer [to-long to-string]])
   (:import [org.joda.time.format DateTimeFormat]))
 
 (defn- make-header-fn [key]
@@ -35,7 +35,7 @@
   (header-cache-control (format "max-age=%d, private" number)))
 
 (defn- digest-make [string]
-  (digest/md5 string))
+  (md5 string))
 
 (defn etag-by-body [body]
   (digest-make body))
@@ -45,8 +45,8 @@
   (let [formatter (. DateTimeFormat (forPattern  "YMdHmsS9"))
         stamp-to-s (. formatter (print (-> record
                                            :updated_at
-                                           coerce/to-long)))]
+                                           to-long)))]
     (digest-make (format "%s/%d-%s"
                          table-name
                          (:id record)
-                         (coerce/to-string (:updated_at record))))))
+                         (to-string (:updated_at record))))))
