@@ -47,7 +47,7 @@
   (pk :id)
   (table (:tableized names))
   (database records/db)
-  (entity-fields :resource_name :link_relation :href :updated_at :id))
+  (entity-fields :resource_name :link_relation :href :updated_at :id :created_at))
 
 (defn discoverable-resource-entity-url [resource-name]
   (app/app-uri-for (format "/%s/%s" (:routable names) resource-name)))
