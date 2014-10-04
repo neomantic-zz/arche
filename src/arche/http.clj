@@ -34,7 +34,7 @@
 (defn cache-control-header-private-age [number]
   (header-cache-control (format "max-age=%d, private" number)))
 
-(defn digest-make [string]
+(defn- digest-make [string]
   (digest/md5 string))
 
 (defn etag-by-body [body]
