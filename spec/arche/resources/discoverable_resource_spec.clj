@@ -35,11 +35,12 @@
                       resource-name
                       link-relation
                       href)]
-         (should== (conj
-                    created
-                    {:resource_name resource-name
-                     :link_relation link-relation
-                     :href href})
+         (should== {:resource_name resource-name
+                    :link_relation  link-relation
+                    :id (:id created)
+                    :created_at (:created_at created)
+                    :updated_at (:updated_at created)
+                    :href href}
                    created))))
   (describe
    "duplications of discoverable resources"
@@ -65,15 +66,6 @@
  (it "creates the correct discoverable resource entity url with url encoding"
      (should= (format "%s%s" (app/base-uri) "/discoverable_resources/bad%20resource%20name")
               (discoverable-resource-entity-url "bad resource name"))))
-
-(describe
- "etag"
- (it "creates one"
-     (should-not-be-nil (etag-make "discoverable_resources" {:id 3
-                                                             :updated_at 3})))
- (it "should be a string"
-     (should-be string? (etag-make "discoverable_resources" {:id 3
-                                                             :updated_at 3}))))
 
 (describe
  "alps"
@@ -125,15 +117,20 @@
       href "http://example.org/studies"]
   (describe
    "finding one discoverable resources"
-   (before (clean-database)
-           (discoverable-resource-create
-            resource-name link-relation href))
+   (before (clean-database))
+   (after (clean-database))
    (it "returns a map of the record"
-       (should==
-        {:resource_name resource-name
-         :link_relation link-relation
-         :href href}
-        (discoverable-resource-first resource-name)))))
+       (let [created (discoverable-resource-create
+                      resource-name link-relation href)
+             found (discoverable-resource-first resource-name)]
+         ;; unable to perform simple map comparison, because
+         ;; the date time of the created at is different from the
+         ;; date time of the found
+         (should= resource-name (:resource_name found))
+         (should= link-relation (:link_relation found))
+         (should= (:id created) (:id found))
+         (should= href (:href found))
+         (should-not-be-nil (:updated_at found))))))
 
 (describe
  "name management"
