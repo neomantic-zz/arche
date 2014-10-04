@@ -60,7 +60,6 @@
                                (str/join ", " supported-content-types))}]))
   :processable? (fn [{parsed ::parsed}] (includes_required? parsed))
   :post-redirect? false
-  ;;:post-to-existing? false
   :respond-with-entity? true
   :post! (fn [{parsed ::parsed}]
            {::record
