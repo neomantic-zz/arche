@@ -43,7 +43,9 @@
 (defn etag-by-record [table-name record]
   ;; this duplicatios how RR creates etag
   (let [formatter (. DateTimeFormat (forPattern  "YMdHmsS9"))
-        stamp-to-s (. formatter (print (coerce/to-long (:updated_at record))))]
+        stamp-to-s (. formatter (print (-> record
+                                           :updated_at
+                                           coerce/to-long)))]
     (digest-make (format "%s/%d-%s"
                          table-name
                          (:id record)
