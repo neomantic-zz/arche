@@ -22,6 +22,7 @@
         arche.resources.discoverable-resource
         arche.resources.profiles)
   (:require [speclj.core :refer :all]
+            [arche.db :refer [cache-key] :as record]
             [arche.app-state :refer :all :as app]))
 
 (let [resource-name "studies"
@@ -123,14 +124,7 @@
        (let [created (discoverable-resource-create
                       resource-name link-relation href)
              found (discoverable-resource-first resource-name)]
-         ;; unable to perform simple map comparison, because
-         ;; the date time of the created at is different from the
-         ;; date time of the found
-         (should= resource-name (:resource_name found))
-         (should= link-relation (:link_relation found))
-         (should= (:id created) (:id found))
-         (should= href (:href found))
-         (should-not-be-nil (:updated_at found))))))
+         (should== created found)))))
 
 (describe
  "name management"
@@ -195,3 +189,15 @@
  "properties"
  (it "returns the required descriptor for response and requests"
      (should= [:resource_name :link_relation :href] required-descriptors)))
+
+
+(let [resource-name "studies"]
+  (describe
+   "entity etags"
+   (before (clean-database))
+   (after (clean-database))
+   (it "returns the same etag value for both created and found entities"
+       (let [created (discoverable-resource-create
+                      resource-name "http://example.org/alps/studies" "http://example.org/studies")
+             found (discoverable-resource-first resource-name)]
+         (should= (record/cache-key "discoverable_resources" created) (record/cache-key "discoverable_resources" found))))))
