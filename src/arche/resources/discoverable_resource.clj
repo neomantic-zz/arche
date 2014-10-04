@@ -60,7 +60,7 @@
 (def profile-url
   (app/alps-profile-url (:titleized names)))
 
-(defn filter-for-required-fields [representable-map]
+(defn- filter-for-required-fields [representable-map]
   (into {}
         (filter (fn [i]
                   (some #(= (first i) %) required-descriptors)) representable-map)))
