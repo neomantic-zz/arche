@@ -19,7 +19,7 @@
 
 (ns arche.http
   (:require [pandect.core :refer :all :as digest]
-            [clj-time.coerce :refer [to-long] :as coerce])
+            [clj-time.coerce :refer :all :as coerce])
   (:import [org.joda.time.format DateTimeFormat]))
 
 (defn- make-header-fn [key]
