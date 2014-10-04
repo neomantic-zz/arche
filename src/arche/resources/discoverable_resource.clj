@@ -40,11 +40,6 @@
      :singular (inflect/singular base-name)
      :keyword (keyword (inflect/dasherize base-name))}))
 
-(defn etag-by-record [record]
-  (digest/md5 (format "%s/%d-%d" (:routable names)
-                      (:id record)
-                      (:updated_at record))))
-
 (def required-descriptors
   [:resource_name :link_relation :href])
 
