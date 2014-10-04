@@ -40,13 +40,11 @@ Scenario: The client can successfully create a discoverable resource
    | href          | https://a-service.io/studies     |
    | resource_name | studies                          |
   And the resource representation should have exactly the following links:
-    | link_relation | href                                                                   |
-    | profile       | http://example.org/alps/DiscoverableResources                       |
-    | self          | http://example.org/discoverable_resources/studies                   |
-    | type          | http://example.org/alps/DiscoverableResources#discoverable_resource |
-    | help          | http://example.org/help/discoverable_resources                         |
+    | link_relation | href                                              |
+    | profile       | http://example.org/alps/DiscoverableResources     |
+    | self          | http://example.org/discoverable_resources/studies |
   And the response should have the following header fields:
-    | field         | field_contents                                       |
-    | Cache-Control | max-age=0, private                                   |
-    | ETag          | anything                                             |
-    | Location      | http://example.org/discoverable_resources/studies    |
+    | field         | field_contents                                    |
+    | Cache-Control | max-age=600, private                              |
+    | ETag          | anything                                          |
+    | Location      | http://example.org/discoverable_resources/studies |

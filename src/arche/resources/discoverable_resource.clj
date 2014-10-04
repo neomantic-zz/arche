@@ -32,16 +32,17 @@
             [inflections.core :refer :all :as inflect]
             [arche.resources.profiles :as profile]))
 
-(def ^{:private true} base-name "discoverable_resources")
+(def names
+  (let [base-name "discoverable_resources"]
+    {:titleized (inflect/camel-case base-name)
+     :routable base-name
+     :tableized (keyword base-name)
+     :singular (inflect/singular base-name)
+     :keyword (keyword (inflect/dasherize base-name))}))
 
-(def names {:titleized (inflect/camel-case base-name)
-            :routable base-name
-            :tableized (keyword base-name)
-            :singular (inflect/singular base-name)
-            :keyword (keyword (inflect/dasherize base-name))})
-
-(defn etag-make [entity-type record]
-  (digest/md5 (format "%s/%d-%d" (name entity-type) (:id record)
+(defn etag-by-record [record]
+  (digest/md5 (format "%s/%d-%d" (:routable names)
+                      (:id record)
                       (:updated_at record))))
 
 (def required-descriptors
@@ -129,7 +130,24 @@
                       {:resource_name resource-name
                        :link_relation link-relation
                        :href href})]
-      (conj attributes (insert discoverable-resources (values attributes))))))
+      ;; work around from korma ugliness; it returns a only
+      ;; the id for the new record, but not as the primary key column
+      ;; name but as 'generated_key`. and it doesn't return the attributes
+      ;; it inserts, either
+      (let [record (insert discoverable-resources (values attributes))
+            id (:generated_key record)]
+        (conj attributes {:id id})))))
+
+(defn ring-response-json [record status-code]
+  (ring-response
+   {:status status-code
+    :headers (into {}
+                   [(http-helper/header-etag (http-helper/etag-by-record (name (:tableized names)) record))
+                    (http-helper/cache-control-header-private-age (app/cache-expiry))
+                    (http-helper/header-location (discoverable-resource-entity-url (:resource_name record)))
+                    (http-helper/header-accept media/hal-media-type)])
+    :body (json/generate-string
+           (hypermedia-map record))}))
 
 (defresource discoverable-resource-entity [resource-name]
   :available-media-types [media/hal-media-type]
@@ -139,16 +157,7 @@
                {::existing existing}
                false))
   :handle-ok (fn [{entity ::existing}]
-               (ring-response
-                {:status 200
-                 :headers (into {}
-                                [(http-helper/header-etag (etag-make base-name entity))
-                                 (http-helper/cache-control-header-private-age (app/cache-expiry))
-                                 (http-helper/header-location
-                                  (discoverable-resource-entity-url (:resource_name entity)))
-                                 (http-helper/header-accept media/hal-media-type)])
-                 :body (json/generate-string
-                        (hypermedia-map entity))})))
+               (ring-response-json entity 200)))
 
 (profile/profile-register!
  {(:keyword names) discoverable-resource-alps-representation})

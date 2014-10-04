@@ -143,14 +143,17 @@
 
 
 (When #"^I invoke uniform interface method POST to \"([^\"]*)\" with the \"([^\"]*)\" body and accepting \"([^\"]*)\" responses:$" [path content-type accept-type body]
-      (execute-post-request path
-                            {"Accept" accept-type
-                             "Content-Type" content-type}
-                            (try
-                              (json/generate-string
-                               (json/parse-string body))
-                              (catch Exception e
-                                (prn "That wasn't json")))))
+      (let [headers {"Accept" accept-type
+                     "Content-Type" content-type}]
+        (last-response-set!
+         (execute-post-request
+          path
+          headers
+          (try
+            (json/generate-string
+             (json/parse-string body))
+            (catch Exception e
+              (prn "That wasn't json")))))))
 
 (Then #"^I should get a status of (\d+)$" [status]
       (is (= (last-response-status) (read-string status))))

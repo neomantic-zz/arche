@@ -15,30 +15,15 @@
 ;;    * Chad Albers
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  arche - A hypermedia resource discovery service
-;;
-;;  https://github.com/neomantic/arche
-;;
-;;  Copyright:
-;;    2014
-;;
-;;  License:
-;;    LGPL: http://www.gnu.org/licenses/lgpl.html
-;;    EPL: http://www.eclipse.org/org/documents/epl-v10.php
-;;    See the LICENSE file in the project's top-level directory for details.
-;;
-;;  Authors:
-;;    * Chad Albers
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (ns arche.resources.discoverable-resources-collection
   (:require [liberator.core :refer [resource defresource]]
+            [liberator.representation :refer [ring-response as-response]]
             [cheshire.core :refer :all :as json]
             [clojure.string :only (join) :as str]
             [clojure.java.io :as io]
+            [arche.http :as http-helper]
+            [arche.app-state :as app]
             [arche.resources.discoverable-resource
              :refer :all :as entity]
             [arche.resources.core :refer :all :as generic]
@@ -69,21 +54,19 @@
                     (catch Exception e
                       [true {:message "Required valid content for Content-Type applicaton/json"}]))))
   :known-content-type? (fn [ctx]
-                         (if (not (some #{(get-in ctx [:request :headers "content-type"])} ["application/json"]))
+                         (if (some #{(get-in ctx [:request :headers "content-type"])} supported-content-types)
+                           true
                            [false {:message (format "Unsupported media type. Currently only supports %s"
-                               (str/join ", " supported-content-types))}]
-                           true))
+                               (str/join ", " supported-content-types))}]))
   :processable? (fn [{parsed ::parsed}] (includes_required? parsed))
   :post-redirect? false
   ;;:post-to-existing? false
   :respond-with-entity? true
   :post! (fn [{parsed ::parsed}]
-           {::new
+           {::record
             (entity/discoverable-resource-create
              (:resource_name parsed)
              (:link_relation parsed)
              (:href parsed))})
-  :handle-created (fn [{entity ::new}]
-                    (json/generate-string
-                        (entity/hypermedia-map entity))
-                    ))
+  :handle-created (fn [{record ::record}]
+                    (entity/ring-response-json record 201)))
