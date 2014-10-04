@@ -23,10 +23,12 @@
             [arche.core-spec :refer [clean-database] :as helper]
             [cheshire.core :refer [generate-string parse-string] :as j]
             [ring.mock.request :refer [header request] :as mock]
-            [ring.util.response :only [:get-header] :as ring]
+            [ring.util.response :refer [get-header]]
             [arche.media :refer :all :as media]
+            [arche.db :refer [cache-key]]
+            [arche.http :refer [etag-make]]
             [arche.resources.discoverable-resource
-             :refer [required-descriptors] :as entity]
+             :refer [required-descriptors discoverable-resource-first] :as entity]
             [arche.core :refer [app] :as web]))
 
 (defn post-request [path accept-type content-type body]
@@ -39,28 +41,24 @@
   `(cheshire.core/generate-string
     ~args))
 
+(defn valid-post []
+  (post-request
+   "/discoverable_resources"
+   "application/hal+json"
+   "application/json"
+   (as-json
+    {:link_relation "http://test.host/alps/users"
+     :href "http://test.host/users"
+     :resource_name "users"})))
+
 (describe
  "creating a resource"
  (before (helper/clean-database))
  (after (helper/clean-database))
  (it "returns 201"
-     (should= 201 (:status (post-request
-                            "/discoverable_resources"
-                            "application/hal+json"
-                            "application/json"
-                            (as-json
-                             {:link_relation "a"
-                              :href "a"
-                              :resource_name "a"})))))
+     (should= 201 (:status (valid-post))))
  (it "handles valid json"
-     (should= 201 (:status (post-request
-                            "/discoverable_resources"
-                            "application/hal+json"
-                            "application/json"
-                            (as-json
-                             {:link_relation "http://test.host/alps/users"
-                              :href "http://test.host/users"
-                              :resource_name "users"})))))
+     (should= 201 (:status (valid-post))))
  (it "response with the correct body"
      (should= {:link_relation "http://test.host/alps/users"
                :href "http://test.host/users"
@@ -71,15 +69,31 @@
                 media/link-relation-profile {media/keyword-href
                                              entity/profile-url}}}
               (j/parse-string
-               (:body (post-request
-                       "/discoverable_resources"
-                       "application/hal+json"
-                       "application/json"
-                       (j/generate-string
-                        {:link_relation "http://test.host/alps/users"
-                         :href "http://test.host/users"
-                         :resource_name "users"}))) true)))
-)
+               (:body (valid-post)) true))))
+
+(let [resource-name "users"
+      response (post-request
+                     "/discoverable_resources"
+                     "application/hal+json"
+                     "application/json"
+                     (as-json
+                      {:link_relation "http://test.host/alps/users"
+                       :href "http://test.host/users"
+                       :resource_name resource-name}))
+      record (entity/discoverable-resource-first resource-name)]
+  (describe
+   "headers on valid post"
+   (before (helper/clean-database))
+   (after (helper/clean-database))
+   (it "returns correct location header"
+       (should= "http://example.org/discoverable_resources/users" (get-header response "Location")))
+   (it "returns correct accept header"
+       (should= "application/hal+json" (get-header response "Accept")))
+   (it "returns correct cache control header"
+       (should= "max-age=600, private" (get-header response "Cache-Control")))
+   (it "returns correct etag"
+       (should= (etag-make (cache-key "discoverable_resources" record))
+                (get-header response "Etag")))))
 
 (let [response (post-request
                 "/discoverable_resources"
@@ -91,7 +105,7 @@
    (it "returns 406 when the accept type is not hal+json"
        (should= 406 (:status response)))
    (it "returns the accept in the header"
-       (should= "application/hal+json" (ring/get-header response "Accept")))))
+       (should= "application/hal+json" (get-header response "Accept")))))
 
 (let [response (post-request "/discoverable_resources"
                              "application/hal+json"
@@ -153,5 +167,4 @@
                                   "application/json"
                                   (j/generate-string
                                    {:link_relation "http://service.io/alps/Users"
-                                    :resource_name "users"}))))))
- )
+                                    :resource_name "users"})))))))
