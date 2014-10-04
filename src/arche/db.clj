@@ -21,7 +21,7 @@
   (:require [korma.db :refer [defdb mysql]]
             [environ.core :refer [env]]
             [clj-time.core :as time]
-            [clj-time.coerce :refer [to-long to-string to-sql-time]])
+            [clj-time.coerce :refer [to-long to-string to-sql-time from-sql-time]])
   (:import [org.joda.time.format DateTimeFormat]))
 
 (defdb db (mysql {:user (env :database-user)
@@ -43,5 +43,5 @@
   ;; this duplicates the way ROR creates a cache key
   ;; using its :nsec format
   (let [formatter (. DateTimeFormat (forPattern  "YMdHmsS9"))
-        stamp-string (. formatter (print (to-long (:updated_at record))))]
+        stamp-string (. formatter (print (to-long (from-sql-time (:updated_at record)))))]
     (format "%s/%d-%s" table-name (:id record) stamp-string)))
