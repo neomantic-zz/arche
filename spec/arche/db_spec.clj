@@ -19,7 +19,8 @@
 
 (ns arche.db-spec
   (:use arche.db)
-  (:import java.util.Date java.sql.Timestamp)
+  (:import java.util.Date java.sql.Timestamp
+           [org.joda.time.format DateTimeFormat])
   (:require [speclj.core :refer :all]
             [clj-time.coerce :as coerce]))
 
@@ -40,3 +41,14 @@
        (should= 2 (count timestamps))
        (should-not-be-nil {:created_at timestamps})
        (should-not-be-nil {:updated_at timestamps}))))
+
+(describe
+ "cache keys"
+ (it "correct creates it"
+     (let [timestamp (sql-timestamp-now)
+           convert-stamp #(let [formatter (. DateTimeFormat (forPattern  "YMdHmsS9"))]
+                             (. formatter (print (coerce/to-long %))))]
+       (should=
+        (format "atable-name/1-%s" (convert-stamp timestamp))
+        (cache-key "atable-name" {:id 1
+                                  :updated_at (sql-timestamp-now)})))))

@@ -43,10 +43,5 @@
   ;; this duplicates the way ROR creates a cache key
   ;; using its :nsec format
   (let [formatter (. DateTimeFormat (forPattern  "YMdHmsS9"))
-        stamp-to-s (. formatter (print (-> record
-                                           :updated_at
-                                           to-long)))]
-    (format "%s/%d-%s"
-            table-name
-            (:id record)
-            (to-string (:updated_at record)))))
+        stamp-string (. formatter (print (to-long (:updated_at record))))]
+    (format "%s/%d-%s" table-name (:id record) stamp-string)))
