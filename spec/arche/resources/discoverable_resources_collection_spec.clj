@@ -137,6 +137,20 @@
                               "application/json"
                               "{\"a\"}")))))
  (describe
+  "empty"
+  (it "returns the correct message"
+      (should= "Unprocessable entity." (:body
+                                       (post-request "/discoverable_resources"
+                                                     "application/hal+json"
+                                                     "application/json"
+                                                     ""))))
+  (it "returns the correct status"
+      (should= 422 (:status
+                    (post-request "/discoverable_resources"
+                                  "application/hal+json"
+                                  "application/json"
+                                  "")))))
+ (describe
   "unprocessable - missing attribute date"
   (it "returns the correct status code when json does not any of the require keys"
       (should= 422 (:status
