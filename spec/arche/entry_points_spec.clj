@@ -112,8 +112,6 @@
     "entry-points map"
     (before
      (support/factory-discoverable-resource-create test-resource-name))
-    (it "has the default links"
-        (pending "figure out reduce"))
     (it "has more items than the default links"
         (should (>
                  (count (link-relations (entry-points-map)))
