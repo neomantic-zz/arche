@@ -172,3 +172,7 @@
                 (let [[key value] pair]
                   (is (= value (key actual)))))
               expected))))
+
+(Then #"^I should get a response with the following errors:$" [arg1]
+  (comment  Express the Regexp above with the code you wish you had  )
+  (throw (cucumber.runtime.PendingException.)))

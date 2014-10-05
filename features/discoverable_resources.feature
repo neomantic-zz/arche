@@ -48,3 +48,16 @@ Scenario: The client can successfully create a discoverable resource
     | Cache-Control | max-age=600, private                              |
     | ETag          | anything                                          |
     | Location      | http://example.org/discoverable_resources/studies |
+
+Scenario: The request to create a discoverable resource fails, if no resource name is supplied
+  When I invoke uniform interface method POST to "v2/discoverable_resources" with the "application/json" body and accepting "application/vnd.hale+json" responses:
+  """
+  {
+   "href": "https://a-service.io/studies",
+   "link_relation": "https://www.mydomain.com/studies"
+  }
+  """
+  Then I should get a status of 422
+  And I should get a response with the following errors:
+  | attribute     | error_on_attribute |
+  | resource_name | can't be blank     |
