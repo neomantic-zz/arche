@@ -41,14 +41,18 @@
   `(cheshire.core/generate-string
     ~args))
 
+(defmacro from-json [args]
+  `(cheshire.core/parse-string
+    ~args true))
+
 (defn valid-post []
   (post-request
    "/discoverable_resources"
    "application/hal+json"
    "application/json"
    (as-json
-    {:link_relation "http://test.host/alps/users"
-     :href "http://test.host/users"
+    {:link_relation "https://test.host/alps/users"
+     :href "https://test.host/users"
      :resource_name "users"})))
 
 (describe
@@ -60,16 +64,16 @@
  (it "handles valid json"
      (should= 201 (:status (valid-post))))
  (it "response with the correct body"
-     (should= {:link_relation "http://test.host/alps/users"
-               :href "http://test.host/users"
+     (should= {:link_relation "https://test.host/alps/users"
+               :href "https://test.host/users"
                :resource_name "users"
                media/keyword-links
                {media/link-relation-self {media/keyword-href
                                           (entity/discoverable-resource-entity-url "users")}
                 media/link-relation-profile {media/keyword-href
                                              entity/profile-url}}}
-              (j/parse-string
-               (:body (valid-post)) true))))
+              (from-json
+               (:body (valid-post))))))
 
 (let [resource-name "users"
       response (post-request
@@ -77,8 +81,8 @@
                      "application/hal+json"
                      "application/json"
                      (as-json
-                      {:link_relation "http://test.host/alps/users"
-                       :href "http://test.host/users"
+                      {:link_relation "https://test.host/alps/users"
+                       :href "https://test.host/users"
                        :resource_name resource-name}))
       record (entity/discoverable-resource-first resource-name)]
   (describe
@@ -139,11 +143,17 @@
  (describe
   "empty"
   (it "returns the correct message"
-      (should= "Unprocessable entity." (:body
-                                       (post-request "/discoverable_resources"
-                                                     "application/hal+json"
-                                                     "application/json"
-                                                     ""))))
+      (should==
+               {:errors
+                {:href ["can't be blank" "is not valid"]
+                 :link_relation ["can't be blank" "is not valid"]
+                 :resource_name ["can't be blank"]}}
+               (from-json
+                (:body
+                 (post-request "/discoverable_resources"
+                               "application/hal+json"
+                               "application/json"
+                               "")))))
   (it "returns the correct status"
       (should= 422 (:status
                     (post-request "/discoverable_resources"
@@ -163,15 +173,15 @@
                     (post-request "/discoverable_resources"
                                   "application/hal+json"
                                   "application/json"
-                                  (j/generate-string
+                                  (as-json
                                    {:href "http://service.io/users"
                                     :resource_name "users"})))))
-(it "returns the correct status code when json does include resource name property"
+  (it "returns the correct status code when json does include resource name property"
       (should= 422 (:status
                     (post-request "/discoverable_resources"
                                   "application/hal+json"
                                   "application/json"
-                                  (j/generate-string
+                                  (as-json
                                    {:link_relation "http://service.io/alps/Users"
                                     :href "http://service.io/users"})))))
   (it "returns the correct status code when json does include href"
@@ -179,9 +189,46 @@
                     (post-request "/discoverable_resources"
                                   "application/hal+json"
                                   "application/json"
-                                  (j/generate-string
+                                  (as-json
                                    {:link_relation "http://service.io/alps/Users"
-                                    :resource_name "users"})))))))
+                                    :resource_name "users"}))))))
+ (it "returns the correct message when resource_name is missing"
+     (should== {:errors {:resource_name ["can't be blank"]}}
+              (from-json (:body (post-request "/discoverable_resources"
+                                              "application/hal+json"
+                                              "application/json"
+                                              (as-json
+                                               {:href "https://service.io/users"
+                                                :link_relation "https://service.io/alps/Users"}))))))
+ (it "returns the correct message when href is missing"
+     (should== {:errors {:href ["can't be blank" "is not valid"]}}
+               (from-json (:body (post-request "/discoverable_resources"
+                                               "application/hal+json"
+                                               "application/json"
+                                               (as-json
+                                                {:resource_name "users"
+                                                 :link_relation "https://service.io/alps/Users"}))))))
+ (it "returns the correct cache-control header"
+     (should= "max-age=0, private"
+              (get-header
+               (post-request "/discoverable_resources"
+                             "application/hal+json"
+                             "application/json"
+                             (as-json
+                              {:href "https://service.io/users"
+                               :link_relation "https://service.io/alps/Users"}))
+               "Cache-Control")))
+ (it "returns the correct content-type"
+     (should= "application/json"
+              (get-header
+               (post-request "/discoverable_resources"
+                             "application/hal+json"
+                             "application/json"
+                             (as-json
+                              {:href "https://service.io/users"
+                               :link_relation "https://service.io/alps/Users"}))
+               "Content-Type"))))
+
 (describe
  "creating error maps"
  (it "creates a error map when attribute has one error"

@@ -24,6 +24,7 @@
             [clojure.java.io :as io]
             [arche.http :as http-helper]
             [arche.app-state :as app]
+            [arche.validations :refer [default-error-messages]]
             [arche.resources.discoverable-resource
              :refer :all :as entity]
             [arche.resources.core :refer :all :as generic]
@@ -32,10 +33,11 @@
 (defn- method-supports-body? [ctx]
   (#{:put :post} (get-in ctx [:request :request-method])))
 
-(defn- includes-required? [parsed]
-  (not (#(some nil? %) (map #(get parsed %) entity/required-descriptors))))
-
 (def supported-content-types ["application/json"])
+
+(def error-messages
+  (assoc default-error-messages
+    :taken-by "has already been taken"))
 
 (defn construct-error-map [errors]
   {:errors
@@ -44,6 +46,17 @@
                 {attribute
                  (apply vector (map #(get error-messages %) error-keys))})
               errors))})
+
+(defn respond-to-unprocessable [{errors ::errors}]
+  (ring-response
+   {:status 422
+    :headers (conj
+              (http-helper/cache-control-header-private-age 0)
+              (http-helper/header-content-type "application/json"))
+    :body (-> errors
+              construct-error-map
+              json/generate-string)}))
+
 (defresource discoverable-resources-collection [request]
   :allowed-methods [:post]
   :available-media-types [media/hal-media-type]
@@ -65,7 +78,12 @@
                            true
                            [false {:message (format "Unsupported media type. Currently only supports %s"
                                (str/join ", " supported-content-types))}]))
-  :processable? (fn [{parsed ::parsed}] (includes-required? parsed))
+  :processable? (fn [{parsed ::parsed}]
+                  (let [errors (entity/validate parsed)]
+                    (if (empty? errors)
+                      true
+                      [false {::errors errors}])))
+  :handle-unprocessable-entity respond-to-unprocessable
   :post-redirect? false
   :respond-with-entity? true
   :post! (fn [{parsed ::parsed}]
