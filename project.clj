@@ -55,7 +55,10 @@
             [clj-sql-up "0.3.3"]
             [lein-environ "1.0.0"]
             [lein-pprint "1.1.1"]]
-  :clj-sql-up {:database {:subprotocol "mysql"}
+  :clj-sql-up {:database {:subprotocol "mysql"
+                          :user "travis"
+                          :password ""
+                          :subname "//127.0.0.1:3306/arche_test"}
                :deps [[mysql/mysql-connector-java "5.1.25"]]}
   :min-lein-version "2.0.0"
   :uberjar-name "arche-standalone.jar"
