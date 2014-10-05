@@ -1,6 +1,6 @@
 language: clojure
 lein: lein2
-script: lein with-profile test cucumber
+script: lein with-profile test cucumber -g feature/step_definitions
 before_script:
   - mysql -e 'create database arche_test;'
   - lein clj-sql-up migrate
