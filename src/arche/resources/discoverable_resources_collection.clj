@@ -37,6 +37,13 @@
 
 (def supported-content-types ["application/json"])
 
+(defn construct-error-map [errors]
+  {:errors
+   (into {}
+         (map (fn [[attribute error-keys]]
+                {attribute
+                 (apply vector (map #(get error-messages %) error-keys))})
+              errors))})
 (defresource discoverable-resources-collection [request]
   :allowed-methods [:post]
   :available-media-types [media/hal-media-type]
