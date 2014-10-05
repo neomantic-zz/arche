@@ -44,7 +44,7 @@
 
 (describe
  "cache keys"
- (it "correct creates it"
+ (it "creates it correctly"
      (let [timestamp (sql-timestamp-now)
            convert-stamp #(let [formatter (. DateTimeFormat (forPattern  "YMdHmsS9"))]
                              (. formatter (print (coerce/to-long %))))]
