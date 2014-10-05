@@ -32,7 +32,7 @@
 (defn- method-supports-body? [ctx]
   (#{:put :post} (get-in ctx [:request :request-method])))
 
-(defn- includes_required? [parsed]
+(defn- includes-required? [parsed]
   (not (#(some nil? %) (map #(get parsed %) entity/required-descriptors))))
 
 (def supported-content-types ["application/json"])
@@ -58,7 +58,7 @@
                            true
                            [false {:message (format "Unsupported media type. Currently only supports %s"
                                (str/join ", " supported-content-types))}]))
-  :processable? (fn [{parsed ::parsed}] (includes_required? parsed))
+  :processable? (fn [{parsed ::parsed}] (includes-required? parsed))
   :post-redirect? false
   :respond-with-entity? true
   :post! (fn [{parsed ::parsed}]
