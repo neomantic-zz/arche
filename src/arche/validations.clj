@@ -20,25 +20,31 @@
 (ns arche.validations)
 
 (def default-error-messages
-  {:blank "can't be blank"})
+  {:blank "can't be blank"
+   :invalid "is not valid"})
 
 (defn- presence-valid? [value]
   (and (not (nil? value))
        (not (empty? value))))
 
-(defn validate-presence [attribute submitted]
-  (if (presence-valid? (get submitted attribute))
+(defn validate-presence [submitted]
+  (if (presence-valid? submitted)
     []
     [:blank]))
 
 (defn validate-format-fn [format-proc]
-  (fn [attribute value]
-    (if (format-proc value)
+  (fn [value]
+    (if (and (not (nil? value)) (format-proc value))
       []
-      [:format])))
+      [:invalid])))
 
-(defn validate-attribute [attribute values & validations]
-  (if (empty? validations)
-    []
-    (apply concat (map #(% attribute values)
-                       validations))))
+(defn validate-attribute [attribute submitted & validations]
+  (let [value-to-test (get submitted attribute)]
+    (if (empty? validations)
+      {}
+      (let [errors (apply
+                    vector
+                    (mapcat #(% value-to-test)
+                            validations))]
+        (if (empty? errors) {}
+            {attribute errors})))))
