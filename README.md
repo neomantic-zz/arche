@@ -1,5 +1,6 @@
 # arche
 
+[![Build Status](https://travis-ci.org/neomantic/arche.svg?branch=feature%2Ftravis)](https://travis-ci.org/neomantic/arche)
 
 ## Dependencies
 * [Clojure](http://clojure.org/)
