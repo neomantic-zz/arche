@@ -32,6 +32,7 @@
             [inflections.core :refer :all :as inflect]
             [clojurewerkz.urly.core :as url]
             [arche.resources.profiles :as profile])
+  (:refer-clojure :exclude [resolve])
   (:import [java.net URI URISyntaxException]))
 
 (def names
