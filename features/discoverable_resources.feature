@@ -59,5 +59,33 @@ Scenario: The request to create a discoverable resource fails, if no resource na
   """
   Then I should get a status of 422
   And I should get a response with the following errors:
-  | attribute     | error_on_attribute                                                                                                                          |
-  | resource_name | can't be blank                                                                                                                              |
+  | attribute     | error_on_attribute |
+  | resource_name | can't be blank     |
+
+Scenario: The request to create a discoverable resource fails, if no href is supplied
+  When I invoke uniform interface method POST to "/discoverable_resources" with the "application/json" body and accepting "application/hal+json" responses:
+  """
+  {
+   "link_relation": "https://www.mydomain.com/studies",
+   "resource_name": "studies"
+  }
+  """
+  Then I should get a status of 422
+  And I should get a response with the following errors:
+  | attribute | error_on_attribute |
+  | href      | can't be blank     |
+  | href      | is not valid       |
+
+Scenario: The request to create a discoverable resource fails, if no link relation is supplied
+  When I invoke uniform interface method POST to "/discoverable_resources" with the "application/json" body and accepting "application/hal+json" responses:
+  """
+  {
+   "href": "https://a-service.io/studies",
+   "resource_name": "studies"
+  }
+  """
+  Then I should get a status of 422
+  And I should get a response with the following errors:
+  | attribute     | error_on_attribute |
+  | link_relation | can't be blank     |
+  | link_relation | is not valid       |

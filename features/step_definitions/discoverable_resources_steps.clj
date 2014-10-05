@@ -177,6 +177,10 @@
       (let [response-map (json/parse-string (last-response-body) true)]
         (is (not (nil? (get response-map :errors))))
         (doall
-         (map (fn [[attribute messages]]
-                (is (= messages (get-in response-map [:errors (key attribute)]))))
-              (table-rows-map table)))))
+         (map (fn [[attribute message]]
+                (is (some #(= % message) (get-in response-map [:errors (keyword attribute)]))
+                    (format "expected '%s' in attribute '%s'; got; '%s'"
+                            message
+                            attribute
+                            (clojure.string/join ", " (get-in response-map [:errors (keyword attribute)])) )))
+              (rest (map vec (.raw table)))))))
