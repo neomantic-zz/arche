@@ -20,7 +20,7 @@
 (ns step-definitions.discoverable-resources-steps
   (:use arche.core
         arche.db
-        arche.resources.discoverable-resources
+        arche.resources.discoverable-resource
         cucumber.runtime.clj
         clojure.test)
   (:refer-clojure :exclude [resolve])
@@ -73,6 +73,11 @@
 (defn execute-get-request [path headers]
   (client/get (url-to-test path) {:throw-exceptions false
                                   :headers headers}))
+
+(defn execute-post-request [path headers body]
+  (client/post (url-to-test path) {:throw-exceptions false
+                                   :headers headers
+                                   :body body}))
 
 (defn call-app-url [url accept-type]
   (if (= (urly/host-of url) (urly/host-of (app/base-uri)))
@@ -136,6 +141,20 @@
       (last-response-set!
        (execute-get-request path {"Accept" media-type})))
 
+
+(When #"^I invoke uniform interface method POST to \"([^\"]*)\" with the \"([^\"]*)\" body and accepting \"([^\"]*)\" responses:$" [path content-type accept-type body]
+      (let [headers {"Accept" accept-type
+                     "Content-Type" content-type}]
+        (last-response-set!
+         (execute-post-request
+          path
+          headers
+          (try
+            (json/generate-string
+             (json/parse-string body))
+            (catch Exception e
+              (prn "That wasn't json")))))))
+
 (Then #"^I should get a status of (\d+)$" [status]
       (is (= (last-response-status) (read-string status))))
 
@@ -153,3 +172,15 @@
                 (let [[key value] pair]
                   (is (= value (key actual)))))
               expected))))
+
+(Then #"^I should get a response with the following errors:$" [table]
+      (let [response-map (json/parse-string (last-response-body) true)]
+        (is (not (nil? (get response-map :errors))))
+        (doall
+         (map (fn [[attribute message]]
+                (is (some #(= % message) (get-in response-map [:errors (keyword attribute)]))
+                    (format "expected '%s' in attribute '%s'; got; '%s'"
+                            message
+                            attribute
+                            (clojure.string/join ", " (get-in response-map [:errors (keyword attribute)])) )))
+              (rest (map vec (.raw table)))))))

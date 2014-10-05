@@ -22,7 +22,7 @@
   (:require [speclj.core :refer :all]
             [arche.core-spec :only (factory-discoverable-resource-create
                                            clean-database) :as support]
-            [arche.resources.discoverable-resources
+            [arche.resources.discoverable-resource
              :only (discoverable-resource-first discoverable-resources-all)
              :as record]
             [clojurewerkz.urly.core :as urly]

@@ -17,8 +17,8 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(ns arche.resources.discoverable-resources
-  (:use korma.core)
+(ns arche.resources.discoverable-resource
+  (:use korma.core arche.validations)
   (:require [cheshire.core :refer :all :as json]
             [liberator.core :refer [resource defresource]]
             [liberator.representation :as rep :refer [ring-response as-response]]
@@ -30,38 +30,47 @@
             [arche.http :as http-helper]
             [pandect.core :refer :all :as digest]
             [inflections.core :refer :all :as inflect]
-            [arche.resources.profiles :as profile]))
+            [clojurewerkz.urly.core :as url]
+            [arche.resources.profiles :as profile])
+  (:refer-clojure :exclude [resolve])
+  (:import [java.net URI URISyntaxException]))
 
-(def ^{:private true} base-name "discoverable_resources")
+(def names
+  (let [base-name "discoverable_resources"]
+    {:titleized (inflect/camel-case base-name)
+     :routable base-name
+     :tableized (keyword base-name)
+     :singular (inflect/singular base-name)
+     :keyword (keyword (inflect/dasherize base-name))}))
 
-(def names {:titleized (inflect/camel-case base-name)
-            :routable base-name
-            :tableized (keyword base-name)
-            :singular (inflect/singular base-name)
-            :keyword (keyword (inflect/dasherize base-name))})
-
-(defn etag-make [entity-type record]
-  (digest/md5 (format "%s/%d-%d" (name entity-type) (:id record)
-                      (:updated_at record))))
+(def required-descriptors
+  [:resource_name :link_relation :href])
 
 (defentity discoverable-resources
   (pk :id)
   (table (:tableized names))
   (database records/db)
-  (entity-fields :resource_name :link_relation :href))
+  (entity-fields :resource_name :link_relation :href :updated_at :id :created_at))
 
 (defn discoverable-resource-entity-url [resource-name]
   (app/app-uri-for (format "/%s/%s" (:routable names) resource-name)))
 
-(defn discoverable-resource-representation [representable-hash-map]
-  (json/generate-string
-   (conj
-    representable-hash-map
-    {media/keyword-links
-     (conj
-      (media/profile-link-relation (app/alps-profile-url (:titleized names)))
-      (media/self-link-relation (discoverable-resource-entity-url (:resource_name representable-hash-map))))})))
+(def profile-url
+  (app/alps-profile-url (:titleized names)))
 
+(defn- filter-for-required-fields [representable-map]
+  (into {}
+        (filter (fn [i]
+                  (some #(= (first i) %) required-descriptors)) representable-map)))
+
+(defn hypermedia-map [representable-map]
+  (conj
+   (filter-for-required-fields representable-map)
+   {media/keyword-links
+    (conj
+     (media/profile-link-relation profile-url)
+     (media/self-link-relation
+      (discoverable-resource-entity-url (:resource_name representable-map))))}))
 
 (defn discoverable-resource-alps-representation []
   (let [link-relation "link_relation"
@@ -115,15 +124,57 @@
 (defn discoverable-resources-all []
   (select discoverable-resources))
 
+(defn url-valid? [value]
+  (try
+    (= (url/protocol-of (url/url-like (URI. value))) "https")
+    (catch URISyntaxException e
+      false)))
+
+(def validate-url (validate-format-fn url-valid?))
+
+(defn validate-resource-name [submitted]
+  (validate-attribute :resource_name submitted validate-presence))
+
+(defn validate-href [submitted]
+  (validate-attribute :href submitted validate-presence validate-url))
+
+(defn validate-link-relation [submitted]
+  (validate-attribute :link_relation submitted validate-presence validate-url))
+
+(defn validate [attributes]
+  (apply conj
+         (map (fn [validator]
+                (validator attributes))
+              [validate-resource-name validate-link-relation validate-href])))
+
 (defn discoverable-resource-create [resource-name link-relation href]
   (if-let [existing (discoverable-resource-first resource-name)]
-    {:errors {:taken-by existing}}
+    {:errors {:taken-by (filter-for-required-fields existing)}}
     (let [attributes (conj
                       (records/new-record-timestamps)
                       {:resource_name resource-name
                        :link_relation link-relation
                        :href href})]
-      (conj attributes (insert discoverable-resources (values attributes))))))
+      (insert discoverable-resources (values attributes))
+      ;; ugly work around for the fact that the timestamps on the record
+      ;; are tiny milliseconds off from the timestamps that are persisted
+      ;; korma problem?
+      (first (select
+              discoverable-resources
+              (where {:resource_name resource-name}))))))
+
+(defn ring-response-json [record status-code]
+  (ring-response
+   {:status status-code
+    :headers (into {}
+                   [(-> (records/cache-key (name (:tableized names)) record)
+                        http-helper/etag-make
+                        http-helper/header-etag)
+                    (http-helper/cache-control-header-private-age (app/cache-expiry))
+                    (http-helper/header-location (discoverable-resource-entity-url (:resource_name record)))
+                    (http-helper/header-accept media/hal-media-type)])
+    :body (json/generate-string
+           (hypermedia-map record))}))
 
 (defresource discoverable-resource-entity [resource-name]
   :available-media-types [media/hal-media-type]
@@ -133,15 +184,7 @@
                {::existing existing}
                false))
   :handle-ok (fn [{entity ::existing}]
-               (ring-response
-                {:status 200
-                 :headers (into {}
-                                [(http-helper/header-etag (etag-make base-name entity))
-                                 (http-helper/cache-control-header-private-age (app/cache-expiry))
-                                 (http-helper/header-location
-                                  (discoverable-resource-entity-url (:resource_name entity)))
-                                 (http-helper/header-accept media/hal-media-type)])
-                 :body (discoverable-resource-representation entity)})))
+               (ring-response-json entity 200)))
 
 (profile/profile-register!
  {(:keyword names) discoverable-resource-alps-representation})

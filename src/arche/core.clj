@@ -19,10 +19,14 @@
 
 (ns arche.core
   (:require [compojure.route :as route]
-            [compojure.core :refer [defroutes GET]]
+            [compojure.core :refer [defroutes GET ANY]]
             [compojure.handler :refer [api]]
             [compojure.route :as route]
-            [arche.resources.discoverable-resources :only (names discoverable-resource-entity) :as discover]
+            [arche.resources.discoverable-resource
+             :only (names discoverable-resource-entity)
+             :as entity]
+            [arche.resources.discoverable-resources-collection
+             :refer [] :as collection]
             [arche.resources.entry-points :only (entry-points route) :as entry]
             [arche.resources.profiles :as profile]
             [arche.app-state :as app]
@@ -33,9 +37,11 @@
 (defroutes app
   (GET (format "/%s/:resource-name" app/alps-path) [resource-name]
        (profile/alps-profiles (inflect/hyphenate resource-name)))
-  (GET (format "/%s/:resource-name" (:routable discover/names))  [resource-name]
-       (discover/discoverable-resource-entity resource-name))
+  (GET (format "/%s/:resource-name" (:routable entity/names))  [resource-name]
+       (entity/discoverable-resource-entity resource-name))
   (GET entry/route [] (entry/entry-points))
+  (ANY (format "/%s" (:routable entity/names)) [request]
+       (collection/discoverable-resources-collection request))
   (route/not-found "Not Found"))
 
 (def handler (api #'app))

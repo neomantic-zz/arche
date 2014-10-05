@@ -23,6 +23,7 @@
             [liberator.core :refer [resource defresource]]
             [arche.http :as http-helper]
             [arche.app-state :as app]
+            [arche.resources.core :refer :all :as generic]
             [inflections.core :only [:camel-case] :as inflect]
             [liberator.representation :as rep :refer [ring-response as-response]]))
 
@@ -38,12 +39,7 @@
 
 (defresource alps-profiles [resource-name]
   :available-media-types [alps/json-media-type]
-  :handle-not-acceptable (fn [_]
-                           (ring-response
-                            {:status 406
-                             :headers (http-helper/header-accept alps/json-media-type)
-                             :body "Unsupported media-type. Supported media type listed in Accept header."}))
-
+  :handle-not-acceptable generic/not-acceptable-response
   :allowed-mehods [:get]
   :exists? (fn [_]
              (if-let [profile-thunk (registered-profile-get (keyword resource-name))]
@@ -55,7 +51,7 @@
                  (ring-response
                   {:status 200
                    :headers (into {}
-                                  [(http-helper/header-etag (http-helper/body-etag-make body))
+                                  [(http-helper/header-etag (http-helper/etag-make body))
                                    (http-helper/cache-control-header-private-age (app/cache-expiry))
                                    (http-helper/header-accept alps/json-media-type)
                                    (http-helper/header-location (app/alps-profile-url (inflect/camel-case resource-name)))])

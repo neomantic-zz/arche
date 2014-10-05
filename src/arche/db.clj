@@ -21,17 +21,27 @@
   (:require [korma.db :refer [defdb mysql]]
             [environ.core :refer [env]]
             [clj-time.core :as time]
-            [clj-time.coerce :as coerce]))
+            [clj-time.coerce :refer [to-long to-string to-sql-time from-sql-time]])
+  (:import [org.joda.time.format DateTimeFormat]))
 
 (defdb db (mysql {:user (env :database-user)
                   :password (env :database-password)
                   :host (env :database-host)
                   :db (env :database-name)}))
 
+(def timestamp-fields
+  [:created_at :updated_at])
+
 (defn sql-timestamp-now []
-  (coerce/to-sql-time (coerce/to-long (time/now))))
+  (to-sql-time (to-long (time/now))))
 
 (defn new-record-timestamps []
   (let [timestamp (sql-timestamp-now)]
-    {:created_at timestamp
-     :updated_at timestamp}))
+    (zipmap timestamp-fields [timestamp timestamp])))
+
+(defn cache-key [table-name record]
+  ;; this duplicates the way ROR creates a cache key
+  ;; using its :nsec format
+  (let [formatter (. DateTimeFormat (forPattern  "YMdHmsS9"))
+        stamp-string (. formatter (print (to-long (from-sql-time (:updated_at record)))))]
+    (format "%s/%d-%s" table-name (:id record) stamp-string)))

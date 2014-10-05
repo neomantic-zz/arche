@@ -19,7 +19,7 @@
 
 (ns arche.core-spec
   (:use arche.db
-        arche.resources.discoverable-resources)
+        arche.resources.discoverable-resource)
   (:require [clojure.java.jdbc :as jdbc]
             [speclj.core :refer :all]
             [arche.app-state :refer :all :as app]

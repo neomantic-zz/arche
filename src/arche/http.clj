@@ -18,7 +18,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (ns arche.http
-  (:require [pandect.core :refer :all :as digest]))
+  (:require [pandect.core :refer [md5]]))
 
 (defn- make-header-fn [key]
   (fn [content]
@@ -28,9 +28,10 @@
 (def header-accept (make-header-fn "Accept"))
 (def header-cache-control (make-header-fn "Cache-Control"))
 (def header-etag (make-header-fn "ETag"))
+(def header-content-type (make-header-fn "Content-Type"))
 
 (defn cache-control-header-private-age [number]
   (header-cache-control (format "max-age=%d, private" number)))
 
-(defn body-etag-make [body]
-  (digest/md5 body))
+(defn etag-make [string]
+  (md5 string))

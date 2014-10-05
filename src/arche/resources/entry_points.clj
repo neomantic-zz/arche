@@ -19,7 +19,7 @@
 
 (ns arche.resources.entry-points
   (:require  [liberator.core :refer [resource defresource]]
-             [arche.resources.discoverable-resources :only (discoverable-resources-all) :as record]
+             [arche.resources.discoverable-resource :only (discoverable-resources-all) :as record]
              [arche.media :as media]
              [arche.http :as http-helper]
              [arche.app-state :as app]
@@ -117,7 +117,7 @@
                  (ring-response
                   {:status 200
                    :headers (into {}
-                                  [(http-helper/header-etag (http-helper/body-etag-make body))
+                                  [(http-helper/header-etag (http-helper/etag-make body))
                                    (http-helper/header-location (self-url))
                                    (http-helper/cache-control-header-private-age (app/cache-expiry))
                                    (http-helper/header-accept
