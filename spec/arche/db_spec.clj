@@ -51,4 +51,4 @@
        (should=
         (format "atable-name/1-%s" (convert-stamp timestamp))
         (cache-key "atable-name" {:id 1
-                                  :updated_at (sql-timestamp-now)})))))
+                                  :updated_at timestamp})))))
