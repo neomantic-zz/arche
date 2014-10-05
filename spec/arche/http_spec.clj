@@ -32,10 +32,13 @@
               (header-accept "a-content-type")))
  (it "returns a map with the correct key for a cache control header"
      (should= {"Cache-Control" "some value"}
-             (header-cache-control "some value")))
-(it "returns a map with the correct key for a etags"
+              (header-cache-control "some value")))
+ (it "returns a map with the correct key for a etags"
      (should= {"ETag" "some value"}
-             (header-etag "some value")))
+              (header-etag "some value")))
  (it "returns a private cache controller header map with max age"
      (should= {"Cache-Control" "max-age=600, private"}
-              (cache-control-header-private-age 600))))
+              (cache-control-header-private-age 600)))
+ (it "returns a content-type header"
+     (should= {"Content-Type" "application/vnd.github"}
+              (header-content-type "application/vnd.github"))))

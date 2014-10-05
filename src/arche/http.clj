@@ -28,6 +28,7 @@
 (def header-accept (make-header-fn "Accept"))
 (def header-cache-control (make-header-fn "Cache-Control"))
 (def header-etag (make-header-fn "ETag"))
+(def header-content-type (make-header-fn "Content-Type"))
 
 (defn cache-control-header-private-age [number]
   (header-cache-control (format "max-age=%d, private" number)))
