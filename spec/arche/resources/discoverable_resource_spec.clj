@@ -221,3 +221,14 @@
       (should-not-throw (json/parse-string (:body test-response))))
   (it "returns the correct status code"
       (should= 200 (:status test-response)))))
+
+(describe
+ "validations"
+ (it "returns false when url is valid"
+     (should= false (url-valid? "g")))
+ (it "returns false when url is valid"
+     (should= false (url-valid? "http://g")))
+ (it "returns true on valid url"
+     (should= true (url-valid? "https://shsnhsnh.io/snthnth#thth?query=2")))
+ (it "returns correct error key when url is not valid"
+     (should== [:format] (validate-url :an-attribute "http://what"))))

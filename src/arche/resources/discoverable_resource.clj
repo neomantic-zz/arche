@@ -18,7 +18,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (ns arche.resources.discoverable-resource
-  (:use korma.core)
+  (:use korma.core arche.validations)
   (:require [cheshire.core :refer :all :as json]
             [liberator.core :refer [resource defresource]]
             [liberator.representation :as rep :refer [ring-response as-response]]
@@ -30,7 +30,9 @@
             [arche.http :as http-helper]
             [pandect.core :refer :all :as digest]
             [inflections.core :refer :all :as inflect]
-            [arche.resources.profiles :as profile]))
+            [clojurewerkz.urly.core :as url]
+            [arche.resources.profiles :as profile])
+  (:import [java.net URI URISyntaxException]))
 
 (def names
   (let [base-name "discoverable_resources"]
@@ -120,6 +122,14 @@
 
 (defn discoverable-resources-all []
   (select discoverable-resources))
+
+(defn url-valid? [value]
+  (try
+    (= (url/protocol-of (url/url-like (URI. value))) "https")
+    (catch URISyntaxException e
+      false)))
+
+(def validate-url (validate-format-fn url-valid?))
 
 (defn discoverable-resource-create [resource-name link-relation href]
   (if-let [existing (discoverable-resource-first resource-name)]
