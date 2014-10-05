@@ -50,7 +50,7 @@ Scenario: The client can successfully create a discoverable resource
     | Location      | http://example.org/discoverable_resources/studies |
 
 Scenario: The request to create a discoverable resource fails, if no resource name is supplied
-  When I invoke uniform interface method POST to "v2/discoverable_resources" with the "application/json" body and accepting "application/vnd.hale+json" responses:
+  When I invoke uniform interface method POST to "discoverable_resources" with the "application/json" body and accepting "application/hal+json" responses:
   """
   {
    "href": "https://a-service.io/studies",
@@ -59,5 +59,5 @@ Scenario: The request to create a discoverable resource fails, if no resource na
   """
   Then I should get a status of 422
   And I should get a response with the following errors:
-  | attribute     | error_on_attribute |
-  | resource_name | can't be blank     |
+  | attribute     | error_on_attribute                                                                                                                          |
+  | resource_name | can't be blank                                                                                                                              |

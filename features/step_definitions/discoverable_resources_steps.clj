@@ -173,6 +173,10 @@
                   (is (= value (key actual)))))
               expected))))
 
-(Then #"^I should get a response with the following errors:$" [arg1]
-  (comment  Express the Regexp above with the code you wish you had  )
-  (throw (cucumber.runtime.PendingException.)))
+(Then #"^I should get a response with the following errors:$" [table]
+      (let [response-map (json/parse-string (last-response-body) true)]
+        (is (not (nil? (get response-map :errors))))
+        (doall
+         (map (fn [[attribute messages]]
+                (is (= messages (get-in response-map [:errors (key attribute)]))))
+              (table-rows-map table)))))
