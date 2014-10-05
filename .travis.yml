@@ -1,0 +1,7 @@
+language: clojure
+lein: lein2
+script: lein with-profile test spec
+before_script:
+  - mysql -e 'create database arche_test;'
+  - lein clj-sql-up migrate
+env: BASE_URI='http://example.org' DATABASE_NAME=arche_test DATABASE_USER=travis DATABASE_HOST=127.0.0.1 DATABASE_PASSWORD=''
