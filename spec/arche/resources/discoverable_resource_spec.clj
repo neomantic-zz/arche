@@ -231,4 +231,31 @@
  (it "returns true on valid url"
      (should= true (url-valid? "https://shsnhsnh.io/snthnth#thth?query=2")))
  (it "returns correct error key when url is not valid"
-     (should== [:format] (validate-url :an-attribute "http://what"))))
+     (should== [:invalid] (validate-url "http://what")))
+ (it "returns empty map when resource name present"
+     (should== {} (validate-resource-name {:resource_name "studies"})))
+ (it "returns the vector with :blank when resource name is empty"
+     (should== {:resource_name [:blank]} (validate-resource-name {:resource_name ""})))
+ (it "returns the vector with :blank when resource name is missing"
+     (should== {:resource_name [:blank]} (validate-resource-name {})))
+ (it "returns vector with :blank and :format when href empty"
+     (should== {:href [:blank :invalid]} (validate-href {:href ""})))
+ (it "returns vector with :blank and :format when href missing"
+     (should== {:href [:blank :invalid]} (validate-href {})))
+ (it "returns vector with :invalid when invalid href"
+     (should== {:href [:invalid]} (validate-href {:href "http://what"})))
+ (it "returns empty map when href valid"
+     (should== {} (validate-href {:href "https://what"})))
+ (it "returns vector with :format when invalid link-relation"
+     (should== {:link_relation [:invalid]} (validate-link-relation {:link_relation "http://what"})))
+ (it "returns vector with :blank and :format when link-relation empty"
+     (should== {:link_relation [:blank :invalid]} (validate-link-relation {:link_relation ""})))
+ (it "returns vector with :format when link-relation is missing"
+     (should== {:link_relation [:blank :invalid]} (validate-link-relation {})))
+ (it "returns empty map when link relation valid"
+     (should== {} (validate-link-relation {:link_relation "https://what"})))
+ (it "validates"
+     (should= {:href [:blank :invalid]
+               :link_relation [:blank :invalid]
+               :resource_name [:blank]}
+               (validate {:href "" :link_relation "" :resource_name ""}))))
