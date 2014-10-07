@@ -38,13 +38,13 @@
       []
       [:invalid])))
 
-(defn validate-attribute [attribute submitted & validations]
-  (let [value-to-test (get submitted attribute)]
+(defn validates-attribute [attribute & validations]
+  (fn [all-attributes]
     (if (empty? validations)
       {}
       (let [errors (apply
                     vector
-                    (mapcat #(% value-to-test)
+                    (mapcat #(% (get all-attributes attribute))
                             validations))]
         (if (empty? errors) {}
             {attribute errors})))))

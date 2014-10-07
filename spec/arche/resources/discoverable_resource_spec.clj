@@ -223,39 +223,47 @@
       (should= 200 (:status test-response)))))
 
 (describe
- "validations"
- (it "returns false when url is valid"
-     (should= false (url-valid? "g")))
- (it "returns false when url is valid"
-     (should= false (url-valid? "http://g")))
- (it "returns true on valid url"
-     (should= true (url-valid? "https://shsnhsnh.io/snthnth#thth?query=2")))
- (it "returns correct error key when url is not valid"
-     (should== [:invalid] (validate-url "http://what")))
- (it "returns empty map when resource name present"
-     (should== {} (validate-resource-name {:resource_name "studies"})))
- (it "returns the vector with :blank when resource name is empty"
-     (should== {:resource_name [:blank]} (validate-resource-name {:resource_name ""})))
- (it "returns the vector with :blank when resource name is missing"
-     (should== {:resource_name [:blank]} (validate-resource-name {})))
- (it "returns vector with :blank and :format when href empty"
-     (should== {:href [:blank :invalid]} (validate-href {:href ""})))
- (it "returns vector with :blank and :format when href missing"
-     (should== {:href [:blank :invalid]} (validate-href {})))
- (it "returns vector with :invalid when invalid href"
-     (should== {:href [:invalid]} (validate-href {:href "http://what"})))
- (it "returns empty map when href valid"
-     (should== {} (validate-href {:href "https://what"})))
- (it "returns vector with :format when invalid link-relation"
-     (should== {:link_relation [:invalid]} (validate-link-relation {:link_relation "http://what"})))
- (it "returns vector with :blank and :format when link-relation empty"
-     (should== {:link_relation [:blank :invalid]} (validate-link-relation {:link_relation ""})))
- (it "returns vector with :format when link-relation is missing"
-     (should== {:link_relation [:blank :invalid]} (validate-link-relation {})))
- (it "returns empty map when link relation valid"
-     (should== {} (validate-link-relation {:link_relation "https://what"})))
- (it "validates"
-     (should= {:href [:blank :invalid]
-               :link_relation [:blank :invalid]
-               :resource_name [:blank]}
-               (validate {:href "" :link_relation "" :resource_name ""}))))
+ "validating"
+ (describe
+  "urls"
+  (it "returns false when url is valid"
+      (should= false (url-valid? "g")))
+  (it "returns false when url is valid"
+      (should= false (url-valid? "http://g")))
+  (it "returns true on valid url"
+      (should= true (url-valid? "https://shsnhsnh.io/snthnth#thth?query=2")))
+  (it "returns correct error key when url is not valid"
+      (should== [:invalid] (validate-url "http://what")))
+  (describe
+   "attributes"
+   (it "returns errors when everything is missing"
+       (should= {:href [:blank :invalid]
+                 :link_relation [:blank :invalid]
+                 :resource_name [:blank]}
+                (validate {})))
+   (it "returns errors when everything is empty"
+       (should= {:href [:blank :invalid]
+                 :link_relation [:blank :invalid]
+                 :resource_name [:blank]}
+                (validate {:href ""
+                           :link_relation ""
+                           :resource_name ""})))
+   (it "can have no errors"
+       (should== {}
+                 (validate {:href "https://a-path"
+                            :link_relation "https://another-path"
+                            :resource_name "some-name"})))
+   (it "returns invalid, and not blank when href is not url"
+       (should-contain :invalid
+                       (:href (validate
+                                        {:href "hsthsnthsnthtnh"})))
+       (should-not-contain :blank
+                           (:href (validate
+                                   {:href "hsthsnthsnthtnh"}))))
+   (it "returns invalid, and not blank when link relation is not url"
+       (should-contain :invalid
+                       (:link_relation (validate
+                                        {:link_relation "hsthsnthsnthtnh"})))
+       (should-not-contain :blank
+                       (:link_relation (validate
+                                        {:link_relation "hsthsnthsnthtnh"})))))))

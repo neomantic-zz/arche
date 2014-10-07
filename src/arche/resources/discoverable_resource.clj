@@ -132,20 +132,12 @@
 
 (def validate-url (validate-format-fn url-valid?))
 
-(defn validate-resource-name [submitted]
-  (validate-attribute :resource_name submitted validate-presence))
-
-(defn validate-href [submitted]
-  (validate-attribute :href submitted validate-presence validate-url))
-
-(defn validate-link-relation [submitted]
-  (validate-attribute :link_relation submitted validate-presence validate-url))
-
 (defn validate [attributes]
   (apply conj
-         (map (fn [validator]
-                (validator attributes))
-              [validate-resource-name validate-link-relation validate-href])))
+         (map #(% attributes)
+              [(validates-attribute :href validate-presence validate-url)
+               (validates-attribute :link_relation validate-presence validate-url)
+               (validates-attribute :resource_name validate-presence)])))
 
 (defn discoverable-resource-create [resource-name link-relation href]
   (if-let [existing (discoverable-resource-first resource-name)]

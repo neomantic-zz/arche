@@ -30,34 +30,39 @@
  "presence validation"
  (it "returns an array with :blank when validation fails"
      (should== {:an-attribute [:blank]}
-               (validate-attribute
-                :an-attribute
-                {:an-attribute ""} validate-presence)))
+               ((validates-attribute
+                 :an-attribute
+                 validate-presence)
+                {:an-attribute ""})))
  (it "returns an array when blank value is nil"
-     (should== {:an-attribute [:blank]} (validate-attribute
-                         :an-attribute
-                         {:an-attribute nil}
-                         validate-presence)))
+     (should== {:an-attribute [:blank]}
+               ((validates-attribute
+                 :an-attribute
+                 validate-presence)
+                {:an-attribute nil})))
  (it "returns an empty hash when value passes validation"
-     (should== {} (validate-attribute
-                   :an-attribute
-                   {:an-attribute "ggg"}
-                   validate-presence))))
+     (should== {} ((validates-attribute
+                    :an-attribute
+                    validate-presence)
+                   {:an-attribute "ggg"}))))
 
 (describe
  "multilple validations"
  (it "returns correct array of keys when multiple validations present fail"
      (should== {:an-attribute  [:blank :fake]}
-               (validate-attribute :an-attribute ""
-                                   validate-presence
-                                   (fn [submitted] [:fake]))))
+               ((validates-attribute :an-attribute ""
+                                     validate-presence
+                                     (fn [submitted] [:fake]))
+                {:attribute "something"})))
  (it "returns correct array of keys one multiple validations fails"
      (should== {:an-attribute  [:fake]}
-               (validate-attribute :an-attribute
-                                   {:an-attribute "shsnhsnhg"}
-                                   validate-presence
-                                   (fn [submitted] [:fake])))) )
+               ((validates-attribute :an-attribute
+                                     validate-presence
+                                     (fn [submitted] [:fake]))
+                {:an-attribute "shsnhsnhg"}))) )
 (describe
  "error message"
  (it "returns the correct message for :blank"
-     (should= "can't be blank" (:blank default-error-messages))))
+     (should= "can't be blank" (:blank default-error-messages)))
+ (it "returns the correct message for :blank"
+     (should= "is not valid" (:invalid default-error-messages))))
