@@ -50,10 +50,10 @@
  "multilple validations"
  (it "returns correct array of keys when multiple validations present fail"
      (should== {:an-attribute  [:blank :fake]}
-               ((validates-attribute :an-attribute ""
+               ((validates-attribute :an-attribute
                                      validate-presence
                                      (fn [submitted] [:fake]))
-                {:an-attribute "something"})))
+                {:an-attribute ""})))
  (it "returns correct array of keys one multiple validations fails"
      (should== {:an-attribute  [:fake]}
                ((validates-attribute :an-attribute
