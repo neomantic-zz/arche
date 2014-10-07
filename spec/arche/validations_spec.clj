@@ -53,7 +53,7 @@
                ((validates-attribute :an-attribute ""
                                      validate-presence
                                      (fn [submitted] [:fake]))
-                {:attribute "something"})))
+                {:an-attribute "something"})))
  (it "returns correct array of keys one multiple validations fails"
      (should== {:an-attribute  [:fake]}
                ((validates-attribute :an-attribute
