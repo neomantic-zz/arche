@@ -1,6 +1,5 @@
 # arche
 
-
 ## Dependencies
 * [Clojure](http://clojure.org/)
 * [leiningen](http://leiningen.org/)
@@ -62,6 +61,9 @@ http://localhost:3000/`. The correct response is the following:
 ## Source Code
 
 https://github.com/neomantic/arche
+
+## Continuous Integration
+[![Build Status](https://travis-ci.org/neomantic/arche.svg?branch=feature%2Ftravis)](https://travis-ci.org/neomantic/arche) [https://travis-ci.org/neomantic/arche](https://travis-ci.org/neomantic/arche)
 
 ## Issues and Feature Requests
 
