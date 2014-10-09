@@ -40,7 +40,8 @@
                  [pandect "0.3.4"]]
   :profiles {:uberjar {:aot :all}
              :production {:env {:production true}}
-             :test {:env { :base-uri "http://example.org"}}
+             :test {:env { :base-uri "http://example.org"}
+                    :plugins [[lein-cucumber "1.0.2"]]}
              :dev {:env {:base-uri "http://localhost:3000"}}}
   :licenses [{:name "Eclipse Public License - v 1.0"
               :url "http://www.eclipse.org/legal/epl-v10.html"
@@ -48,8 +49,7 @@
              {:name "GNU Lesser Public License Version 3"
               :url "http://www.gnu.org/licenses/lgpl.html"
               :distribution :repo}]
-  :plugins [[lein-cucumber "1.0.2"]
-            [ring-serve "0.1.2"]
+  :plugins [[ring-serve "0.1.2"]
             [lein-ring "0.8.11"]
             [speclj "3.1.0"]
             [clj-sql-up "0.3.3"]
