@@ -19,10 +19,10 @@
 
 (ns step-definitions.alps-steps
   (:use cucumber.runtime.clj
-        step-definitions.discoverable-resources-steps
         clojure.test)
   (:require [cheshire.core :only (parse-string) :as json]
             [arche.media :refer :all :as m]
+            [step-definitions.test-helpers :refer :all]
             [arche.alps :only [keyword-link
                                       keyword-alps
                                       keyword-rel

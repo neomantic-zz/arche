@@ -18,11 +18,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (ns step-definitions.hypermedia-steps
-  (:use step-definitions.discoverable-resources-steps
-        cucumber.runtime.clj
+  (:use cucumber.runtime.clj
         clojure.test)
   (:require [cheshire.core :only (parse-string) :as json]
             [arche.media :as media]
+            [step-definitions.test-helpers :refer :all]
             [environ.core :refer [env]])
   (:import [java.net URI URL]))
 
