@@ -112,17 +112,20 @@
 (defresource entry-points []
   :available-media-types [media/hal-media-type]
   :allowed-methods [:get]
-  :handle-ok (fn [{resource :resource}]
-               (let [body (json/generate-string (entry-points-map))]
-                 (ring-response
-                  {:status 200
-                   :headers (into {}
-                                  [(http-helper/header-etag (http-helper/etag-make body))
-                                   (http-helper/header-location (self-url))
-                                   (http-helper/cache-control-header-private-age (app/cache-expiry))
-                                   (http-helper/header-accept
-                                    (str/join ", " ((:available-media-types resource))))])
-                   :body body}))))
+  :exists? (fn [_]
+             [true {::body (json/generate-string (entry-points-map))}])
+  :handle-ok (fn [{resource :resource, body ::body}]
+               (ring-response
+                {:status 200
+                 :headers (into {}
+                                [
+                                 (http-helper/header-location (self-url))
+                                 (http-helper/cache-control-header-private-age (app/cache-expiry))
+                                 (http-helper/header-accept
+                                  (str/join ", " ((:available-media-types resource))))])
+                 :body body}))
+  :etag (fn [{body ::body}]
+          (http-helper/etag-make body)))
 
 (profile/profile-register!
  {(:keyword names) alps-profile-map})
