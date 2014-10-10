@@ -118,8 +118,7 @@
                (ring-response
                 {:status 200
                  :headers (into {}
-                                [
-                                 (http-helper/header-location (self-url))
+                                [(http-helper/header-location (self-url))
                                  (http-helper/cache-control-header-private-age (app/cache-expiry))
                                  (http-helper/header-accept
                                   (str/join ", " ((:available-media-types resource))))])
