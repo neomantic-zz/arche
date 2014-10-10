@@ -93,4 +93,7 @@
              (:link_relation parsed)
              (:href parsed))})
   :handle-created (fn [{record ::record}]
-                    (entity/ring-response-json record 201)))
+                    (entity/ring-response-json record 201))
+  :etag (fn [ctx]
+          (if (= :post (get-in ctx [:request :request-method]))
+            (etag-for (::record ctx)))))

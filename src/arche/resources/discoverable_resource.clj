@@ -159,24 +159,27 @@
   (ring-response
    {:status status-code
     :headers (into {}
-                   [(-> (records/cache-key (name (:tableized names)) record)
-                        http-helper/etag-make
-                        http-helper/header-etag)
-                    (http-helper/cache-control-header-private-age (app/cache-expiry))
+                   [(http-helper/cache-control-header-private-age (app/cache-expiry))
                     (http-helper/header-location (discoverable-resource-entity-url (:resource_name record)))
                     (http-helper/header-accept media/hal-media-type)])
     :body (json/generate-string
            (hypermedia-map record))}))
 
+(defn etag-for [record]
+  (http-helper/etag-make
+   (records/cache-key (name (:tableized names)) record)))
+
 (defresource discoverable-resource-entity [resource-name]
   :available-media-types [media/hal-media-type]
   :allowed-methods [:get]
   :exists? (fn [_]
-             (if-let [existing (discoverable-resource-first resource-name)]
-               {::existing existing}
+             (if-let [record (discoverable-resource-first resource-name)]
+               {::record record}
                false))
-  :handle-ok (fn [{entity ::existing}]
-               (ring-response-json entity 200)))
+  :handle-ok (fn [{record ::record}]
+               (ring-response-json record 200))
+  :etag (fn [{record ::record}]
+          (etag-for record)))
 
 (profile/profile-register!
  {(:keyword names) discoverable-resource-alps-representation})

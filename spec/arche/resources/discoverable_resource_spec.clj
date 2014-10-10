@@ -20,12 +20,23 @@
 (ns arche.resources.discoverable-resource-spec
   (:use arche.core-spec
         arche.resources.discoverable-resource
-        arche.resources.profiles)
+        arche.resources.profiles
+        arche.core)
   (:require [speclj.core :refer :all]
             [cheshire.core :refer :all :as json]
             [arche.db :refer [cache-key] :as record]
+            [ring.mock.request :refer :all :as ring-mock]
+            [ring.util.response :only [:get-header] :as ring]
             [arche.http :refer [etag-make] :as http-helper]
             [arche.app-state :refer :all :as app]))
+
+(defn mock-request [resource_name]
+  (header
+   (ring-mock/request :get (format "/discoverable_resources/%s" resource_name))
+   "Accept" "application/hal+json"))
+
+(defn make-request [mock-request]
+  (app mock-request))
 
 (let [resource-name "studies"
       link-relation "http://example.org/alps/studies"
@@ -210,17 +221,11 @@
               resource-name "http://example.org/alps/studies" "http://example.org/studies")
       test-response (:response (ring-response-json record 200))]
   (describe
-  "response as json"
-  (it "returns the correct headers"
-      (should== {"ETag" (http-helper/etag-make (record/cache-key (:routable names) record))
-                 "Cache-Control" "max-age=600, private"
-                 "Accept" "application/hal+json"
-                 "Location" (discoverable-resource-entity-url resource-name)}
-                (:headers test-response)))
-  (it "returns parsable json"
-      (should-not-throw (json/parse-string (:body test-response))))
-  (it "returns the correct status code"
-      (should= 200 (:status test-response)))))
+   "response as json"
+   (it "returns parsable json"
+       (should-not-throw (json/parse-string (:body test-response))))
+   (it "returns the correct status code"
+       (should= 200 (:status test-response)))))
 
 (describe
  "validating"
@@ -267,3 +272,28 @@
        (should-not-contain :blank
                        (:link_relation (validate
                                         {:link_relation "hsthsnthsnthtnh"})))))))
+
+(describe
+ "etags"
+ (it "returns and etag"
+     (let [resource-name "studies"
+           created (discoverable-resource-create
+                    resource-name "http://example.org/alps/studies" "http://example.org/studies")]
+       (should-not-be-nil
+        (ring/get-header
+         (make-request (mock-request resource-name))
+         "Etag"))))
+ (it "genarates an etag"
+     (let [record (discoverable-resource-create
+                    "studies" "http://example.org/alps/studies" "http://example.org/studies")]
+       (should-not-be-nil (etag-for record)))))
+
+(describe
+ (it "returns the location headers"
+     (let [resource-name "studies"
+           created (discoverable-resource-create
+                    resource-name "http://example.org/alps/studies" "http://example.org/studies")]
+       (should= (discoverable-resource-entity-url resource-name)
+        (ring/get-header
+         (make-request (mock-request resource-name))
+         "Location")))))
