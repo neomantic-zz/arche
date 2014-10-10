@@ -233,12 +233,12 @@
   "urls"
   (it "returns false when url is valid"
       (should= false (url-valid? "g")))
-  (it "returns false when url is valid"
-      (should= false (url-valid? "http://g")))
+  (it "returns true when url is valid"
+      (should= true (url-valid? "http://g")))
   (it "returns true on valid url"
       (should= true (url-valid? "https://shsnhsnh.io/snthnth#thth?query=2")))
   (it "returns correct error key when url is not valid"
-      (should== [:invalid] (validate-url "http://what")))
+      (should== [:invalid] (validate-url "sthnshusnthh")))
   (describe
    "attributes"
    (it "returns errors when everything is missing"
@@ -261,7 +261,7 @@
    (it "returns invalid, and not blank when href is not url"
        (should-contain :invalid
                        (:href (validate
-                                        {:href "hsthsnthsnthtnh"})))
+                               {:href "hsthsnthsnthtnh"})))
        (should-not-contain :blank
                            (:href (validate
                                    {:href "hsthsnthsnthtnh"}))))
@@ -270,8 +270,24 @@
                        (:link_relation (validate
                                         {:link_relation "hsthsnthsnthtnh"})))
        (should-not-contain :blank
+                           (:link_relation (validate
+                                            {:link_relation "hsthsnthsnthtnh"}))))
+   (it "does not return invalid when href is https"
+       (should-not-contain :invalid
+                       (:href (validate
+                               {:href "http://service.io/hello"}))))
+   (it "does not return invalid when href is https"
+       (should-not-contain :invalid
+                       (:href (validate
+                               {:href "https://service.io/hello"}))))
+   (it "does not return invalid when link relation is https"
+       (should-not-contain :invalid
                        (:link_relation (validate
-                                        {:link_relation "hsthsnthsnthtnh"})))))))
+                                        {:link_relation "https://service.io/hello"}))))
+   (it "does not return invalid when link relation is http"
+       (should-not-contain :invalid
+                       (:link_relation (validate
+                                        {:link_relation "http://service.io/hello"})))))))
 
 (describe
  "etags"

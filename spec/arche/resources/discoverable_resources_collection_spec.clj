@@ -206,7 +206,10 @@
                                                "application/json"
                                                (as-json
                                                 {:resource_name "users"
-                                                 :link_relation "https://service.io/alps/Users"}))))))
+                                                 :link_relation "https://service.io/alps/Users"})))))))
+
+(describe
+ "headers"
  (it "returns the correct cache-control header"
      (should= "max-age=0, private"
               (get-header

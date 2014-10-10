@@ -126,7 +126,8 @@
 
 (defn url-valid? [value]
   (try
-    (= (url/protocol-of (url/url-like (URI. value))) "https")
+    (let [protocol (url/protocol-of (url/url-like (URI. value)))]
+      (or (=  protocol "https") (=  protocol "http")))
     (catch URISyntaxException e
       false)))
 
