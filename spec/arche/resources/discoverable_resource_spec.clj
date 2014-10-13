@@ -307,9 +307,9 @@
 (describe
  (it "returns the location headers"
      (let [resource-name "studies"
-           created (discoverable-resource-create
+           record (discoverable-resource-create
                     resource-name "http://example.org/alps/studies" "http://example.org/studies")]
-       (should= (discoverable-resource-entity-url resource-name)
+       (should= (url-for record)
         (ring/get-header
          (make-request (mock-request resource-name))
          "Location")))))

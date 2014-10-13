@@ -26,6 +26,7 @@
             [ring.util.response :refer [get-header]]
             [arche.media :refer :all :as media]
             [arche.db :refer [cache-key]]
+            [arche.app-state :as app]
             [arche.http :refer [etag-make]]
             [arche.resources.discoverable-resource
              :refer [required-descriptors discoverable-resource-first] :as entity]
@@ -45,6 +46,10 @@
   `(cheshire.core/parse-string
     ~args true))
 
+(defn create-record []
+  (entity/discoverable-resource-create
+   "studies" "http://example.org/alps/studies" "http://example.org/studies"))
+
 (defn valid-post []
   (post-request
    "/discoverable_resources"
@@ -54,6 +59,12 @@
     {:link_relation "https://test.host/alps/users"
      :href "https://test.host/users"
      :resource_name "users"})))
+
+;; FIXME can't get with "/" on the end
+(defn make-get-request []
+  (app (header
+        (mock/request :get "/discoverable_resources")
+        "Accept" "application/hal+json")))
 
 (describe
  "creating a resource"
@@ -69,7 +80,7 @@
                :resource_name "users"
                media/keyword-links
                {media/link-relation-self {media/keyword-href
-                                          (entity/discoverable-resource-entity-url "users")}
+                                          (entity/url-for {:resource_name "users"})}
                 media/link-relation-profile {media/keyword-href
                                              entity/profile-url}}}
               (from-json
@@ -248,3 +259,70 @@
                 :another ["can't be blank"]}}
               (construct-error-map {:an-attribute [:blank]
                                     :another [:blank]}))))
+
+(describe
+ "getting all"
+  (before (helper/clean-database))
+  (after (helper/clean-database))
+ (it "is successful when there are none"
+     (should= 200 (:status (make-get-request))))
+  (it "is successful when there are some"
+      (do
+        (create-record)
+        (should= 200 (:status (make-get-request)))))
+ (it "has the application/hal+json content-type"
+     (should-not-be-nil
+      (re-matches #"application\/hal\+json.*"
+                  (get-header (make-get-request) "Content-Type"))))
+ (it "is parsable json"
+     (should-not-throw (from-json (:body (make-get-request)))))
+ (it "returns a Cache-control header"
+     (should=
+      (format "max-age=%s, private" (app/cache-expiry))
+      (get-header (make-get-request) "Cache-control")))
+ (it "returns a Content-type header"
+     (should=
+      "application/hal+json"
+      (get-header (make-get-request) "Content-Type")))
+ (it "returns a Etag header"
+     (should-not-be-nil
+      (get-header (make-get-request) "ETag")))
+ (it "returns the correct accept header"
+     (should=
+      "application/hal+json"
+      (get-header (make-get-request) "Accept")))
+ (it "returns the correct location header"
+     (should=
+      "http://example.org/discoverable_resources"
+      (get-header (make-get-request) "Location"))))
+
+(describe
+ "all resources as representable collection"
+ (before (helper/clean-database))
+ (after (helper/clean-database))
+ (context
+  "when there are none"
+  (it "returns the correct map when there are none"
+      (should==
+      {:items []
+       :_embedded {:items []}
+       :_links {:self {:href "http://example.org/discoverable_resources"}}}
+      (hypermedia-map []))))
+ (context
+  "when there at least some"
+  (it "returns the corret map when there is at least 1"
+     (let [record (create-record)]
+       (should== {:items [
+                          {:href (entity/url-for record)}
+                          ]
+                  :_embedded {:items [{
+                                       :link_relation (:link_relation record)
+                                       :href (:href record)
+                                       :resource_name (:resource_name record)
+                                       :_links {
+                                                :self {:href (entity/url-for record)}
+                                                }
+                                       }
+                                      ]}
+                  :_links {:self {:href "http://example.org/discoverable_resources"}}}
+                 (hypermedia-map [record]))))))
