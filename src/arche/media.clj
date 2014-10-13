@@ -25,6 +25,7 @@
 (def link-relation-self :self)
 (def link-relation-profile :profile)
 (def link-relation-type :type)
+(def keyword-embedded :_embedded)
 
 (defn- link-relation-value [link-relation-type]
   (fn [uri]
