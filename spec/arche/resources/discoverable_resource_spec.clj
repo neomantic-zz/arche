@@ -76,10 +76,10 @@
  "creating urls"
  (it "creates the correct discoverable resource entity url"
      (should= (format "%s/discoverable_resources/studies" (app/base-uri))
-              (discoverable-resource-entity-url "studies")))
+              (url-for {:resource_name "studies"})))
  (it "creates the correct discoverable resource entity url with url encoding"
-     (should= (format "%s%s" (app/base-uri) "/discoverable_resources/bad%20resource%20name")
-              (discoverable-resource-entity-url "bad resource name"))))
+     (should= (format "%s%s" (app/base-uri) "/discoverable_resources/ugly%20resource%20name")
+              (url-for {:resource_name "ugly resource name"}))))
 
 (describe
  "alps"

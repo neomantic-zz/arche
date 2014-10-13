@@ -55,6 +55,9 @@
 (defn discoverable-resource-entity-url [resource-name]
   (app/app-uri-for (format "/%s/%s" (:routable names) resource-name)))
 
+(defn url-for [record]
+  (app/app-uri-for (format "/%s/%s" (:routable names) (:resource_name record))))
+
 (def profile-url
   (app/alps-profile-url (:titleized names)))
 
