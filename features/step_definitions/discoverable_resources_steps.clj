@@ -121,6 +121,15 @@
 (defn database-truncate []
   (jdbc/db-do-commands dbspec "TRUNCATE TABLE discoverable_resources;"))
 
+
+(defn to-json [args]
+  (cheshire.core/generate-string
+    args))
+
+(defn from-json [args]
+  (cheshire.core/parse-string
+    args true))
+
 (Before []
         (server-start)
         (database-truncate))
@@ -149,8 +158,9 @@
           path
           headers
           (try
-            (json/generate-string
-             (json/parse-string body))
+            (-> body
+                from-json
+                to-json)
             (catch Exception e
               (prn "That wasn't json")))))))
 
@@ -159,7 +169,7 @@
 
 (Then #"^the resource representation should have exactly the following properties:$" [table]
       (let [actual (into {} (remove (fn [[key item]] (= key media/keyword-links))
-                                    (json/parse-string (last-response-body) true)))
+                                    (from-json (last-response-body))))
             map-of-table (table-to-map table)
             expected (zipmap
                       (map keyword (keys map-of-table))
@@ -173,7 +183,7 @@
               expected))))
 
 (Then #"^I should get a response with the following errors:$" [table]
-      (let [response-map (json/parse-string (last-response-body) true)]
+      (let [response-map (from-json (last-response-body))]
         (is (not (nil? (get response-map :errors))))
         (doall
          (map (fn [[attribute message]]
@@ -183,3 +193,15 @@
                             attribute
                             (clojure.string/join ", " (get-in response-map [:errors (keyword attribute)])) )))
               (rest (map vec (.raw table)))))))
+
+(Then #"^the resource representation should have at least the following links:$" [arg1]
+  (comment  Express the Regexp above with the code you wish you had  )
+  (throw (cucumber.runtime.PendingException.)))
+
+(Then #"^the resource representation should have the following items in its links:$" [arg1]
+  (comment  Express the Regexp above with the code you wish you had  )
+  (throw (cucumber.runtime.PendingException.)))
+
+(Then #"^the resource representation should have an embedded resource items with the following links and properties:$" [arg1]
+  (comment  Express the Regexp above with the code you wish you had  )
+  (throw (cucumber.runtime.PendingException.)))

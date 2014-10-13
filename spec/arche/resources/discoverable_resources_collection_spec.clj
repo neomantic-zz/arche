@@ -37,15 +37,6 @@
             (mock/header (mock/request :post path body)
                          "Accept" accept-type)
             "Content-Type" content-type)))
-
-(defmacro as-json [args]
-  `(cheshire.core/generate-string
-    ~args))
-
-(defmacro from-json [args]
-  `(cheshire.core/parse-string
-    ~args true))
-
 (defn create-record []
   (entity/discoverable-resource-create
    "studies" "http://example.org/alps/studies" "http://example.org/studies"))

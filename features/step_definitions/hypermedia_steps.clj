@@ -33,8 +33,8 @@
 
 (Then #"^I should receive the following \"([^\"]*)\" response:$" [media-type expected-response]
       (if (re-find #".+json\z" media-type)
-        (is (= (json/parse-string expected-response true)
-               (json/parse-string (:body @last-response) true)))
+        (is (= (from-json expected-response)
+               (from-json (last-response-body))))
         (throw (Exception. "Currently only supports testing json responses."))))
 
 (Then #"^the resource representation should have exactly the following links:$" [table]

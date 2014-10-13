@@ -20,8 +20,7 @@
 (ns step-definitions.alps-steps
   (:use cucumber.runtime.clj
         clojure.test)
-  (:require [cheshire.core :only (parse-string) :as json]
-            [arche.media :refer :all :as m]
+  (:require [arche.media :refer :all :as m]
             [step-definitions.discoverable-resources-steps :refer :all]
             [arche.alps :only [keyword-link
                                keyword-alps
@@ -33,7 +32,7 @@
     (throw (Exception. (format "Only %s documents are currently testable" a/json-media-type)))))
 
 (Given #"^I follow the link to the \"([^\"]*)\" accepting \"([^\"]*)\"$" [link-relation-type media-type]
-       (if-let [links (m/keyword-links  (json/parse-string (last-response-body) true))]
+       (if-let [links (m/keyword-links  (from-json (last-response-body)))]
          (if-let [link ((keyword link-relation-type) links)]
            (let [{status :status, :as response} (call-app-url (a/keyword-href link) media-type)]
              (if (= 200 status)
@@ -43,18 +42,18 @@
                                    response)))))
            (throw (Exception. (format "The document is missing a link with a %s link relation %s"
                                       link-relation-type (last-response-body)))))
-         (throw (Exception. (format "The application/hale+json document doesn't have link %s" (last-response-body))))))
+         (throw (Exception. (format "The application/hal+json document doesn't have link %s" (last-response-body))))))
 
 (Then #"^I should receive an \"([^\"]*)\" with the following attributes:$" [media-type table]
       (throw-when-not-json! media-type)
-      (let [body (json/parse-string (last-response-body))]
+      (let [body (from-json (last-response-body))]
         (doseq [row (table-rows-map table)]
           (is (= (get body (first row) (last row)))
               (format "expected attribute pair %s, but not found in %s" row (last-response-body))))))
 
 (Then #"^the \"([^\"]*)\" document should have the following links:$" [media-type table]
       (throw-when-not-json! media-type)
-      (if-let [received-links (get-in (json/parse-string (last-response-body) true)
+      (if-let [received-links (get-in (from-json (last-response-body))
                                       [a/keyword-alps
                                        a/keyword-link])]
         (let [expected (table-to-map table)
@@ -83,7 +82,7 @@
 
 (Then #"^the \"([^\"]*)\" document should have a \"([^\"]*)\" descriptor with the following properties:$" [media-type descriptor-id table]
       (throw-when-not-json! media-type)
-      (if-let [descriptors (get-in (json/parse-string (last-response-body) true)
+      (if-let [descriptors (get-in (from-json (last-response-body))
                                    [a/keyword-alps
                                     a/keyword-descriptor])]
         (let [expected (table-rows-map table)
@@ -113,7 +112,7 @@
         (throw (Exception. (format "The response was missing descriptors: %s" (last-response-body))))))
 
 (Then #"^the \"([^\"]*)\" descriptor should have the following descriptors:$" [descriptor-id table]
-      (if-let [descriptors (get-in (json/parse-string (last-response-body) true)
+      (if-let [descriptors (get-in (from-json (last-response-body))
                                    [a/keyword-alps
                                     a/keyword-descriptor])]
         (let [existing (filter #(= (a/keyword-id %) descriptor-id) descriptors)]
@@ -129,7 +128,7 @@
         (throw (Exception. (format "The response was missing descriptors: %s" (last-response-body))))))
 
 (Then #"^the \"([^\"]*)\" descriptor should have the following link:$" [descriptor-id table]
-      (if-let [descriptors (get-in (json/parse-string (last-response-body) true)
+      (if-let [descriptors (get-in (from-json (last-response-body))
                                    [a/keyword-alps
                                     a/keyword-descriptor])]
         (let [existing (filter #(= (a/keyword-id %) descriptor-id) descriptors)]
