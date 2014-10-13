@@ -148,5 +148,7 @@
                     (entity/ring-response-json record 201))
   :etag (fn [ctx]
           (cond
-           (create-action? ctx) (entity/etag-for (::record ctx))
-           (index-action? ctx) (http-helper/etag-make (::body ctx)))))
+           (index-action? ctx) (http-helper/etag-make (::body ctx))
+           (create-action? ctx) (if-let [record (::record ctx)]
+                                  (entity/etag-for (::record ctx)))
+           :else nil)))
