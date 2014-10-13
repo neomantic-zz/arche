@@ -52,9 +52,6 @@
   (database records/db)
   (entity-fields :resource_name :link_relation :href :updated_at :id :created_at))
 
-(defn discoverable-resource-entity-url [resource-name]
-  (app/app-uri-for (format "/%s/%s" (:routable names) resource-name)))
-
 (defn url-for [record]
   (app/app-uri-for (format "/%s/%s" (:routable names) (:resource_name record))))
 
@@ -73,7 +70,7 @@
     (conj
      (media/profile-link-relation profile-url)
      (media/self-link-relation
-      (discoverable-resource-entity-url (:resource_name representable-map))))}))
+      (url-for representable-map)))}))
 
 (defn discoverable-resource-alps-representation []
   (let [link-relation "link_relation"
@@ -164,7 +161,7 @@
    {:status status-code
     :headers (into {}
                    [(http-helper/cache-control-header-private-age (app/cache-expiry))
-                    (http-helper/header-location (discoverable-resource-entity-url (:resource_name record)))
+                    (http-helper/header-location (url-for record))
                     (http-helper/header-accept media/hal-media-type)])
     :body (json/generate-string
            (hypermedia-map record))}))
