@@ -20,7 +20,7 @@
 (ns step-definitions.http-response-steps
   (:use cucumber.runtime.clj
         clojure.test)
-  (:require [step-definitions.test-helpers :refer :all]))
+  (:require [step-definitions.discoverable-resources-steps :refer :all]))
 
 (Then #"^the response should have the following header fields:$" [table]
       (let [received-headers (last-response-headers)]

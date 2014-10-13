@@ -22,11 +22,11 @@
         clojure.test)
   (:require [cheshire.core :only (parse-string) :as json]
             [arche.media :refer :all :as m]
-            [step-definitions.test-helpers :refer :all]
+            [step-definitions.discoverable-resources-steps :refer :all]
             [arche.alps :only [keyword-link
-                                      keyword-alps
-                                      keyword-rel
-                                      keyword-href] :as a]))
+                               keyword-alps
+                               keyword-rel
+                               keyword-href] :as a]))
 
 (defn throw-when-not-json! [media-type]
   (when (not (= media-type  a/json-media-type))

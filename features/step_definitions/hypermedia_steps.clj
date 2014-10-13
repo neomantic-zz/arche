@@ -22,7 +22,7 @@
         clojure.test)
   (:require [cheshire.core :only (parse-string) :as json]
             [arche.media :as media]
-            [step-definitions.test-helpers :refer :all]
+            [step-definitions.discoverable-resources-steps :refer :all]
             [environ.core :refer [env]])
   (:import [java.net URI URL]))
 
