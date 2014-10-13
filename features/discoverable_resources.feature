@@ -103,16 +103,6 @@ Scenario: A client reads a discoverable resource index as hale+json
     And the resource representation should have the following items in its links:
     | href                                                 | type                                                                   |
     | http://example.org/v2/discoverable_resources/studies | http://example.org/v2/alps/DiscoverableResources#discoverable_resource |
-    And the resource representation should have a "create" link relation with at least the following properties:
-    | property name | value                                        |
-    | href          | http://example.org/v2/discoverable_resources |
-    | method        | POST                                         |
-    | templated     | true                                         |
-    And the data form for the "create" link relation should contain the following:
-    | input name    | input type |
-    | href          | text:text  |
-    | link_relation | text:text  |
-    | resource_name | text:text  |
     And the resource representation should have an embedded resource items with the following links and properties:
     | self link                                            | link_relation property           | href property                | resource_name property |
     | http://example.org/v2/discoverable_resources/studies | https://www.mydomain.com/studies | https://a-service.io/studies | studies                |
