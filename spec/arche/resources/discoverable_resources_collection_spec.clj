@@ -41,12 +41,20 @@
   (entity/discoverable-resource-create
    "studies" "http://example.org/alps/studies" "http://example.org/studies"))
 
+(defn to-json [args]
+  (cheshire.core/generate-string
+    args))
+
+(defn from-json [args]
+  (cheshire.core/parse-string
+    args true))
+
 (defn valid-post []
   (post-request
    "/discoverable_resources"
    "application/hal+json"
    "application/json"
-   (as-json
+   (to-json
     {:link_relation "https://test.host/alps/users"
      :href "https://test.host/users"
      :resource_name "users"})))
@@ -82,7 +90,7 @@
                      "/discoverable_resources"
                      "application/hal+json"
                      "application/json"
-                     (as-json
+                     (to-json
                       {:link_relation "https://test.host/alps/users"
                        :href "https://test.host/users"
                        :resource_name resource-name}))
@@ -174,7 +182,7 @@
                     (post-request "/discoverable_resources"
                                   "application/hal+json"
                                   "application/json"
-                                  (as-json
+                                  (to-json
                                    {:href "http://service.io/users"
                                     :resource_name "users"})))))
   (it "returns the correct status code when json does include resource name property"
@@ -182,7 +190,7 @@
                     (post-request "/discoverable_resources"
                                   "application/hal+json"
                                   "application/json"
-                                  (as-json
+                                  (to-json
                                    {:link_relation "http://service.io/alps/Users"
                                     :href "http://service.io/users"})))))
   (it "returns the correct status code when json does include href"
@@ -190,7 +198,7 @@
                     (post-request "/discoverable_resources"
                                   "application/hal+json"
                                   "application/json"
-                                  (as-json
+                                  (to-json
                                    {:link_relation "http://service.io/alps/Users"
                                     :resource_name "users"}))))))
  (it "returns the correct message when resource_name is missing"
@@ -198,7 +206,7 @@
               (from-json (:body (post-request "/discoverable_resources"
                                               "application/hal+json"
                                               "application/json"
-                                              (as-json
+                                              (to-json
                                                {:href "https://service.io/users"
                                                 :link_relation "https://service.io/alps/Users"}))))))
  (it "returns the correct message when href is missing"
@@ -206,7 +214,7 @@
                (from-json (:body (post-request "/discoverable_resources"
                                                "application/hal+json"
                                                "application/json"
-                                               (as-json
+                                               (to-json
                                                 {:resource_name "users"
                                                  :link_relation "https://service.io/alps/Users"})))))))
 
@@ -218,7 +226,7 @@
                (post-request "/discoverable_resources"
                              "application/hal+json"
                              "application/json"
-                             (as-json
+                             (to-json
                               {:href "https://service.io/users"
                                :link_relation "https://service.io/alps/Users"}))
                "Cache-Control")))
@@ -228,7 +236,7 @@
                (post-request "/discoverable_resources"
                              "application/hal+json"
                              "application/json"
-                             (as-json
+                             (to-json
                               {:href "https://service.io/users"
                                :link_relation "https://service.io/alps/Users"}))
                "Content-Type"))))
