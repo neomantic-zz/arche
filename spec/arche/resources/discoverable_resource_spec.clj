@@ -222,6 +222,8 @@
       test-response (:response (ring-response-json record 200))]
   (describe
    "response as json"
+   (before (clean-database))
+   (after (clean-database))
    (it "returns parsable json"
        (should-not-throw (json/parse-string (:body test-response))))
    (it "returns the correct status code"
@@ -291,6 +293,8 @@
 
 (describe
  "etags"
+ (before (clean-database))
+ (after (clean-database))
  (it "returns and etag"
      (let [resource-name "studies"
            created (discoverable-resource-create
@@ -304,7 +308,9 @@
                     "studies" "http://example.org/alps/studies" "http://example.org/studies")]
        (should-not-be-nil (etag-for record)))))
 
-(describe
+(describe "location header"
+ (before (clean-database))
+ (after (clean-database))
  (it "returns the location headers"
      (let [resource-name "studies"
            record (discoverable-resource-create
