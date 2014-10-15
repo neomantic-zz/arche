@@ -299,7 +299,7 @@
         (ring/get-header
          (make-request (mock-request resource-name))
          "Etag"))))
- (it "genarates an etag"
+ (it "generates an etag"
      (let [record (discoverable-resource-create
                     "studies" "http://example.org/alps/studies" "http://example.org/studies")]
        (should-not-be-nil (etag-for record)))))
