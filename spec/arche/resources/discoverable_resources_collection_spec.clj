@@ -277,7 +277,7 @@
      (should-not-throw (from-json (:body (make-get-request)))))
  (it "returns a Cache-control header"
      (should=
-      (format "max-age=%s, private" (app/cache-expiry))
+      "max-age=0, private"
       (get-header (make-get-request) "Cache-control")))
  (it "returns a Content-type header"
      (should=

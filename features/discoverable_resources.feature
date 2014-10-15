@@ -109,3 +109,8 @@ Scenario: A client reads a discoverable resource index as hal+json
     | property | href          | https://a-service.io/studies                      |
     | property | resource_name | studies                                           |
     | link     | self          | http://example.org/discoverable_resources/studies |
+   And the response should have the following header fields:
+    | field         | field_contents                            |
+    | Cache-Control | max-age=0, private                        |
+    | ETag          | anything                                  |
+    | Location      | http://example.org/discoverable_resources |

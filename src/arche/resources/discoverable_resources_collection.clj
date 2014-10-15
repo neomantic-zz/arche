@@ -134,7 +134,7 @@
                (ring-response
                 {:status 200
                  :headers (into {}
-                                [(http-helper/cache-control-header-private-age (app/cache-expiry))
+                                [(http-helper/cache-control-header-private-age 0)
                                  (http-helper/header-location self-url)
                                  (http-helper/header-accept media/hal-media-type)])
                  :body body}))
