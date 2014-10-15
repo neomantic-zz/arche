@@ -63,7 +63,7 @@ http://localhost:3000/`. The correct response is the following:
 https://github.com/neomantic/arche
 
 ## Continuous Integration
-[![Build Status](https://travis-ci.org/neomantic/arche.svg?branch=feature%2Ftravis)](https://travis-ci.org/neomantic/arche) [https://travis-ci.org/neomantic/arche](https://travis-ci.org/neomantic/arche)
+[![Build Status](https://travis-ci.org/neomantic/arche.svg?branch=develop)](https://travis-ci.org/neomantic/arche) [https://travis-ci.org/neomantic/arche](https://travis-ci.org/neomantic/arche)
 
 ## Issues and Feature Requests
 

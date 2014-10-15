@@ -40,7 +40,7 @@
                  [pandect "0.3.4"]]
   :profiles {:uberjar {:aot :all}
              :production {:env {:production true}}
-             :test {:env {:base-uri "http://example.org"}}
+             :test {:env { :base-uri "http://example.org"}}
              :dev {:env {:base-uri "http://localhost:3000"}}}
   :licenses [{:name "Eclipse Public License - v 1.0"
               :url "http://www.eclipse.org/legal/epl-v10.html"
@@ -55,10 +55,8 @@
             [clj-sql-up "0.3.3"]
             [lein-environ "1.0.0"]
             [lein-pprint "1.1.1"]]
-  :clj-sql-up {:database {:subprotocol "mysql"
-                          :user "travis"
-                          :password ""
-                          :subname "//127.0.0.1:3306/arche_test"}
+  :clj-sql-up {:database {:subprotocol "mysql"}
+               :database-travis "jdbc:mysql://travis@127.0.0.1:3306/arche_test"
                :deps [[mysql/mysql-connector-java "5.1.25"]]}
   :min-lein-version "2.0.0"
   :uberjar-name "arche-standalone.jar"

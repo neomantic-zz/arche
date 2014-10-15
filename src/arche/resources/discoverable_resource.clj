@@ -52,8 +52,8 @@
   (database records/db)
   (entity-fields :resource_name :link_relation :href :updated_at :id :created_at))
 
-(defn discoverable-resource-entity-url [resource-name]
-  (app/app-uri-for (format "/%s/%s" (:routable names) resource-name)))
+(defn url-for [record]
+  (app/app-uri-for (format "/%s/%s" (:routable names) (:resource_name record))))
 
 (def profile-url
   (app/alps-profile-url (:titleized names)))
@@ -70,7 +70,7 @@
     (conj
      (media/profile-link-relation profile-url)
      (media/self-link-relation
-      (discoverable-resource-entity-url (:resource_name representable-map))))}))
+      (url-for representable-map)))}))
 
 (defn discoverable-resource-alps-representation []
   (let [link-relation "link_relation"
@@ -126,26 +126,19 @@
 
 (defn url-valid? [value]
   (try
-    (= (url/protocol-of (url/url-like (URI. value))) "https")
+    (let [protocol (url/protocol-of (url/url-like (URI. value)))]
+      (or (=  protocol "https") (=  protocol "http")))
     (catch URISyntaxException e
       false)))
 
 (def validate-url (validate-format-fn url-valid?))
 
-(defn validate-resource-name [submitted]
-  (validate-attribute :resource_name submitted validate-presence))
-
-(defn validate-href [submitted]
-  (validate-attribute :href submitted validate-presence validate-url))
-
-(defn validate-link-relation [submitted]
-  (validate-attribute :link_relation submitted validate-presence validate-url))
-
 (defn validate [attributes]
   (apply conj
-         (map (fn [validator]
-                (validator attributes))
-              [validate-resource-name validate-link-relation validate-href])))
+         (map #(% attributes)
+              [(validates-attribute :href validate-presence validate-url)
+               (validates-attribute :link_relation validate-presence validate-url)
+               (validates-attribute :resource_name validate-presence)])))
 
 (defn discoverable-resource-create [resource-name link-relation href]
   (if-let [existing (discoverable-resource-first resource-name)]
@@ -167,24 +160,27 @@
   (ring-response
    {:status status-code
     :headers (into {}
-                   [(-> (records/cache-key (name (:tableized names)) record)
-                        http-helper/etag-make
-                        http-helper/header-etag)
-                    (http-helper/cache-control-header-private-age (app/cache-expiry))
-                    (http-helper/header-location (discoverable-resource-entity-url (:resource_name record)))
+                   [(http-helper/cache-control-header-private-age (app/cache-expiry))
+                    (http-helper/header-location (url-for record))
                     (http-helper/header-accept media/hal-media-type)])
     :body (json/generate-string
            (hypermedia-map record))}))
+
+(defn etag-for [record]
+  (http-helper/etag-make
+   (records/cache-key (name (:tableized names)) record)))
 
 (defresource discoverable-resource-entity [resource-name]
   :available-media-types [media/hal-media-type]
   :allowed-methods [:get]
   :exists? (fn [_]
-             (if-let [existing (discoverable-resource-first resource-name)]
-               {::existing existing}
+             (if-let [record (discoverable-resource-first resource-name)]
+               {::record record}
                false))
-  :handle-ok (fn [{entity ::existing}]
-               (ring-response-json entity 200)))
+  :handle-ok (fn [{record ::record}]
+               (ring-response-json record 200))
+  :etag (fn [{record ::record}]
+          (etag-for record)))
 
 (profile/profile-register!
  {(:keyword names) discoverable-resource-alps-representation})

@@ -17,7 +17,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (ns arche.resources.discoverable-resources-collection
-  (:require [liberator.core :refer [resource defresource]]
+  (:require [liberator.core :refer [resource defresource =method]]
             [liberator.representation :refer [ring-response as-response]]
             [cheshire.core :refer :all :as json]
             [clojure.string :only (join) :as str]
@@ -26,7 +26,7 @@
             [arche.app-state :as app]
             [arche.validations :refer [default-error-messages]]
             [arche.resources.discoverable-resource
-             :refer :all :as entity]
+             :refer :all :as entity :exclude [hypermedia-map]]
             [arche.resources.core :refer :all :as generic]
             [arche.media :as media]))
 
@@ -57,12 +57,45 @@
               construct-error-map
               json/generate-string)}))
 
+(defn- supported-content-type? [liberator-ctx]
+  (some #{(get-in liberator-ctx [:request :headers "content-type"])} supported-content-types))
+
+(defn- index-action? [ctx]
+  (=method :get ctx))
+
+(defn- create-action? [ctx]
+  (=method :post ctx))
+
+(def self-url
+  (app/app-uri-for (str "/" (:routable entity/names))))
+
+(def type-url
+  (format "%s#%s" entity/profile-url (:routable entity/names)))
+
+(defn hypermedia-map [records]
+  {:items (apply vector
+                 (map
+                  (fn [record]
+                    {media/keyword-href (entity/url-for record)})
+                  records))
+   media/keyword-embedded {:items
+                           (apply vector
+                                  (map (fn [{:keys [link_relation href resource_name] :as record}]
+                                   {:link_relation link_relation
+                                    :href href
+                                    :resource_name resource_name
+                                    media/keyword-links (media/self-link-relation (entity/url-for record))
+                                    })
+                                 records))}
+   media/keyword-links
+   (media/self-link-relation self-url)})
+
 (defresource discoverable-resources-collection [request]
-  :allowed-methods [:post]
+  :allowed-methods [:post :get]
   :available-media-types [media/hal-media-type]
   :handle-not-acceptable generic/not-acceptable-response
   :malformed? (fn [ctx]
-                (when (method-supports-body? ctx)
+                (if (method-supports-body? ctx)
                   (try
                     (if-let [body (get-in ctx [:request :body])]
                       [false {::parsed
@@ -72,20 +105,39 @@
                                  (slurp (io/reader body))) true)}]
                       [true {:message "No Body"}])
                     (catch Exception e
-                      [true {:message "Required valid content for Content-Type applicaton/json"}]))))
+                      [true {:message "Required valid content for Content-Type applicaton/json"}]))
+                  false))
   :known-content-type? (fn [ctx]
-                         (if (some #{(get-in ctx [:request :headers "content-type"])} supported-content-types)
+                         (if (index-action? ctx)
                            true
-                           [false {:message (format "Unsupported media type. Currently only supports %s"
-                               (str/join ", " supported-content-types))}]))
-  :processable? (fn [{parsed ::parsed}]
-                  (let [errors (entity/validate parsed)]
-                    (if (empty? errors)
-                      true
-                      [false {::errors errors}])))
+                             (if (and (create-action? ctx)
+                                      (supported-content-type? ctx))
+                               true
+                               [false {:message (format "Unsupported media type. Currently only supports %s"
+                                                        (str/join ", " supported-content-types))}])))
+  :processable? (fn [{parsed ::parsed, :as ctx}]
+                  (if (index-action? ctx)
+                    true
+                    (let [errors (entity/validate parsed)]
+                      (if (empty? errors)
+                        true
+                        [false {::errors errors}]))))
   :handle-unprocessable-entity respond-to-unprocessable
   :post-redirect? false
   :respond-with-entity? true
+  :exists? (fn [ctx]
+             (if (index-action? ctx)
+               [true {::body (json/generate-string
+                              (hypermedia-map (discoverable-resources-all)))}]
+               false))
+  :handle-ok (fn [{body ::body}]
+               (ring-response
+                {:status 200
+                 :headers (into {}
+                                [(http-helper/cache-control-header-private-age 0)
+                                 (http-helper/header-location self-url)
+                                 (http-helper/header-accept media/hal-media-type)])
+                 :body body}))
   :post! (fn [{parsed ::parsed}]
            {::record
             (entity/discoverable-resource-create
@@ -93,4 +145,10 @@
              (:link_relation parsed)
              (:href parsed))})
   :handle-created (fn [{record ::record}]
-                    (entity/ring-response-json record 201)))
+                    (entity/ring-response-json record 201))
+  :etag (fn [ctx]
+          (cond
+           (index-action? ctx) (http-helper/etag-make (::body ctx))
+           (create-action? ctx) (if-let [record (::record ctx)]
+                                  (entity/etag-for (::record ctx)))
+           :else nil)))

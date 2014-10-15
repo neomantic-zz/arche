@@ -20,12 +20,23 @@
 (ns arche.resources.discoverable-resource-spec
   (:use arche.core-spec
         arche.resources.discoverable-resource
-        arche.resources.profiles)
+        arche.resources.profiles
+        arche.core)
   (:require [speclj.core :refer :all]
             [cheshire.core :refer :all :as json]
             [arche.db :refer [cache-key] :as record]
+            [ring.mock.request :refer :all :as ring-mock]
+            [ring.util.response :only [:get-header] :as ring]
             [arche.http :refer [etag-make] :as http-helper]
             [arche.app-state :refer :all :as app]))
+
+(defn mock-request [resource_name]
+  (header
+   (ring-mock/request :get (format "/discoverable_resources/%s" resource_name))
+   "Accept" "application/hal+json"))
+
+(defn make-request [mock-request]
+  (app mock-request))
 
 (let [resource-name "studies"
       link-relation "http://example.org/alps/studies"
@@ -65,10 +76,10 @@
  "creating urls"
  (it "creates the correct discoverable resource entity url"
      (should= (format "%s/discoverable_resources/studies" (app/base-uri))
-              (discoverable-resource-entity-url "studies")))
+              (url-for {:resource_name "studies"})))
  (it "creates the correct discoverable resource entity url with url encoding"
-     (should= (format "%s%s" (app/base-uri) "/discoverable_resources/bad%20resource%20name")
-              (discoverable-resource-entity-url "bad resource name"))))
+     (should= (format "%s%s" (app/base-uri) "/discoverable_resources/ugly%20resource%20name")
+              (url-for {:resource_name "ugly resource name"}))))
 
 (describe
  "alps"
@@ -210,52 +221,95 @@
               resource-name "http://example.org/alps/studies" "http://example.org/studies")
       test-response (:response (ring-response-json record 200))]
   (describe
-  "response as json"
-  (it "returns the correct headers"
-      (should== {"ETag" (http-helper/etag-make (record/cache-key (:routable names) record))
-                 "Cache-Control" "max-age=600, private"
-                 "Accept" "application/hal+json"
-                 "Location" (discoverable-resource-entity-url resource-name)}
-                (:headers test-response)))
-  (it "returns parsable json"
-      (should-not-throw (json/parse-string (:body test-response))))
-  (it "returns the correct status code"
-      (should= 200 (:status test-response)))))
+   "response as json"
+   (it "returns parsable json"
+       (should-not-throw (json/parse-string (:body test-response))))
+   (it "returns the correct status code"
+       (should= 200 (:status test-response)))))
 
 (describe
- "validations"
- (it "returns false when url is valid"
-     (should= false (url-valid? "g")))
- (it "returns false when url is valid"
-     (should= false (url-valid? "http://g")))
- (it "returns true on valid url"
-     (should= true (url-valid? "https://shsnhsnh.io/snthnth#thth?query=2")))
- (it "returns correct error key when url is not valid"
-     (should== [:invalid] (validate-url "http://what")))
- (it "returns empty map when resource name present"
-     (should== {} (validate-resource-name {:resource_name "studies"})))
- (it "returns the vector with :blank when resource name is empty"
-     (should== {:resource_name [:blank]} (validate-resource-name {:resource_name ""})))
- (it "returns the vector with :blank when resource name is missing"
-     (should== {:resource_name [:blank]} (validate-resource-name {})))
- (it "returns vector with :blank and :format when href empty"
-     (should== {:href [:blank :invalid]} (validate-href {:href ""})))
- (it "returns vector with :blank and :format when href missing"
-     (should== {:href [:blank :invalid]} (validate-href {})))
- (it "returns vector with :invalid when invalid href"
-     (should== {:href [:invalid]} (validate-href {:href "http://what"})))
- (it "returns empty map when href valid"
-     (should== {} (validate-href {:href "https://what"})))
- (it "returns vector with :format when invalid link-relation"
-     (should== {:link_relation [:invalid]} (validate-link-relation {:link_relation "http://what"})))
- (it "returns vector with :blank and :format when link-relation empty"
-     (should== {:link_relation [:blank :invalid]} (validate-link-relation {:link_relation ""})))
- (it "returns vector with :format when link-relation is missing"
-     (should== {:link_relation [:blank :invalid]} (validate-link-relation {})))
- (it "returns empty map when link relation valid"
-     (should== {} (validate-link-relation {:link_relation "https://what"})))
- (it "validates"
-     (should= {:href [:blank :invalid]
-               :link_relation [:blank :invalid]
-               :resource_name [:blank]}
-               (validate {:href "" :link_relation "" :resource_name ""}))))
+ "validating"
+ (describe
+  "urls"
+  (it "returns false when url is valid"
+      (should= false (url-valid? "g")))
+  (it "returns true when url is valid"
+      (should= true (url-valid? "http://g")))
+  (it "returns true on valid url"
+      (should= true (url-valid? "https://shsnhsnh.io/snthnth#thth?query=2")))
+  (it "returns correct error key when url is not valid"
+      (should== [:invalid] (validate-url "sthnshusnthh")))
+  (describe
+   "attributes"
+   (it "returns errors when everything is missing"
+       (should= {:href [:blank :invalid]
+                 :link_relation [:blank :invalid]
+                 :resource_name [:blank]}
+                (validate {})))
+   (it "returns errors when everything is empty"
+       (should= {:href [:blank :invalid]
+                 :link_relation [:blank :invalid]
+                 :resource_name [:blank]}
+                (validate {:href ""
+                           :link_relation ""
+                           :resource_name ""})))
+   (it "can have no errors"
+       (should== {}
+                 (validate {:href "https://a-path"
+                            :link_relation "https://another-path"
+                            :resource_name "some-name"})))
+   (it "returns invalid, and not blank when href is not url"
+       (should-contain :invalid
+                       (:href (validate
+                               {:href "hsthsnthsnthtnh"})))
+       (should-not-contain :blank
+                           (:href (validate
+                                   {:href "hsthsnthsnthtnh"}))))
+   (it "returns invalid, and not blank when link relation is not url"
+       (should-contain :invalid
+                       (:link_relation (validate
+                                        {:link_relation "hsthsnthsnthtnh"})))
+       (should-not-contain :blank
+                           (:link_relation (validate
+                                            {:link_relation "hsthsnthsnthtnh"}))))
+   (it "does not return invalid when href is https"
+       (should-not-contain :invalid
+                       (:href (validate
+                               {:href "http://service.io/hello"}))))
+   (it "does not return invalid when href is https"
+       (should-not-contain :invalid
+                       (:href (validate
+                               {:href "https://service.io/hello"}))))
+   (it "does not return invalid when link relation is https"
+       (should-not-contain :invalid
+                       (:link_relation (validate
+                                        {:link_relation "https://service.io/hello"}))))
+   (it "does not return invalid when link relation is http"
+       (should-not-contain :invalid
+                       (:link_relation (validate
+                                        {:link_relation "http://service.io/hello"})))))))
+
+(describe
+ "etags"
+ (it "returns and etag"
+     (let [resource-name "studies"
+           created (discoverable-resource-create
+                    resource-name "http://example.org/alps/studies" "http://example.org/studies")]
+       (should-not-be-nil
+        (ring/get-header
+         (make-request (mock-request resource-name))
+         "Etag"))))
+ (it "genarates an etag"
+     (let [record (discoverable-resource-create
+                    "studies" "http://example.org/alps/studies" "http://example.org/studies")]
+       (should-not-be-nil (etag-for record)))))
+
+(describe
+ (it "returns the location headers"
+     (let [resource-name "studies"
+           record (discoverable-resource-create
+                    resource-name "http://example.org/alps/studies" "http://example.org/studies")]
+       (should= (url-for record)
+        (ring/get-header
+         (make-request (mock-request resource-name))
+         "Location")))))

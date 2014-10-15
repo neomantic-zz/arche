@@ -30,7 +30,9 @@
  (it "returns the correct keyword for self"
      (should= :self link-relation-self))
  (it "returns the correct keyword for type"
-     (should= :type link-relation-type)))
+     (should= :type link-relation-type))
+ (it "returns the correct keyword for embedded"
+     (should= :_embedded keyword-embedded)))
 
 (describe
  "media types"

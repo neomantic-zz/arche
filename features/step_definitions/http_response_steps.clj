@@ -18,9 +18,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (ns step-definitions.http-response-steps
-  (:use step-definitions.discoverable-resources-steps
-        cucumber.runtime.clj
-        clojure.test))
+  (:use cucumber.runtime.clj
+        clojure.test)
+  (:require [step-definitions.discoverable-resources-steps :refer :all]))
 
 (Then #"^the response should have the following header fields:$" [table]
       (let [received-headers (last-response-headers)]
@@ -32,3 +32,6 @@
               (is (= value (get received-headers field))
                   (format "expected value %s for header %s; got %s"
                           value field (get received-headers field))))))))
+
+(Then #"^I should get a status of (\d+)$" [status]
+      (is (= (last-response-status) (read-string status))))

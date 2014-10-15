@@ -18,30 +18,22 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (ns step-definitions.discoverable-resources-steps
-  (:use arche.core
-        arche.db
-        arche.resources.discoverable-resource
+  (:use arche.resources.discoverable-resource
         cucumber.runtime.clj
         clojure.test)
-  (:refer-clojure :exclude [resolve])
-  (:require [clojure.java.jdbc :as jdbc]
-            [ring.adapter.jetty :as jetty]
-            [ring.util.response :as ring]
-            [arche.media :as media]
+  (:require [arche.media :as media]
+            [arche.core :as web]
             [clojurewerkz.urly.core :as urly]
-            [arche.app-state :as app]
             [cheshire.core :refer :all :as json]
             [clj-http.client :as client]
-            [environ.core :refer [env]])
-  (:import [java.net URI URL]))
+            [arche.app-state :as app]
+            [ring.adapter.jetty :as jetty]
+            [clojure.java.jdbc :as jdbc]
+            [ring.util.response :as ring]
+            [environ.core :refer [env]]))
 
-;; cucumber helpers
-(defn table-to-map [table]
-  (into {} (map vec (.raw table))))
-
-(defn table-rows-map [table]
-  (into {} (rest (table-to-map table))))
-
+;; support procedures - for some reason, refactoring these out
+;; means clojure or cucumber cannot find these producers
 (def test-port 57767)
 
 (def last-response (atom nil))
@@ -56,8 +48,16 @@
 (def last-response-headers (last-response-property :headers))
 (def last-response-status (last-response-property :status))
 
+;; cucumber helpers
+(defn table-to-map [table]
+  (into {} (map vec (.raw table))))
+
+(defn table-rows-map [table]
+  (into {} (rest (table-to-map table))))
+
 (defn link-href-get [link-relation-type links]
   (get-in links [link-relation-type (name media/keyword-href)]))
+
 
 (defn url-to-test [path]
   (let [url (urly/url-like "http://localhost")
@@ -99,7 +99,7 @@
 (defn server-start []
   (if @server
     (throw (IllegalStateException. "Server already started."))
-    (reset! server (jetty/run-jetty handler
+    (reset! server (jetty/run-jetty web/handler
                                    {:port test-port
                                     :join? false}))))
 (defn server-stop []
@@ -121,6 +121,15 @@
 (defn database-truncate []
   (jdbc/db-do-commands dbspec "TRUNCATE TABLE discoverable_resources;"))
 
+
+(defn to-json [args]
+  (cheshire.core/generate-string
+    args))
+
+(defn from-json [args]
+  (cheshire.core/parse-string
+    args true))
+
 (Before []
         (server-start)
         (database-truncate))
@@ -141,7 +150,6 @@
       (last-response-set!
        (execute-get-request path {"Accept" media-type})))
 
-
 (When #"^I invoke uniform interface method POST to \"([^\"]*)\" with the \"([^\"]*)\" body and accepting \"([^\"]*)\" responses:$" [path content-type accept-type body]
       (let [headers {"Accept" accept-type
                      "Content-Type" content-type}]
@@ -150,17 +158,15 @@
           path
           headers
           (try
-            (json/generate-string
-             (json/parse-string body))
+            (-> body
+                from-json
+                to-json)
             (catch Exception e
               (prn "That wasn't json")))))))
 
-(Then #"^I should get a status of (\d+)$" [status]
-      (is (= (last-response-status) (read-string status))))
-
 (Then #"^the resource representation should have exactly the following properties:$" [table]
       (let [actual (into {} (remove (fn [[key item]] (= key media/keyword-links))
-                                    (json/parse-string (last-response-body) true)))
+                                    (from-json (last-response-body))))
             map-of-table (table-to-map table)
             expected (zipmap
                       (map keyword (keys map-of-table))
@@ -174,7 +180,7 @@
               expected))))
 
 (Then #"^I should get a response with the following errors:$" [table]
-      (let [response-map (json/parse-string (last-response-body) true)]
+      (let [response-map (from-json (last-response-body))]
         (is (not (nil? (get response-map :errors))))
         (doall
          (map (fn [[attribute message]]

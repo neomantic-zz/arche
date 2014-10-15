@@ -18,13 +18,16 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (ns arche.entry-points-spec
-  (:use arche.resources.entry-points)
+  (:use arche.resources.entry-points
+        arche.core)
   (:require [speclj.core :refer :all]
-            [arche.core-spec :only (factory-discoverable-resource-create
+            [arche.core-spec :only (arche-request factory-discoverable-resource-create
                                            clean-database) :as support]
             [arche.resources.discoverable-resource
              :only (discoverable-resource-first discoverable-resources-all)
              :as record]
+            [ring.mock.request :refer :all :as ring-mock]
+            [ring.util.response :only [:get-header] :as ring]
             [clojurewerkz.urly.core :as urly]
             [arche.media :as media]
             [arche.app-state :as app]))
@@ -46,6 +49,14 @@
   (.toString (.mutatePath
               (urly/url-like (app/base-uri))
               route)))
+
+(def mock-request
+  (header
+   (ring-mock/request :get "/")
+   "Accept" "application/hal+json"))
+
+(defn make-request []
+  (app mock-request))
 
 (describe
  "route"
@@ -214,3 +225,15 @@
 
          }
         (alps-profile-map)))))
+
+(describe
+ "etags"
+ (it "returns an etag"
+     (let [response (make-request)]
+       (should-not-be-nil (:headers response "Etag"))))
+ (it "accepts the etag"
+     (let [etag (ring/get-header (make-request) "Etag")
+           request (header
+                    mock-request
+                    "If-None-Match" etag)]
+       (should= 304 (:status (app request))))))
