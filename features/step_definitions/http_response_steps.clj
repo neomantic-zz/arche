@@ -32,3 +32,6 @@
               (is (= value (get received-headers field))
                   (format "expected value %s for header %s; got %s"
                           value field (get received-headers field))))))))
+
+(Then #"^I should get a status of (\d+)$" [status]
+      (is (= (last-response-status) (read-string status))))

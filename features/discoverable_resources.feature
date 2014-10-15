@@ -90,19 +90,22 @@ Scenario: The request to create a discoverable resource fails, if no link relati
   | link_relation | can't be blank     |
   | link_relation | is not valid       |
 
-Scenario: A client reads a discoverable resource index as hale+json
+Scenario: A client reads a discoverable resource index as hal+json
     Given a discoverable resource exists with the following attributes:
     | link_relation | https://www.mydomain.com/studies |
     | href          | https://a-service.io/studies     |
     | resource_name | studies                          |
-    When I invoke the uniform interface method GET to "v2/discoverable_resources" accepting "application/vnd.hale+json"
+    When I invoke the uniform interface method GET to "/discoverable_resources" accepting "application/hal+json"
     Then I should get a status of 200
     And the resource representation should have at least the following links:
-    | link_relation | href                                                                    |
-    | self          | http://example.org/v2/discoverable_resources                            |
-    And the resource representation should have the following items in its links:
-    | href                                                 | type                                                                   |
-    | http://example.org/v2/discoverable_resources/studies | http://example.org/v2/alps/DiscoverableResources#discoverable_resource |
-    And the resource representation should have an embedded resource items with the following links and properties:
-    | self link                                            | link_relation property           | href property                | resource_name property |
-    | http://example.org/v2/discoverable_resources/studies | https://www.mydomain.com/studies | https://a-service.io/studies | studies                |
+    | link_relation | href                                      |
+    | self          | http://example.org/discoverable_resources |
+    And the resource representation "items" property should have the following items:
+    | attribute | value                                             |
+    | href      | http://example.org/discoverable_resources/studies |
+    And the resource representation should have an embedded "items" property with the following links and properties:
+    | type     | identifer     | value                                             |
+    | property | link_relation | https://www.mydomain.com/studies                  |
+    | property | href          | https://a-service.io/studies                      |
+    | property | resource_name | studies                                           |
+    | link     | self          | http://example.org/discoverable_resources/studies |
