@@ -146,7 +146,7 @@
        (let [table-map (table-to-map table)]
          (discoverable-resource-create
           (get table-map "resource_name")
-          (get table-map "link_relation")
+          (get table-map "link_relation_url")
           (get table-map "href"))))
 
 (When #"^I invoke the uniform interface method GET to \"([^\"]*)\" accepting \"([^\"]*)\"$" [path media-type]

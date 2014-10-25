@@ -5,11 +5,11 @@ Feature: Discovering a way to find a resource
 
 Scenario: A client receives a list of links to find resource entries points
   Given a discoverable resource exists with the following attributes:
-    | link_relation | https://www.mydomain.com/alps/study |
-    | href          | https://service.com/study           |
-    | resource_name | studies                             |
+    | link_relation_url | https://www.mydomain.com/alps/study |
+    | href              | https://service.com/study           |
+    | resource_name     | studies                             |
   And a discoverable resource exists with the following attributes:
-    | link_relation | https://www.mydomain.com/alps/users |
+    | link_relation_url | https://www.mydomain.com/alps/users |
     | href          | https://service.com/users           |
     | resource_name | users                               |
   When I invoke the uniform interface method GET to "/" accepting "application/hal+json"
@@ -73,9 +73,9 @@ Scenario: A client can receive an alps profile describing the link relations of 
 
 Scenario: A client can receive an alps profile describing the link relations of entry points when there are some
   Given a discoverable resource exists with the following attributes:
-    | link_relation | https://www.mydomain.com/alps/study |
-    | href          | https://service.com/study           |
-    | resource_name | studies                             |
+    | link_relation_url | https://www.mydomain.com/alps/study |
+    | href              | https://service.com/study           |
+    | resource_name     | studies                             |
   And I invoke the uniform interface method GET to "/" accepting "application/hal+json"
   And I follow the link to the "profile" accepting "application/alps+json"
   Then I should get a status of 200

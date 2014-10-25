@@ -5,15 +5,15 @@ Feature: API for discoverable resources
 
 Scenario: A client reads a discoverable resource as hale+json
     Given a discoverable resource exists with the following attributes:
-    | link_relation | https://www.mydomain.com/studies |
-    | href          | https://a-service.io/studies     |
-    | resource_name | studies                          |
+    | link_relation_url | https://www.mydomain.com/studies |
+    | href              | https://a-service.io/studies     |
+    | resource_name     | studies                          |
     When I invoke the uniform interface method GET to "/discoverable_resources/studies" accepting "application/hal+json"
     Then I should get a status of 200
     And the resource representation should have exactly the following properties:
-    | link_relation | https://www.mydomain.com/studies |
-    | href          | https://a-service.io/studies     |
-    | resource_name | studies                          |
+    | link_relation_url | https://www.mydomain.com/studies |
+    | href              | https://a-service.io/studies     |
+    | resource_name     | studies                          |
     And the resource representation should have exactly the following links:
     | link_relation | href                                              |
     | self          | http://example.org/discoverable_resources/studies |
@@ -33,17 +33,16 @@ Scenario: The client can successfully create a discoverable resource
   When I invoke uniform interface method POST to "/discoverable_resources" with the "application/json" body and accepting "application/hal+json" responses:
   """
   {
-   "link_relation": "https://www.mydomain.com/studies",
+   "link_relation_url": "https://www.mydomain.com/studies",
    "href": "https://a-service.io/studies",
    "resource_name": "studies"
   }
   """
   Then I should get a status of 201
   And the resource representation should have exactly the following properties:
-   | link_relation | href                             |
-   | link_relation | https://www.mydomain.com/studies |
-   | href          | https://a-service.io/studies     |
-   | resource_name | studies                          |
+   | link_relation_url | https://www.mydomain.com/studies |
+   | href              | https://a-service.io/studies     |
+   | resource_name     | studies                          |
   And the resource representation should have exactly the following links:
     | link_relation | href                                              |
     | profile       | http://example.org/alps/DiscoverableResources     |
@@ -59,7 +58,7 @@ Scenario: The request to create a discoverable resource fails, if no resource na
   """
   {
    "href": "https://a-service.io/studies",
-   "link_relation": "https://www.mydomain.com/studies"
+   "link_relation_url": "https://www.mydomain.com/studies"
   }
   """
   Then I should get a status of 422
@@ -71,7 +70,7 @@ Scenario: The request to create a discoverable resource fails, if no href is sup
   When I invoke uniform interface method POST to "/discoverable_resources" with the "application/json" body and accepting "application/hal+json" responses:
   """
   {
-   "link_relation": "https://www.mydomain.com/studies",
+   "link_relation_url": "https://www.mydomain.com/studies",
    "resource_name": "studies"
   }
   """
@@ -91,15 +90,15 @@ Scenario: The request to create a discoverable resource fails, if no link relati
   """
   Then I should get a status of 422
   And I should get a response with the following errors:
-  | attribute     | error_on_attribute |
-  | link_relation | can't be blank     |
-  | link_relation | is not valid       |
+  | attribute         | error_on_attribute |
+  | link_relation_url | can't be blank     |
+  | link_relation_url | is not valid       |
 
 Scenario: The request to create a discoverable resource fails, if the href is not HTTP or HTTPS
   Given I invoke uniform interface method POST to "/discoverable_resources" with the "application/json" body and accepting "application/hal+json" responses:
   """
   {
-   "link_relation": "https://www.mydomain.com/studies",
+   "link_relation_url": "https://www.mydomain.com/studies",
    "href": "mailto:someone@somewhere.org",
    "resource_name": "studies"
   }
@@ -113,35 +112,35 @@ Scenario: If the link relation submitted is not https or http, then the request 
   Given I invoke uniform interface method POST to "/discoverable_resources" with the "application/json" body and accepting "application/hal+json" responses:
   """
   {
-   "link_relation": "mailto:someone@somewhere.org",
+   "link_relation_url": "mailto:someone@somewhere.org",
    "href": "https://a-service.io/studies",
    "resource_name": "studies"
   }
   """
   Then I should get a status of 422
   And I should get a response with the following errors:
-  | attribute     | error_on_attribute |
-  | link_relation | is not valid       |
+  | attribute         | error_on_attribute |
+  | link_relation_url | is not valid       |
 
 Scenario: A client reads a discoverable resource index as hal+json
-    Given a discoverable resource exists with the following attributes:
-    | link_relation | https://www.mydomain.com/studies |
+  Given a discoverable resource exists with the following attributes:
+    | link_relation_url | https://www.mydomain.com/studies |
     | href          | https://a-service.io/studies     |
     | resource_name | studies                          |
     When I invoke the uniform interface method GET to "/discoverable_resources" accepting "application/hal+json"
     Then I should get a status of 200
     And the resource representation should have at least the following links:
-    | link_relation | href                                      |
+    | link_relation_url | href                                      |
     | self          | http://example.org/discoverable_resources |
     And the resource representation "items" property should have the following items:
     | attribute | value                                             |
     | href      | http://example.org/discoverable_resources/studies |
     And the resource representation should have an embedded "items" property with the following links and properties:
-    | type     | identifer     | value                                             |
-    | property | link_relation | https://www.mydomain.com/studies                  |
-    | property | href          | https://a-service.io/studies                      |
-    | property | resource_name | studies                                           |
-    | link     | self          | http://example.org/discoverable_resources/studies |
+    | type     | identifer         | value                                             |
+    | property | link_relation_url | https://www.mydomain.com/studies                  |
+    | property | href              | https://a-service.io/studies                      |
+    | property | resource_name     | studies                                           |
+    | link     | self              | http://example.org/discoverable_resources/studies |
    And the response should have the following header fields:
     | field         | field_contents                            |
     | Cache-Control | max-age=0, private                        |

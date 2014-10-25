@@ -55,7 +55,7 @@
    "application/hal+json"
    "application/json"
    (to-json
-    {:link_relation "https://test.host/alps/users"
+    {:link_relation_url "https://test.host/alps/users"
      :href "https://test.host/users"
      :resource_name "users"})))
 
@@ -74,7 +74,7 @@
  (it "handles valid json"
      (should= 201 (:status (valid-post))))
  (it "response with the correct body"
-     (should= {:link_relation "https://test.host/alps/users"
+     (should= {:link_relation_url "https://test.host/alps/users"
                :href "https://test.host/users"
                :resource_name "users"
                media/keyword-links
@@ -91,7 +91,7 @@
                      "application/hal+json"
                      "application/json"
                      (to-json
-                      {:link_relation "https://test.host/alps/users"
+                      {:link_relation_url "https://test.host/alps/users"
                        :href "https://test.host/users"
                        :resource_name resource-name}))
       record (entity/discoverable-resource-first resource-name)]
@@ -155,7 +155,7 @@
       (should==
                {:errors
                 {:href ["can't be blank" "is not valid"]
-                 :link_relation ["can't be blank" "is not valid"]
+                 :link_relation_url ["can't be blank" "is not valid"]
                  :resource_name ["can't be blank"]}}
                (from-json
                 (:body
@@ -177,7 +177,7 @@
                                   "application/hal+json"
                                   "application/json"
                                   "{\"a\": 1}"))))
-  (it "returns the correct status code when json does include link-relation"
+  (it "returns the correct status code when json does include link_relation_url"
       (should= 422 (:status
                     (post-request "/discoverable_resources"
                                   "application/hal+json"
@@ -191,7 +191,7 @@
                                   "application/hal+json"
                                   "application/json"
                                   (to-json
-                                   {:link_relation "http://service.io/alps/Users"
+                                   {:link_relation_url "http://service.io/alps/Users"
                                     :href "http://service.io/users"})))))
   (it "returns the correct status code when json does include href"
       (should= 422 (:status
@@ -199,7 +199,7 @@
                                   "application/hal+json"
                                   "application/json"
                                   (to-json
-                                   {:link_relation "http://service.io/alps/Users"
+                                   {:link_relation_url "http://service.io/alps/Users"
                                     :resource_name "users"}))))))
  (it "returns the correct message when resource_name is missing"
      (should== {:errors {:resource_name ["can't be blank"]}}
@@ -208,7 +208,7 @@
                                               "application/json"
                                               (to-json
                                                {:href "https://service.io/users"
-                                                :link_relation "https://service.io/alps/Users"}))))))
+                                                :link_relation_url "https://service.io/alps/Users"}))))))
  (it "returns the correct message when href is missing"
      (should== {:errors {:href ["can't be blank" "is not valid"]}}
                (from-json (:body (post-request "/discoverable_resources"
@@ -216,7 +216,7 @@
                                                "application/json"
                                                (to-json
                                                 {:resource_name "users"
-                                                 :link_relation "https://service.io/alps/Users"})))))))
+                                                 :link_relation_url "https://service.io/alps/Users"})))))))
 
 (describe
  "headers"
@@ -228,7 +228,7 @@
                              "application/json"
                              (to-json
                               {:href "https://service.io/users"
-                               :link_relation "https://service.io/alps/Users"}))
+                               :link_relation_url "https://service.io/alps/Users"}))
                "Cache-Control")))
  (it "returns the correct content-type"
      (should= "application/json"
@@ -238,7 +238,7 @@
                              "application/json"
                              (to-json
                               {:href "https://service.io/users"
-                               :link_relation "https://service.io/alps/Users"}))
+                               :link_relation_url "https://service.io/alps/Users"}))
                "Content-Type"))))
 
 (describe
@@ -315,7 +315,7 @@
                           {:href (entity/url-for record)}
                           ]
                   :_embedded {:items [{
-                                       :link_relation (:link_relation record)
+                                       :link_relation_url (:link_relation_url record)
                                        :href (:href record)
                                        :resource_name (:resource_name record)
                                        :_links {

@@ -5,9 +5,9 @@ Feature: Profile
 
 Scenario: A client should be able to receive a profile of entry in application/alps+json
    Given a discoverable resource exists with the following attributes:
-   | link_relation | https://www.mydomain.com/alps/study |
-   | href          | https://service.com/study           |
-   | resource_name | studies                             |
+   | link_relation_url | https://www.mydomain.com/alps/study |
+   | href              | https://service.com/study           |
+   | resource_name     | studies                             |
    And I invoke the uniform interface method GET to "/alps/DiscoverableResources" accepting "application/alps+json"
    Then I should receive the following "application/alps+json" response:
    """
@@ -18,7 +18,7 @@ Scenario: A client should be able to receive a profile of entry in application/a
            "doc": {
              "value": "The LinkRelation of the DiscoverableResource"
            },
-           "id": "link_relation",
+           "id": "link_relation_url",
            "type": "semantic",
            "href": "http://alps.io/schema.org/URL"
          },
@@ -58,7 +58,7 @@ Scenario: A client should be able to receive a profile of entry in application/a
            "type": "semantic",
            "descriptor": [
              {
-               "href": "link_relation"
+               "href": "link_relation_url"
              },
              {
                "href": "href"
@@ -85,9 +85,9 @@ Scenario: A client should be able to receive a profile of entry in application/a
 
 Scenario: A client should be able to receive the correct headers of a profile response
    Given a discoverable resource exists with the following attributes:
-   | link_relation | https://www.mydomain.com/alps/study |
-   | href          | https://service.com/study           |
-   | resource_name | studies                             |
+   | link_relation_url | https://www.mydomain.com/alps/study |
+   | href              | https://service.com/study           |
+   | resource_name     | studies                             |
    And I invoke the uniform interface method GET to "alps/DiscoverableResources" accepting "application/alps+json"
     And the response should have the following header fields:
     | field         | field_contents                                   |

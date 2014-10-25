@@ -39,7 +39,7 @@
   (app mock-request))
 
 (let [resource-name "studies"
-      link-relation "http://example.org/alps/studies"
+      link-relation-url "http://example.org/alps/studies"
       href "http://example.org/studies"]
   (describe
    "creates a discoverable resource"
@@ -47,10 +47,10 @@
    (it "creates one"
        (let [created (discoverable-resource-create
                       resource-name
-                      link-relation
+                      link-relation-url
                       href)]
          (should== {:resource_name resource-name
-                    :link_relation  link-relation
+                    :link_relation_url  link-relation-url
                     :id (:id created)
                     :created_at (:created_at created)
                     :updated_at (:updated_at created)
@@ -60,16 +60,16 @@
    "duplications of discoverable resources"
    (before (clean-database)
            (discoverable-resource-create resource-name
-                                         link-relation
+                                         link-relation-url
                                          href))
    (it "returns an error"
        (should== {:errors
                   {:taken-by
                    {:resource_name resource-name
-                    :link_relation link-relation
+                    :link_relation_url link-relation-url
                     :href href}}}
                  (discoverable-resource-create resource-name
-                                               link-relation
+                                               link-relation-url
                                                href)))))
 
 (describe
@@ -90,7 +90,7 @@
                 {:descriptor
                  [{:href "http://alps.io/schema.org/URL"
                    :type "semantic"
-                   :id "link_relation"
+                   :id "link_relation_url"
                    :doc {:value "The LinkRelation of the DiscoverableResource"}}
                   {:href "http://alps.io/schema.org/URL"
                    :type "semantic"
@@ -105,7 +105,7 @@
                    :id   "show"
                    :doc {:value "Returns an individual DiscoverableResource"}}
                   {:descriptor
-                   [{:href "link_relation"}
+                   [{:href "link_relation_url"}
                     {:href "href"}
                     {:href "resource_name"}
                     {:href "show"}]
@@ -127,7 +127,7 @@
      (should-not-be-nil (registered-profile-get :discoverable-resources))))
 
 (let [resource-name "studies"
-      link-relation "http://example.org/alps/studies"
+      link-relation-url "http://example.org/alps/studies"
       href "http://example.org/studies"]
   (describe
    "finding one discoverable resources"
@@ -135,7 +135,7 @@
    (after (clean-database))
    (it "returns a map of the record"
        (let [created (discoverable-resource-create
-                      resource-name link-relation href)
+                      resource-name link-relation-url href)
              found (discoverable-resource-first resource-name)]
          (should== created found)))))
 
@@ -168,10 +168,10 @@
  (it "produces the correct map to serialize"
      (let [name "studies"
            href   "http://test.host/url/studies"
-           link-relation  "http://link-relation.io"
-           mappable (discoverable-resource-create name link-relation href)]
+           link-relation-url  "http://link-relation.io"
+           mappable (discoverable-resource-create name link-relation-url href)]
        (should==
-        {:link_relation link-relation
+        {:link_relation_url link-relation-url
          :href href
          :resource_name name
          :_links {
@@ -182,14 +182,14 @@
  (it "removes timesstamp info"
      (let [name "studies"
            href   "http://test.host/url/studies"
-           link-relation  "http://link-relation.io"
-           mappable {:link_relation link-relation
+           link-relation-url  "http://link-relation.io"
+           mappable {:link_relation_url link-relation-url
                      :href href
                      :resource_name name
                      :created_at "sometime"
                      :updated_at "sometime"}]
        (should==
-        {:link_relation link-relation
+        {:link_relation_url link-relation-url
          :href href
          :resource_name name
          :_links {
@@ -201,7 +201,7 @@
 (describe
  "properties"
  (it "returns the required descriptor for response and requests"
-     (should= [:resource_name :link_relation :href] required-descriptors)))
+     (should= [:resource_name :link_relation_url :href] required-descriptors)))
 
 
 (let [resource-name "studies"]
@@ -245,20 +245,20 @@
    "attributes"
    (it "returns errors when everything is missing"
        (should= {:href [:blank :invalid]
-                 :link_relation [:blank :invalid]
+                 :link_relation_url [:blank :invalid]
                  :resource_name [:blank]}
                 (validate {})))
    (it "returns errors when everything is empty"
        (should= {:href [:blank :invalid]
-                 :link_relation [:blank :invalid]
+                 :link_relation_url [:blank :invalid]
                  :resource_name [:blank]}
                 (validate {:href ""
-                           :link_relation ""
+                           :link_relation_url ""
                            :resource_name ""})))
    (it "can have no errors"
        (should== {}
                  (validate {:href "https://a-path"
-                            :link_relation "https://another-path"
+                            :link_relation_url "https://another-path"
                             :resource_name "some-name"})))
    (it "returns invalid, and not blank when href is not url"
        (should-contain :invalid
@@ -269,11 +269,11 @@
                                    {:href "hsthsnthsnthtnh"}))))
    (it "returns invalid, and not blank when link relation is not url"
        (should-contain :invalid
-                       (:link_relation (validate
-                                        {:link_relation "hsthsnthsnthtnh"})))
+                       (:link_relation_url (validate
+                                        {:link_relation_url "hsthsnthsnthtnh"})))
        (should-not-contain :blank
-                           (:link_relation (validate
-                                            {:link_relation "hsthsnthsnthtnh"}))))
+                           (:link_relation_url (validate
+                                            {:link_relation_url "hsthsnthsnthtnh"}))))
    (it "does not return invalid when href is https"
        (should-not-contain :invalid
                        (:href (validate
@@ -284,12 +284,12 @@
                                {:href "https://service.io/hello"}))))
    (it "does not return invalid when link relation is https"
        (should-not-contain :invalid
-                       (:link_relation (validate
-                                        {:link_relation "https://service.io/hello"}))))
+                       (:link_relation_url (validate
+                                        {:link_relation_url "https://service.io/hello"}))))
    (it "does not return invalid when link relation is http"
        (should-not-contain :invalid
-                       (:link_relation (validate
-                                        {:link_relation "http://service.io/hello"})))))))
+                       (:link_relation_url (validate
+                                        {:link_relation_url "http://service.io/hello"})))))))
 
 (describe
  "etags"
