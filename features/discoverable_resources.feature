@@ -26,7 +26,7 @@ Scenario: A client reads a discoverable resource as hale+json
 
 Scenario: A client gets an error when the link_relation_url is not registered in wormhole
   Given no discoverable resource is registered
-  When I invoke the uniform interface method GET to "v1/discoverable_resources/study" accepting "application/vnd.hale+json"
+  When I invoke the uniform interface method GET to "/discoverable_resources/study" accepting "application/vnd.hal+json"
   Then I should get a status of 404
 
 Scenario: The client can successfully create a discoverable resource
