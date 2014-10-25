@@ -142,7 +142,7 @@
 
 (defn discoverable-resource-create [resource-name link-relation-url href]
   (if-let [existing (discoverable-resource-first resource-name)]
-    {:errors {:taken-by (filter-for-required-fields existing)}}
+    {:errors {:taken (filter-for-required-fields existing)}}
     (let [attributes (conj
                       (records/new-record-timestamps)
                       {:resource_name resource-name

@@ -64,7 +64,7 @@
                                          href))
    (it "returns an error"
        (should== {:errors
-                  {:taken-by
+                  {:taken
                    {:resource_name resource-name
                     :link_relation_url link-relation-url
                     :href href}}}
