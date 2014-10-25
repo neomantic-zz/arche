@@ -27,7 +27,7 @@
             [arche.validations :refer [default-error-messages]]
             [arche.resources.discoverable-resource
              :refer :all :as entity :exclude [hypermedia-map]]
-            [arche.resources.core :refer :all :as generic]
+            [arche.resources.core :refer :all :as common]
             [arche.media :as media]))
 
 (defn- method-supports-body? [ctx]
@@ -46,7 +46,7 @@
               (http-helper/cache-control-header-private-age 0)
               (http-helper/header-content-type "application/json"))
     :body (json/generate-string
-               (generic/construct-error-map errors error-messages))}))
+               (common/construct-error-map errors error-messages))}))
 
 (defn- supported-content-type? [liberator-ctx]
   (some #{(get-in liberator-ctx [:request :headers "content-type"])} supported-content-types))
@@ -84,7 +84,7 @@
 (defresource discoverable-resources-collection [request]
   :allowed-methods [:post :get]
   :available-media-types [media/hal-media-type]
-  :handle-not-acceptable generic/not-acceptable-response
+  :handle-not-acceptable common/not-acceptable-response
   :malformed? (fn [ctx]
                 (if (method-supports-body? ctx)
                   (try
