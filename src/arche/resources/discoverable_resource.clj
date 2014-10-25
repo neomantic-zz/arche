@@ -44,13 +44,13 @@
      :keyword (keyword (inflect/dasherize base-name))}))
 
 (def required-descriptors
-  [:resource_name :link_relation :href])
+  [:resource_name :link_relation_url :href])
 
 (defentity discoverable-resources
   (pk :id)
   (table (:tableized names))
   (database records/db)
-  (entity-fields :resource_name :link_relation :href :updated_at :id :created_at))
+  (entity-fields :resource_name :link_relation_url :href :updated_at :id :created_at))
 
 (defn url-for [record]
   (app/app-uri-for (format "/%s/%s" (:routable names) (:resource_name record))))
@@ -73,12 +73,12 @@
       (url-for representable-map)))}))
 
 (defn discoverable-resource-alps-representation []
-  (let [link-relation "link_relation"
+  (let [link-relation-url "link_relation_url"
         href "href"
         singular (inflect/singular (:titleized names))
         resource-name "resource_name"
         base-descriptors [(alps/descriptor-semantic
-                           (alps/id link-relation)
+                           (alps/id link-relation-url)
                            (alps/doc (format "The LinkRelation of the %s" singular))
                            (alps/href (:url alps/schemas)))
                           (alps/descriptor-semantic
@@ -137,16 +137,16 @@
   (apply conj
          (map #(% attributes)
               [(validates-attribute :href validate-presence validate-url)
-               (validates-attribute :link_relation validate-presence validate-url)
+               (validates-attribute :link_relation_url validate-presence validate-url)
                (validates-attribute :resource_name validate-presence)])))
 
-(defn discoverable-resource-create [resource-name link-relation href]
+(defn discoverable-resource-create [resource-name link-relation-url href]
   (if-let [existing (discoverable-resource-first resource-name)]
     {:errors {:taken-by (filter-for-required-fields existing)}}
     (let [attributes (conj
                       (records/new-record-timestamps)
                       {:resource_name resource-name
-                       :link_relation link-relation
+                       :link_relation_url link-relation-url
                        :href href})]
       (insert discoverable-resources (values attributes))
       ;; ugly work around for the fact that the timestamps on the record

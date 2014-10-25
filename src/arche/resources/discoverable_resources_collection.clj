@@ -80,8 +80,8 @@
                   records))
    media/keyword-embedded {:items
                            (apply vector
-                                  (map (fn [{:keys [link_relation href resource_name] :as record}]
-                                   {:link_relation link_relation
+                                  (map (fn [{:keys [link_relation_url href resource_name] :as record}]
+                                   {:link_relation_url link_relation_url
                                     :href href
                                     :resource_name resource_name
                                     media/keyword-links (media/self-link-relation (entity/url-for record))
@@ -142,7 +142,7 @@
            {::record
             (entity/discoverable-resource-create
              (:resource_name parsed)
-             (:link_relation parsed)
+             (:link_relation_url parsed)
              (:href parsed))})
   :handle-created (fn [{record ::record}]
                     (entity/ring-response-json record 201))

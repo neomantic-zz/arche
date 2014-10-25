@@ -98,15 +98,15 @@
                             (ring/url-encode (:alps-type names))))
            (alps/doc "Returns a list of entry points")))
          (map (fn [{name :resource_name
-                    link-relation :link_relation}]
+                    link-relation-url :link_relation_url}]
                 (alps/descriptor-safe
                  (alps/id name)
                  {alps/keyword-name name}
-                 (alps/link :profile link-relation)
+                 (alps/link :profile link-relation-url)
                  (alps/doc
                   (format "Returns a resource of the type '%s' as described by its profile"
                           name))
-                 (alps/rt link-relation)))
+                 (alps/rt link-relation-url)))
               all))))))))
 
 (defresource entry-points []

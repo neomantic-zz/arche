@@ -212,7 +212,7 @@
                              {:id test-resource-name
                               :name test-resource-name
                               :type "safe"
-                              :rt (:link_relation (record/discoverable-resource-first test-resource-name))
+                              :rt (:link_relation_url (record/discoverable-resource-first test-resource-name))
                               :doc {
                                     :value (format
                                             "Returns a resource of the type '%s' as described by its profile"
@@ -220,7 +220,7 @@
                                     }
                               :link {
                                      :rel "profile"
-                                     :href (:link_relation (record/discoverable-resource-first test-resource-name))
+                                     :href (:link_relation_url (record/discoverable-resource-first test-resource-name))
                                      }}]}
 
          }
