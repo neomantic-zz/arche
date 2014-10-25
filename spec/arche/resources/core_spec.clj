@@ -16,4 +16,28 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(ns arche.resources.core-spec)
+(ns arche.resources.core-spec
+  (:use arche.resources.core)
+  (:require [speclj.core :refer :all]))
+
+(describe
+ "creating error maps"
+ (it "creates a error map when attribute has one error"
+     (should= {:errors
+               {:an-attribute ["can't be blank"]}}
+              (construct-error-map {:an-attribute [:blank]}
+                                   {:blank "can't be blank"})))
+ (it "creates a error map when attribute has multiple-errors"
+     (should= {:errors
+               {:an-attribute ["can't be blank"
+                               "is already taken"]}}
+              (construct-error-map {:an-attribute [:blank :taken]}
+                                   {:blank "can't be blank"
+                                    :taken "is already taken"})))
+ (it "creates a error map when more than one attribute has a error"
+     (should= {:errors
+               {:an-attribute ["can't be blank"]
+                :another ["can't be blank"]}}
+              (construct-error-map {:an-attribute [:blank]
+                                    :another [:blank]}
+                                   {:blank "can't be blank"}))))

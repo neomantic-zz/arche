@@ -39,23 +39,14 @@
   (assoc default-error-messages
     :taken-by "has already been taken"))
 
-(defn construct-error-map [errors]
-  {:errors
-   (into {}
-         (map (fn [[attribute error-keys]]
-                {attribute
-                 (apply vector (map #(get error-messages %) error-keys))})
-              errors))})
-
 (defn respond-to-unprocessable [{errors ::errors}]
   (ring-response
    {:status 422
     :headers (conj
               (http-helper/cache-control-header-private-age 0)
               (http-helper/header-content-type "application/json"))
-    :body (-> errors
-              construct-error-map
-              json/generate-string)}))
+    :body (json/generate-string
+               (generic/construct-error-map errors error-messages))}))
 
 (defn- supported-content-type? [liberator-ctx]
   (some #{(get-in liberator-ctx [:request :headers "content-type"])} supported-content-types))

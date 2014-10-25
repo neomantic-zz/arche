@@ -242,24 +242,6 @@
                "Content-Type"))))
 
 (describe
- "creating error maps"
- (it "creates a error map when attribute has one error"
-     (should= {:errors
-               {:an-attribute ["can't be blank"]}}
-              (construct-error-map {:an-attribute [:blank]})))
- (it "creates a error map when attribute has multiple-errors"
-     (should= {:errors
-               {:an-attribute ["can't be blank"
-                               "has already been taken"]}}
-              (construct-error-map {:an-attribute [:blank :taken-by]})))
- (it "creates a error map when more than one attribute has a error"
-     (should= {:errors
-               {:an-attribute ["can't be blank"]
-                :another ["can't be blank"]}}
-              (construct-error-map {:an-attribute [:blank]
-                                    :another [:blank]}))))
-
-(describe
  "getting all"
   (before (helper/clean-database))
   (after (helper/clean-database))
