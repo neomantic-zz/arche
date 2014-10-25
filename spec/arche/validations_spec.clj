@@ -21,10 +21,36 @@
   (:use arche.validations)
   (:require [speclj.core :refer :all]))
 
-;; (describe
-;;  "without validations"
-;;  (it "returns nothing when no validation"
-;;      (should= [] (validate-attribute :an-attribute ""))))
+(describe
+ "validate-presence"
+ (it "returns correct key when submitted value is empty"
+     (should== [:blank] (validate-presence {})))
+ (it "returns correct key when submitted value is empty string"
+     (should== [:blank] (validate-presence "")))
+ (it "returns correct key when submitted value is nil"
+     (should== [:blank] (validate-presence nil))))
+
+(describe
+ "validate-uniqueness"
+ (it "returns correct key when uniqueness fails"
+     (should== [:taken] ((validate-uniqueness-fn
+                          (fn [attribute]
+                            false)) "")))
+ (it "returns an empty vector key when uniqueness succeeds"
+     (should== [] ((validate-uniqueness-fn
+                          (fn [attribute]
+                            true)) ""))))
+
+(describe
+ "validate-format"
+ (it "returns correct key when uniqueness fails"
+     (should== [:invalid] ((validate-format-fn
+                          (fn [attribute]
+                            false)) "")))
+ (it "returns an empty vector key when uniqueness succeeds"
+     (should== [] ((validate-format-fn
+                          (fn [attribute]
+                            true)) ""))))
 
 (describe
  "presence validation"
@@ -59,10 +85,12 @@
                ((validates-attribute :an-attribute
                                      validate-presence
                                      (fn [submitted] [:fake]))
-                {:an-attribute "shsnhsnhg"}))) )
+                {:an-attribute "shsnhsnhg"}))))
 (describe
  "error message"
  (it "returns the correct message for :blank"
      (should= "can't be blank" (:blank default-error-messages)))
  (it "returns the correct message for :blank"
-     (should= "is not valid" (:invalid default-error-messages))))
+     (should= "is not valid" (:invalid default-error-messages)))
+ (it "returns the correct message for :blank"
+     (should= "is already taken" (:taken default-error-messages))))

@@ -21,22 +21,30 @@
 
 (def default-error-messages
   {:blank "can't be blank"
-   :invalid "is not valid"})
+   :invalid "is not valid"
+   :taken "is already taken"})
 
-(defn- presence-valid? [value]
-  (and (not (nil? value))
-       (not (empty? value))))
+(defn- validation-fn [boolean-proc symbol]
+  (fn [submitted]
+    (if (boolean-proc submitted)
+      []
+      [symbol])))
 
-(defn validate-presence [submitted]
-  (if (presence-valid? submitted)
-    []
-    [:blank]))
+(def validate-presence
+  (validation-fn
+   (fn [submitted]
+     (and (not (nil? submitted))
+          (not (empty? submitted))))
+   :blank))
 
 (defn validate-format-fn [format-proc]
-  (fn [value]
-    (if (and (not (nil? value)) (format-proc value))
-      []
-      [:invalid])))
+  (validation-fn
+   (fn [value]
+     (and (not (nil? value)) (format-proc value)))
+   :invalid))
+
+(defn validate-uniqueness-fn [proc]
+  (validation-fn proc :taken))
 
 (defn validates-attribute [attribute & validations]
   (fn [all-attributes]
@@ -48,3 +56,8 @@
                             validations))]
         (if (empty? errors) {}
             {attribute errors})))))
+
+(def errors-key :error)
+
+(defn has-errors? [entity]
+  (not (nil? (get entity errors-key))))
