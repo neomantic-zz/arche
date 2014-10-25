@@ -95,6 +95,34 @@ Scenario: The request to create a discoverable resource fails, if no link relati
   | link_relation | can't be blank     |
   | link_relation | is not valid       |
 
+Scenario: The request to create a discoverable resource fails, if the href is not HTTP or HTTPS
+  Given I invoke uniform interface method POST to "/discoverable_resources" with the "application/json" body and accepting "application/hal+json" responses:
+  """
+  {
+   "link_relation": "https://www.mydomain.com/studies",
+   "href": "mailto:someone@somewhere.org",
+   "resource_name": "studies"
+  }
+  """
+  Then I should get a status of 422
+  And I should get a response with the following errors:
+  | attribute | error_on_attribute |
+  | href      | is not valid       |
+
+Scenario: If the link relation submitted is not https or http, then the request to create a discoverable resource fails
+  Given I invoke uniform interface method POST to "/discoverable_resources" with the "application/json" body and accepting "application/hal+json" responses:
+  """
+  {
+   "link_relation": "mailto:someone@somewhere.org",
+   "href": "https://a-service.io/studies",
+   "resource_name": "studies"
+  }
+  """
+  Then I should get a status of 422
+  And I should get a response with the following errors:
+  | attribute     | error_on_attribute |
+  | link_relation | is not valid       |
+
 Scenario: A client reads a discoverable resource index as hal+json
     Given a discoverable resource exists with the following attributes:
     | link_relation | https://www.mydomain.com/studies |
