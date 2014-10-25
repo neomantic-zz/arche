@@ -24,6 +24,11 @@ Scenario: A client reads a discoverable resource as hale+json
     | ETag          | anything                                             |
     | Location      | http://example.org/discoverable_resources/studies    |
 
+Scenario: A client gets an error when the link_relation_url is not registered in wormhole
+  Given no discoverable resource is registered
+  When I invoke the uniform interface method GET to "v1/discoverable_resources/study" accepting "application/vnd.hale+json"
+  Then I should get a status of 404
+
 Scenario: The client can successfully create a discoverable resource
   When I invoke uniform interface method POST to "/discoverable_resources" with the "application/json" body and accepting "application/hal+json" responses:
   """
