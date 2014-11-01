@@ -332,7 +332,7 @@
         (get-header (make-get-request mime-type) "Location")))))
 
 (describe
- "all resources as representable collection"
+ "all resources as hal representable collection"
  (before (helper/clean-database))
  (after (helper/clean-database))
  (context
@@ -342,7 +342,7 @@
       {:items []
        :_embedded {:items []}
        :_links {:self {:href "http://example.org/discoverable_resources"}}}
-      (hypermedia-map []))))
+      (hal-map []))))
  (context
   "when there at least some"
   (it "returns the corret map when there is at least 1"
@@ -360,7 +360,63 @@
                                        }
                                       ]}
                   :_links {:self {:href "http://example.org/discoverable_resources"}}}
-                 (hypermedia-map [record]))))))
+                 (hal-map [record]))))))
+
+      ;; "create": {
+      ;;       "data": {
+      ;;         "href": {
+      ;;           "type": "text:text"
+      ;;         },
+      ;;         "link_relation_url": {
+      ;;           "type": "text:text"
+      ;;         },
+      ;;         "resource_name": {
+      ;;           "type": "text:text"
+      ;;         }
+      ;;       },
+      ;;       "href": "<%= create_url %>",
+      ;;       "method": "POST",
+      ;;       "templated": true
+(describe
+ "all resources as hale representable collection"
+ (before (helper/clean-database))
+ (after (helper/clean-database))
+ (context
+  "when there are none"
+  (it "returns the correct map when there are none"
+      (should==
+      {:items []
+       :_embedded {:items []}
+       :_links {:self {:href "http://example.org/discoverable_resources"}
+                :create {:href "http://example.org/discoverable_resources"
+                         :method "POST"
+                         :data {:href {:type "text:text"}
+                                :link_relation_url {:type "text:text"}
+                                :resource_name {:type "text:text"}}}}}
+      (hale-map []))))
+ (context
+  "when there at least some"
+  (it "returns the correct map when there is at least 1"
+     (let [record (create-record)]
+       (should== {:items [
+                          {:href (entity/url-for record)}
+                          ]
+                  :_embedded {:items [{
+                                       :link_relation_url (:link_relation_url record)
+                                       :href (:href record)
+                                       :resource_name (:resource_name record)
+                                       :_links {
+                                                :self {:href (entity/url-for record)}
+                                                }
+                                       }
+                                      ]}
+                  :_links {:self {:href "http://example.org/discoverable_resources"}
+                           :create {:href "http://example.org/discoverable_resources"
+                                    :method "POST"
+                                    :data {:href {:type "text:text"}
+                                           :link_relation_url {:type "text:text"}
+                                           :resource_name {:type "text:text"}}}}}
+                 (hale-map [record]))))))
 
 (describe
  "processable"

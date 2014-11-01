@@ -32,7 +32,18 @@
  (it "returns the correct keyword for type"
      (should= :type link-relation-type))
  (it "returns the correct keyword for embedded"
-     (should= :_embedded keyword-embedded)))
+     (should= :_embedded keyword-embedded))
+ (it "returns the correct keyword for type"
+     (should= :type hale-keyword-type))
+ (it "returns the correct keyword for method"
+     (should= :method hale-keyword-method))
+ (it "returns the correct keyword for data"
+     (should= :data hale-keyword-data)))
+
+(describe
+ "hale data-types"
+ (it "returns map for a type text"
+     (should== {:type "text:text"} hale-type-text)))
 
 (describe
  "media types"

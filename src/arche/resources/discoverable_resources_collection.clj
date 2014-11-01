@@ -75,10 +75,12 @@
 (def self-url
   (app/app-uri-for (str "/" (:routable entity/names))))
 
+(def ^:private create-url self-url)
+
 (def type-url
   (format "%s#%s" entity/profile-url (:routable entity/names)))
 
-(defn hypermedia-map [records]
+(defn hal-map [records]
   {:items (apply vector
                  (map
                   (fn [record]
@@ -109,15 +111,29 @@
                      (http-helper/header-accept
                       (str/join "," ((:available-media-types (:resource context)))))])}))
 
-(defrecord HalResponse [records]
+(defrecord ^:private HalResponse [records]
   Representation
   (as-response [this context]
-    (index-ring-map context (hypermedia-map records))))
+    (index-ring-map context (hal-map records))))
 
-(defrecord HaleResponse [records]
+(defrecord ^:private HaleResponse [records]
   Representation
   (as-response [this context]
-    (index-ring-map context (hypermedia-map records))))
+    (index-ring-map context (hal-map records))))
+
+(defn hale-map [records]
+  (let [hal-map (hal-map records)
+        links (media/keyword-links hal-map)]
+    ;;there is nothing "smart" about this map...i.e., inspecting
+    ;; the resource, and find the route, expected-attributes, etc
+    (assoc
+        hal-map
+      media/keyword-links
+      (conj
+       links
+       {:create (hash-map media/hale-keyword-method "POST",
+                          media/keyword-href create-url,
+                          media/hale-keyword-data (into {} (map #(hash-map % media/hale-type-text) required-descriptors)))}))))
 
 (defresource discoverable-resources-collection [request]
   :allowed-methods [:post :get]

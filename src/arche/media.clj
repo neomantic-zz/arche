@@ -27,6 +27,11 @@
 (def link-relation-profile :profile)
 (def link-relation-type :type)
 (def keyword-embedded :_embedded)
+(def hale-keyword-type :type)
+(def hale-type-text (hash-map hale-keyword-type "text:text"))
+(def hale-keyword-method :method)
+(def hale-keyword-data :data)
+
 
 (defn- link-relation-value [link-relation-type]
   (fn [uri]
