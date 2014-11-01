@@ -95,3 +95,11 @@
           (doseq [[link-relation-type url] expected-links]
             (is (= (get-in links [link-relation-type (name media/keyword-href)]) url))
             (verify-url link-relation-type url)))))
+
+(Then #"^the resource representation should have a \"([^\"]*)\" link relation with at least the following properties:$" [arg1 arg2]
+      (comment  Express the Regexp above with the code you wish you had  )
+      (throw (cucumber.runtime.PendingException.)))
+
+(Then #"^the data form for the \"([^\"]*)\" link relation should contain the following:$" [arg1 arg2]
+      (comment  Express the Regexp above with the code you wish you had  )
+      (throw (cucumber.runtime.PendingException.)))
