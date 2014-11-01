@@ -133,28 +133,37 @@
 
 (def validate-url (validate-format-fn url-valid?))
 
-(defn validate [attributes]
-  (apply conj
-         (map #(% attributes)
-              [(validates-attribute :href validate-presence validate-url)
-               (validates-attribute :link_relation_url validate-presence validate-url)
-               (validates-attribute :resource_name validate-presence)])))
+(def ^:private validate-nonexistence
+  (validates-attribute :resource_name
+                       (validate-uniqueness-fn
+                        (fn [resource-name]
+                          (or (nil? resource-name)
+                              (empty? resource-name)
+                              (nil? (discoverable-resource-first resource-name)))))))
 
-(defn discoverable-resource-create [resource-name link-relation-url href]
-  (if-let [existing (discoverable-resource-first resource-name)]
-    {:errors {:taken (filter-for-required-fields existing)}}
-    (let [attributes (conj
-                      (records/new-record-timestamps)
-                      {:resource_name resource-name
-                       :link_relation_url link-relation-url
-                       :href href})]
-      (insert discoverable-resources (values attributes))
-      ;; ugly work around for the fact that the timestamps on the record
-      ;; are tiny milliseconds off from the timestamps that are persisted
-      ;; korma problem?
-      (first (select
-              discoverable-resources
-              (where {:resource_name resource-name}))))))
+(defn validate-uniqueness [attributes]
+  (validate attributes
+             [validate-nonexistence]))
+
+
+(def validate-href (validates-attribute :href validate-presence validate-url))
+(def validate-link-relation (validates-attribute :link_relation_url validate-presence validate-url))
+(def validate-resource-name-present (validates-attribute :resource_name validate-presence))
+
+(defn discoverable-resource-create
+  [{:keys [resource-name link-relation-url href]}]
+  (insert
+   discoverable-resources
+   (values (conj
+            (records/new-record-timestamps)
+            {:resource_name resource-name
+             :link_relation_url link-relation-url
+             :href href})))
+  ;; ugly work around for the fact that the timestamps on the record
+  ;; are tiny milliseconds off from the timestamps that are persisted
+  ;; korma problem?
+  (discoverable-resource-first resource-name))
+
 
 (defn ring-response-json [record status-code]
   (ring-response

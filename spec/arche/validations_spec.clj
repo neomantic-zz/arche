@@ -78,13 +78,13 @@
      (should== {:an-attribute  [:blank :fake]}
                ((validates-attribute :an-attribute
                                      validate-presence
-                                     (fn [submitted] [:fake]))
+                                     (fn [_] [:fake]))
                 {:an-attribute ""})))
  (it "returns correct array of keys one multiple validations fails"
      (should== {:an-attribute  [:fake]}
                ((validates-attribute :an-attribute
                                      validate-presence
-                                     (fn [submitted] [:fake]))
+                                     (fn [_] [:fake]))
                 {:an-attribute "shsnhsnhg"}))))
 (describe
  "error message"
@@ -94,3 +94,27 @@
      (should= "is not valid" (:invalid default-error-messages)))
  (it "returns the correct message for :blank"
      (should= "is already taken" (:taken default-error-messages))))
+
+(describe
+ "validate"
+ (it "returns map with error key and attributes when it fails and there is only one validation"
+     (should== {:an-attribute ""
+                :_*errors {:an-attribute [:blank]}}
+               (validate {:an-attribute ""}
+                [(validates-attribute :an-attribute validate-presence)])))
+ (it "returns map with error key and attributes when it fails and there is only multple validation"
+     (should== {:an-attribute "", :another "blah"
+                :_*errors {:an-attribute [:blank]
+                           :another [:fake]
+                           }}
+               (validate {:an-attribute "" :another "blah"}
+                [(validates-attribute :an-attribute validate-presence)
+                 (validates-attribute :another (validate-fn (fn [_] false) :fake))])))
+ (it "returns map with no errors when no validations are passed"
+     (should== {:an-attribute ""}
+               (validate {:an-attribute ""} [])))
+ (it "returns map with no errors when all validations succeeed"
+     (should== {:an-attribute ""}
+               (validate {:an-attribute ""}
+                          [(validates-attribute :an-attribute
+                                                (validate-fn (fn [_] true) :fake))]))))

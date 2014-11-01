@@ -46,31 +46,16 @@
    (before (clean-database))
    (it "creates one"
        (let [created (discoverable-resource-create
-                      resource-name
-                      link-relation-url
-                      href)]
+                      {:resource-name resource-name
+                       :link-relation-url link-relation-url
+                       :href href})]
          (should== {:resource_name resource-name
                     :link_relation_url  link-relation-url
                     :id (:id created)
                     :created_at (:created_at created)
                     :updated_at (:updated_at created)
                     :href href}
-                   created))))
-  (describe
-   "duplications of discoverable resources"
-   (before (clean-database)
-           (discoverable-resource-create resource-name
-                                         link-relation-url
-                                         href))
-   (it "returns an error"
-       (should== {:errors
-                  {:taken
-                   {:resource_name resource-name
-                    :link_relation_url link-relation-url
-                    :href href}}}
-                 (discoverable-resource-create resource-name
-                                               link-relation-url
-                                               href)))))
+                   created)))))
 
 (describe
  "creating urls"
@@ -135,7 +120,9 @@
    (after (clean-database))
    (it "returns a map of the record"
        (let [created (discoverable-resource-create
-                      resource-name link-relation-url href)
+                      {:resource-name resource-name
+                       :link-relation-url link-relation-url
+                       :href href})
              found (discoverable-resource-first resource-name)]
          (should== created found)))))
 
@@ -156,7 +143,11 @@
  "getting all discoverables"
  (before
   (clean-database)
-  (discoverable-resource-create "studies" "http://link-relation.io" "http://test.host/url/studies"))
+  (discoverable-resource-create
+   {:resource-name "studies"
+    :link-relation-url "http://link-relation.io"
+    :href "http://test.host/url/studies"}))
+ (after (clean-database))
  (it "returns a correct number of discoverables"
      (should= 1 (count (discoverable-resources-all)))))
 
@@ -169,7 +160,10 @@
      (let [name "studies"
            href   "http://test.host/url/studies"
            link-relation-url  "http://link-relation.io"
-           mappable (discoverable-resource-create name link-relation-url href)]
+           mappable (discoverable-resource-create
+                     {:resource-name name
+                       :link-relation-url link-relation-url
+                       :href href})]
        (should==
         {:link_relation_url link-relation-url
          :href href
@@ -192,10 +186,8 @@
         {:link_relation_url link-relation-url
          :href href
          :resource_name name
-         :_links {
-                  :self {:href "http://example.org/discoverable_resources/studies"}
-                  :profile {:href "http://example.org/alps/DiscoverableResources"}
-                  }}
+         :_links {:self {:href "http://example.org/discoverable_resources/studies"}
+                  :profile {:href "http://example.org/alps/DiscoverableResources"}}}
         (hypermedia-map mappable)))))
 
 (describe
@@ -211,14 +203,19 @@
    (after (clean-database))
    (it "returns the same etag value for both created and found entities"
        (let [created (discoverable-resource-create
-                      resource-name "http://example.org/alps/studies" "http://example.org/studies")
+                      {:resource-name resource-name
+                       :link-relation-url "http://example.org/alps/studies"
+                       :href "http://example.org/studies"})
              found (discoverable-resource-first resource-name)]
          (should= (record/cache-key "discoverable_resources" created) (record/cache-key "discoverable_resources" found))))))
 
 
 (let [resource-name "studies"
-      record (discoverable-resource-create
-              resource-name "http://example.org/alps/studies" "http://example.org/studies")
+      record
+      (discoverable-resource-create
+       {:resource-name resource-name
+        :link-relation-url "http://example.org/alps/studies"
+        :href "http://example.org/studies"})
       test-response (:response (ring-response-json record 200))]
   (describe
    "response as json"
@@ -240,72 +237,118 @@
   (it "returns true on valid url"
       (should= true (url-valid? "https://shsnhsnh.io/snthnth#thth?query=2")))
   (it "returns correct error key when url is not valid"
-      (should== [:invalid] (validate-url "sthnshusnthh")))
-  (describe
-   "attributes"
-   (it "returns errors when everything is missing"
-       (should= {:href [:blank :invalid]
-                 :link_relation_url [:blank :invalid]
-                 :resource_name [:blank]}
-                (validate {})))
-   (it "returns errors when everything is empty"
-       (should= {:href [:blank :invalid]
-                 :link_relation_url [:blank :invalid]
-                 :resource_name [:blank]}
-                (validate {:href ""
-                           :link_relation_url ""
-                           :resource_name ""})))
-   (it "can have no errors"
-       (should== {}
-                 (validate {:href "https://a-path"
-                            :link_relation_url "https://another-path"
-                            :resource_name "some-name"})))
-   (it "returns invalid, and not blank when href is not url"
-       (should-contain :invalid
-                       (:href (validate
-                               {:href "hsthsnthsnthtnh"})))
-       (should-not-contain :blank
-                           (:href (validate
-                                   {:href "hsthsnthsnthtnh"}))))
-   (it "returns invalid, and not blank when link relation is not url"
-       (should-contain :invalid
-                       (:link_relation_url (validate
-                                        {:link_relation_url "hsthsnthsnthtnh"})))
-       (should-not-contain :blank
-                           (:link_relation_url (validate
-                                            {:link_relation_url "hsthsnthsnthtnh"}))))
-   (it "does not return invalid when href is https"
-       (should-not-contain :invalid
-                       (:href (validate
-                               {:href "http://service.io/hello"}))))
-   (it "does not return invalid when href is https"
-       (should-not-contain :invalid
-                       (:href (validate
-                               {:href "https://service.io/hello"}))))
-   (it "does not return invalid when link relation is https"
-       (should-not-contain :invalid
-                       (:link_relation_url (validate
-                                        {:link_relation_url "https://service.io/hello"}))))
-   (it "does not return invalid when link relation is http"
-       (should-not-contain :invalid
-                       (:link_relation_url (validate
-                                        {:link_relation_url "http://service.io/hello"})))))))
+      (should== [:invalid] (validate-url "sthnshusnthh"))))
+ (describe
+  "uniqueness"
+  (it "returns empty map with a resource with the same name does not exist"
+      (should== {:resource_name "studies"}
+                (validate-uniqueness
+                    {:resource_name "studies"})))
+  (it "returns empty map when no resource name was submitted"
+      (should== {} (validate-uniqueness
+                   {})))
+  (it "returns empty map when an empty resource name was submitted"
+      (should== {:resource_name ""}
+                (validate-uniqueness
+                   {:resource_name ""})))
+  (it "returns the correct key when a resource already has the same resource_name"
+      (let [resource-name "studies"]
+        (discoverable-resource-create
+         {:resource-name resource-name
+          :link-relation-url "http://example.org/alps/studies"
+          :href "http://example.org/studies"})
+        (should== {:resource_name "studies"
+                   :_*errors {:resource_name [:taken]}}
+                  (validate-uniqueness
+                   {:resource_name "studies"}))
+        (clean-database))))
+ (describe
+  "link_relation_url"
+  (it "returns empty map when link_relation_url is valid with http"
+      (should== {}
+                (validate-link-relation
+                 {:link_relation_url "http://what.io"})))
+  (it "returns empty map when linkt_relation_url is valid with https"
+      (should== {}
+                (validate-link-relation
+                 {:link_relation_url "https://what.io"})))
+  (it "returns correct key when not a uri"
+      (should== {:link_relation_url [:invalid]}
+                (validate-link-relation
+                 {:link_relation_url "x1sh/daithff="})))
+  (it "returns correct key when link_relation_url is not https/http"
+      (should== {:link_relation_url [:invalid]}
+                (validate-link-relation
+                 {:link_relation_url "mailto:calbers@neomantic"})))
+  (it "returns an correct when no link_relation_url is submitted"
+      (should== {:link_relation_url [:blank :invalid]}
+                (validate-link-relation
+                 {})))
+  (it "returns an correct when an empty link_relation_url is submitted"
+      (should== {:link_relation_url [:blank :invalid]}
+                (validate-link-relation
+                 {:href ""}))))
+ (describe
+  "href"
+  (it "returns empty map when href is valid with http"
+      (should== {}
+                (validate-href
+                 {:href "http://what.io"})))
+  (it "returns empty map when href is valid with https"
+      (should== {}
+                (validate-href
+                 {:href "https://what.io"})))
+  (it "returns correct key when not a uri"
+      (should== {:href [:invalid]}
+                (validate-href
+                 {:href "x1sh/daithff="})))
+  (it "returns correct key when href is not https/http"
+      (should== {:href [:invalid]}
+                (validate-href
+                 {:href "mailto:calbers@neomantic"})))
+  (it "returns an correct when no href is submitted"
+      (should== {:href [:blank :invalid]}
+                (validate-href
+                 {})))
+  (it "returns an correct when an empty href is submitted"
+      (should== {:href [:blank :invalid]}
+                (validate-href
+                 {:href ""}))))
+ (describe
+  "presence of resource_name"
+  (it "returns an empty map when the name is submitted"
+      (should== {}
+                (validate-resource-name-present
+                 {:resource_name "studies"})))
+  (it "returns a map with the correct key when no resource name was submitted"
+      (should== {:resource_name [:blank]}
+                (validate-resource-name-present
+                 {})))
+  (it "returns a map with the correct key where an empty resource name was submitted"
+      (should== {:resource_name [:blank]}
+                (validate-resource-name-present
+                 {:resource_name ""})))))
 
 (describe
  "etags"
  (before (clean-database))
  (after (clean-database))
  (it "returns and etag"
-     (let [resource-name "studies"
-           created (discoverable-resource-create
-                    resource-name "http://example.org/alps/studies" "http://example.org/studies")]
+     (let [resource-name "studies"]
+       (discoverable-resource-create
+        {:resource-name resource-name
+         :link-relation-url "http://example.org/alps/studies"
+         :href "http://example.org/studies"})
        (should-not-be-nil
         (ring/get-header
          (make-request (mock-request resource-name))
          "Etag"))))
  (it "generates an etag"
-     (let [record (discoverable-resource-create
-                    "studies" "http://example.org/alps/studies" "http://example.org/studies")]
+     (let [record
+           (discoverable-resource-create
+            {:resource-name "studies"
+             :link-relation-url "http://example.org/alps/studies"
+             :href "http://example.org/studies"})]
        (should-not-be-nil (etag-for record)))))
 
 (describe "location header"
@@ -313,8 +356,11 @@
  (after (clean-database))
  (it "returns the location headers"
      (let [resource-name "studies"
-           record (discoverable-resource-create
-                    resource-name "http://example.org/alps/studies" "http://example.org/studies")]
+           record
+           (discoverable-resource-create
+            {:resource-name resource-name
+             :link-relation-url "http://example.org/alps/studies"
+             :href "http://example.org/studies"})]
        (should= (url-for record)
         (ring/get-header
          (make-request (mock-request resource-name))

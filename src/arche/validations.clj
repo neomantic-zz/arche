@@ -24,27 +24,27 @@
    :invalid "is not valid"
    :taken "is already taken"})
 
-(defn- validation-fn [boolean-proc symbol]
+(defn validate-fn [boolean-proc symbol]
   (fn [submitted]
     (if (boolean-proc submitted)
       []
       [symbol])))
 
 (def validate-presence
-  (validation-fn
+  (validate-fn
    (fn [submitted]
      (and (not (nil? submitted))
           (not (empty? submitted))))
    :blank))
 
 (defn validate-format-fn [format-proc]
-  (validation-fn
+  (validate-fn
    (fn [value]
      (and (not (nil? value)) (format-proc value)))
    :invalid))
 
 (defn validate-uniqueness-fn [proc]
-  (validation-fn proc :taken))
+  (validate-fn proc :taken))
 
 (defn validates-attribute [attribute & validations]
   (fn [all-attributes]
@@ -57,7 +57,21 @@
         (if (empty? errors) {}
             {attribute errors})))))
 
-(def errors-key :error)
+;; a key which most likely will not conflict with
+;; the attributes of a column name in a table
+(def errors-key :_*errors)
 
 (defn has-errors? [entity]
   (not (nil? (get entity errors-key))))
+
+
+(defn validate [attributes validations]
+  (let [collected-errors (into {} (map #(% attributes) validations))]
+    (if (empty? collected-errors)
+      attributes
+      (conj
+       {errors-key collected-errors}
+       attributes))))
+
+(defn errors-get [errors-map]
+  (errors-key errors-map))

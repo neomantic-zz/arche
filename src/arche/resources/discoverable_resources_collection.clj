@@ -24,7 +24,7 @@
             [clojure.java.io :as io]
             [arche.http :as http-helper]
             [arche.app-state :as app]
-            [arche.validations :refer [default-error-messages]]
+            [arche.validations :refer [default-error-messages validate has-errors? errors-get]]
             [arche.resources.discoverable-resource
              :refer :all :as entity :exclude [hypermedia-map]]
             [arche.resources.core :refer :all :as common]
@@ -39,14 +39,26 @@
   (assoc default-error-messages
     :taken-by "has already been taken"))
 
-(defn respond-to-unprocessable [{errors ::errors}]
+(defn test-processable [attributes]
+  (validate attributes
+            [entity/validate-href
+             entity/validate-link-relation
+             entity/validate-resource-name-present]))
+
+(defn respond-with-errors [status errors]
   (ring-response
-   {:status 422
+   {:status status
     :headers (conj
               (http-helper/cache-control-header-private-age 0)
               (http-helper/header-content-type "application/json"))
     :body (json/generate-string
-               (common/construct-error-map errors error-messages))}))
+           (common/error-map-make (errors-get errors) error-messages))}))
+
+(defn respond-to-bad-request [{errors ::errors}]
+  (respond-with-errors 400 errors))
+
+(defn respond-to-unprocessable [{errors ::errors}]
+  (respond-with-errors 422 errors))
 
 (defn- supported-content-type? [liberator-ctx]
   (some #{(get-in liberator-ctx [:request :headers "content-type"])} supported-content-types))
@@ -107,12 +119,12 @@
                                [false {:message (format "Unsupported media type. Currently only supports %s"
                                                         (str/join ", " supported-content-types))}])))
   :processable? (fn [{parsed ::parsed, :as ctx}]
-                  (if (index-action? ctx)
-                    true
-                    (let [errors (entity/validate parsed)]
-                      (if (empty? errors)
-                        true
-                        [false {::errors errors}]))))
+                  (if (create-action? ctx)
+                    (let [test (test-processable parsed)]
+                      (if (has-errors? test)
+                        [false {::errors test}]
+                        true))
+                    true))
   :handle-unprocessable-entity respond-to-unprocessable
   :post-redirect? false
   :respond-with-entity? true
@@ -130,13 +142,17 @@
                                  (http-helper/header-accept media/hal-media-type)])
                  :body body}))
   :post! (fn [{parsed ::parsed}]
-           {::record
-            (entity/discoverable-resource-create
-             (:resource_name parsed)
-             (:link_relation_url parsed)
-             (:href parsed))})
-  :handle-created (fn [{record ::record}]
-                    (entity/ring-response-json record 201))
+           (let [errors (validate-uniqueness parsed)]
+             (if (has-errors? errors)
+               {::errors errors}
+               {::record (entity/discoverable-resource-create
+                          {:resource-name (:resource_name parsed)
+                           :link-relation-url (:link_relation_url parsed)
+                           :href (:href parsed)})})))
+  :handle-created (fn [{record ::record, errors ::errors}]
+                    (if (not-empty errors)
+                      (respond-with-errors 400 errors)
+                      (entity/ring-response-json record 201)))
   :etag (fn [ctx]
           (cond
            (index-action? ctx) (http-helper/etag-make (::body ctx))

@@ -53,9 +53,9 @@
 
 (defn factory-discoverable-resource-create [resource-name]
   (discoverable-resource-create
-   resource-name
-   (format "%s%s" "http://factory/alps/" resource-name)
-   (format "%s%s" "http://factory/" resource-name)))
+   {:resource-name  resource-name
+    :link-relation-url (format "%s%s" "http://factory/alps/" resource-name)
+    :href (format "%s%s" "http://factory/" resource-name)}))
 
 (describe
  "routes to GET discoverable resources"

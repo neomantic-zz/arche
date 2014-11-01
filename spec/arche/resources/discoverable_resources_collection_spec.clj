@@ -28,6 +28,7 @@
             [arche.db :refer [cache-key]]
             [arche.app-state :as app]
             [arche.http :refer [etag-make]]
+            [arche.validations :refer [errors-key]]
             [arche.resources.discoverable-resource
              :refer [required-descriptors discoverable-resource-first] :as entity]
             [arche.core :refer [app] :as web]))
@@ -39,7 +40,9 @@
             "Content-Type" content-type)))
 (defn create-record []
   (entity/discoverable-resource-create
-   "studies" "http://example.org/alps/studies" "http://example.org/studies"))
+   {:resource-name "studies"
+    :link-relation-url "http://example.org/alps/studies"
+    :href "http://example.org/studies"}))
 
 (defn to-json [args]
   (cheshire.core/generate-string
@@ -169,6 +172,14 @@
                                   "application/hal+json"
                                   "application/json"
                                   "")))))
+(describe
+ "testing processablity"
+ (it "returns the correct map if href is absent"
+     (should== {errors-key {:href [:blank :invalid]
+                           :resource_name [:blank]
+                           :link_relation_url [:blank :invalid]}
+                :href ""}
+               (test-processable {:href ""}))))
  (describe
   "unprocessable - missing attribute date"
   (it "returns the correct status code when json does not any of the require keys"
@@ -217,6 +228,48 @@
                                                (to-json
                                                 {:resource_name "users"
                                                  :link_relation_url "https://service.io/alps/Users"})))))))
+
+(describe
+   "creating duplicates"
+   (before (clean-database)
+           (entity/discoverable-resource-create
+            {:resource-name "studies"
+             :link-relation-url "http://example.org/alps/studies"
+             :href "http://example.org/studies"}))
+   (after (clean-database))
+   (it "returns 400 trying to create an existing resource"
+       (let [response
+             (post-request "/discoverable_resources"
+                           "application/hal+json"
+                           "application/json"
+                           (to-json
+                            {:resource_name "studies"
+                             :link_relation_url "http://example.org/alps/studies"
+                             :href "http://example.org/studies"}))]
+         (should= 400 (:status response))))
+   (it "returns the corret body trying to create an existing resource"
+       (let [response
+             (post-request "/discoverable_resources"
+                           "application/hal+json"
+                           "application/json"
+                           (to-json
+                            {:resource_name "studies"
+                             :link_relation_url "http://example.org/alps/studies"
+                             :href "http://example.org/studies"}))]
+         (should= {:errors {:resource_name ["is already taken"]}}
+                  (from-json (:body response)))))
+   (it "returns the correct content-type"
+       (let [response
+             (post-request "/discoverable_resources"
+                           "application/hal+json"
+                           "application/json"
+                           (to-json
+                            {:resource_name "studies"
+                             :link_relation_url "http://example.org/alps/studies"
+                             :href "http://example.org/studies"}))]
+         (should= "application/json"
+                  (get-header response "Content-Type")))))
+
 
 (describe
  "headers"
@@ -307,3 +360,70 @@
                                       ]}
                   :_links {:self {:href "http://example.org/discoverable_resources"}}}
                  (hypermedia-map [record]))))))
+
+(describe
+ "processable"
+ (it "returns errors when everything is missing"
+	 (should= {errors-key {:href [:blank :invalid]
+                          :link_relation_url [:blank :invalid]
+                          :resource_name [:blank]}}
+			  (test-processable {})))
+ (it "returns errors when everything is empty"
+     (should= {errors-key
+               {:href [:blank :invalid]
+                :link_relation_url [:blank :invalid]
+                :resource_name [:blank]}
+               :href ""
+               :link_relation_url ""
+               :resource_name ""}
+    		  (test-processable {:href ""
+                                 :link_relation_url ""
+                                 :resource_name ""})))
+ (it "should have no errors"
+     (should== {:href "https://a-path"
+                :link_relation_url "https://another-path"
+                :resource_name "some-name"}
+    		   (test-processable {:href "https://a-path"
+                                  :link_relation_url "https://another-path"
+                                  :resource_name "some-name"})))
+
+ (it "returns invalid, and not blank when href is not url"
+     (should-contain :invalid
+                     (get-in (test-processable {:href "hsthsnthsnthtnh"})
+                             [errors-key :href]))
+     (should-not-contain :blank
+    					 (get-in (test-processable {:href "hsthsnthsnthtnh"})
+                                 [errors-key :href])))
+ (it "returns invalid, and not blank when link relation is not url"
+     (should-contain :invalid
+                     (get-in
+                      (test-processable
+                       {:link_relation_url "hsthsnthsnthtnh"})
+                      [errors-key :link_relation_url]))
+     (should-not-contain :blank
+                         (get-in
+                          (test-processable
+                           {:link_relation_url "hsthsnthsnthtnh"})
+                          [errors-key :link_relation_url])))
+ (it "does not return invalid when href is https"
+     (should-not-contain :invalid
+                         (get-in (test-processable
+                                  {:href "http://service.io/hello"})
+                                 [errors-key :href])))
+ (it "does not return invalid when href is https"
+     (should-not-contain :invalid
+                         (get-in (test-processable
+                                  {:href "http://service.io/hello"})
+                                 [errors-key :href])))
+ (it "does not return invalid when link relation is https"
+     (should-not-contain :invalid
+                         (get-in
+                          (test-processable
+                           {:link_relation_url "https://service.io/hello"})
+                          [errors-key :link_relation_url])))
+ (it "does not return invalid when link relation is http"
+     (should-not-contain :invalid
+                         (get-in
+                          (test-processable
+                           {:link_relation_url "https://service.io/hello"})
+                          [errors-key :link_relation_url]))))
