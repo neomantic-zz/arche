@@ -189,7 +189,8 @@
   :handle-ok (fn [{record ::record}]
                (ring-response-json record 200))
   :etag (fn [{record ::record}]
-          (etag-for record)))
+          (if (not (nil? record))
+            (etag-for record))))
 
 (profile/profile-register!
  {(:keyword names) discoverable-resource-alps-representation})

@@ -27,12 +27,13 @@
             [arche.db :refer [cache-key] :as record]
             [ring.mock.request :refer :all :as ring-mock]
             [ring.util.response :only [:get-header] :as ring]
+            [ring.util.codec :only [:url-encode]]
             [arche.http :refer [etag-make] :as http-helper]
             [arche.app-state :refer :all :as app]))
 
 (defn mock-request [resource_name]
   (header
-   (ring-mock/request :get (format "/discoverable_resources/%s" resource_name))
+   (ring-mock/request :get (format "/discoverable_resources/%s" (ring.util.codec/url-encode resource_name)))
    "Accept" "application/hal+json"))
 
 (defn make-request [mock-request]
@@ -333,7 +334,7 @@
  "etags"
  (before (clean-database))
  (after (clean-database))
- (it "returns and etag"
+ (it "returns an etag when resource exists"
      (let [resource-name "studies"]
        (discoverable-resource-create
         {:resource-name resource-name
@@ -343,6 +344,13 @@
         (ring/get-header
          (make-request (mock-request resource-name))
          "Etag"))))
+ (it "does not return an etag when resource does not exists"
+     ;; test added, because liberator always hits the etag
+     ;; method
+     (should-be-nil
+      (ring/get-header
+       (make-request (mock-request "nobodies"))
+       "Etag")))
  (it "generates an etag"
      (let [record
            (discoverable-resource-create
