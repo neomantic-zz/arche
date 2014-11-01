@@ -122,6 +122,24 @@ Scenario: If the link relation submitted is not https or http, then the request 
   | attribute         | error_on_attribute |
   | link_relation_url | is not valid       |
 
+Scenario: The request to create a discoverable resource fails, if the resource already exists
+  Given a discoverable resource exists with the following attributes:
+  | link_relation_url | https://www.mydomain.com/studies |
+  | href              | https://a-service.io/studies     |
+  | resource_name     | studies                          |
+  When I invoke uniform interface method POST to "/discoverable_resources" with the "application/json" body and accepting "application/hal+json" responses:
+  """
+  {
+   "link_relation_url": "https://www.mydomain.com/studies",
+   "href": "https://a-service.io/studies",
+   "resource_name": "studies"
+  }
+  """
+  Then I should get a status of 400
+  And I should get a response with the following errors:
+  | attribute     | error_on_attribute |
+  | resource_name | is already taken   |
+
 Scenario: A client reads a discoverable resource index as hal+json
   Given a discoverable resource exists with the following attributes:
     | link_relation_url | https://www.mydomain.com/studies |
