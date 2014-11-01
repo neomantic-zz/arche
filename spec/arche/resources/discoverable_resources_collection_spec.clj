@@ -297,41 +297,39 @@
                                :link_relation_url "https://service.io/alps/Users"}))
                "Content-Type"))))
 
-(describe
- "getting all"
-  (before (helper/clean-database))
-  (after (helper/clean-database))
- (it "is successful when there are none"
-     (should= 200 (:status (make-get-request mime-hal))))
-  (it "is successful when there are some"
-      (do
-        (create-record)
-        (should= 200 (:status (make-get-request mime-hal)))))
- (it "has the application/hal+json content-type"
-     (should-not-be-nil
-      (re-matches #"application\/hal\+json.*"
-                  (get-header (make-get-request mime-hal) "Content-Type"))))
- (it "is parsable json"
-     (should-not-throw (from-json (:body (make-get-request mime-hal)))))
- (it "returns a Cache-control header"
-     (should=
-      "max-age=0, private"
-      (get-header (make-get-request mime-hal) "Cache-control")))
- (it "returns a Content-type header"
-     (should=
-      "application/hal+json"
-      (get-header (make-get-request mime-hal) "Content-Type")))
- (it "returns a Etag header"
-     (should-not-be-nil
-      (get-header (make-get-request mime-hal) "ETag")))
- (it "returns the correct accept header"
-     (should=
-      "application/vnd.hale+json,application/hal+json"
-      (get-header (make-get-request mime-hal) "Accept")))
- (it "returns the correct location header"
-     (should=
-      "http://example.org/discoverable_resources"
-      (get-header (make-get-request mime-hal) "Location"))))
+(doseq [mime-type [mime-hale mime-hal]]
+  (describe
+   (format "getting all using the %s mime-type" mime-type)
+   (before (helper/clean-database))
+   (after (helper/clean-database))
+   (it "is successful when there are none"
+       (should= 200 (:status (make-get-request mime-type))))
+   (it "is successful when there are some"
+       (do
+         (create-record)
+         (should= 200 (:status (make-get-request mime-type)))))
+   (it "is parsable json"
+       (should-not-throw (from-json (:body (make-get-request mime-type)))))
+   (it "returns a Cache-control header"
+       (should=
+        "max-age=0, private"
+        (get-header (make-get-request mime-type) "Cache-control")))
+   (it "returns a Content-type header"
+       (should=
+        (if (= mime-type mime-hale) mime-hale
+            mime-hal)
+        (get-header (make-get-request mime-type) "Content-Type")))
+   (it "returns a Etag header"
+       (should-not-be-nil
+        (get-header (make-get-request mime-type) "ETag")))
+   (it "returns the correct accept header"
+       (should=
+        "application/vnd.hale+json,application/hal+json"
+        (get-header (make-get-request mime-type) "Accept")))
+   (it "returns the correct location header"
+       (should=
+        "http://example.org/discoverable_resources"
+        (get-header (make-get-request mime-type) "Location")))))
 
 (describe
  "all resources as representable collection"

@@ -18,7 +18,7 @@
 
 (ns arche.resources.discoverable-resources-collection
   (:require [liberator.core :refer [resource defresource =method]]
-            [liberator.representation :refer [ring-response as-response]]
+            [liberator.representation :refer [ring-response Representation]]
             [cheshire.core :refer :all :as json]
             [clojure.string :only (join) :as str]
             [clojure.java.io :as io]
@@ -38,6 +38,9 @@
 (def error-messages
   (assoc default-error-messages
     :taken-by "has already been taken"))
+
+(defn- requested-mime-type [liberator-ctx]
+  (get-in liberator-ctx [:representation :media-type]))
 
 (defn test-processable [attributes]
   (validate attributes
@@ -93,6 +96,29 @@
    media/keyword-links
    (media/self-link-relation self-url)})
 
+(defn- index-ring-map [context hypermedia-map]
+  (let [json (json/generate-string hypermedia-map)]
+    {:body json
+     :status 200
+     :headers (into {}
+                    [(-> json
+                         http-helper/etag-make
+                         http-helper/header-etag)
+                     (http-helper/cache-control-header-private-age 0)
+                     (http-helper/header-location self-url)
+                     (http-helper/header-accept
+                      (str/join "," ((:available-media-types (:resource context)))))])}))
+
+(defrecord HalResponse [records]
+  Representation
+  (as-response [this context]
+    (index-ring-map context (hypermedia-map records))))
+
+(defrecord HaleResponse [records]
+  Representation
+  (as-response [this context]
+    (index-ring-map context (hypermedia-map records))))
+
 (defresource discoverable-resources-collection [request]
   :allowed-methods [:post :get]
   :available-media-types [media/hale-media-type media/hal-media-type]
@@ -130,18 +156,12 @@
   :respond-with-entity? true
   :exists? (fn [ctx]
              (if (index-action? ctx)
-               [true {::body (json/generate-string
-                              (hypermedia-map (discoverable-resources-all)))}]
+               [true {::records (discoverable-resources-all)}]
                false))
-  :handle-ok (fn [{resource :resource, body ::body}]
-               (ring-response
-                {:status 200
-                 :headers (into {}
-                                [(http-helper/cache-control-header-private-age 0)
-                                 (http-helper/header-location self-url)
-                                 (http-helper/header-accept
-                                  (str/join "," ((:available-media-types resource))))])
-                 :body body}))
+  :handle-ok (fn [{records ::records :as ctx}]
+               (if (= (requested-mime-type ctx) media/hale-media-type)
+                 (HaleResponse. records)
+                 (HalResponse. records)))
   :post! (fn [{parsed ::parsed}]
            (let [errors (validate-uniqueness parsed)]
              (if (has-errors? errors)
@@ -156,7 +176,6 @@
                       (entity/ring-response-json record 201)))
   :etag (fn [ctx]
           (cond
-           (index-action? ctx) (http-helper/etag-make (::body ctx))
            (create-action? ctx) (if-let [record (::record ctx)]
                                   (entity/etag-for (::record ctx)))
            :else nil)))
