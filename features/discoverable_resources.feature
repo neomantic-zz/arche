@@ -166,7 +166,7 @@ Scenario: A client reads a discoverable resource index as hal+json
     | Location      | http://example.org/discoverable_resources |
 
 
-Scenario: A client reads a discoverable resource index as vnd.hal+json
+Scenario: A client reads a discoverable resource index as vnd.hale+json
   Given a discoverable resource exists with the following attributes:
   | link_relation_url | https://www.mydomain.com/studies |
   | href              | https://a-service.io/studies     |
