@@ -187,9 +187,8 @@ Scenario: A client reads a discoverable resource index as vnd.hale+json
   | link     | self              | http://example.org/discoverable_resources/studies |
   And the resource representation should have a "create" link relation with at least the following properties:
   | property name | value                                        |
-  | href          | http://example.org/v1/discoverable_resources |
+  | href          | http://example.org/discoverable_resources    |
   | method        | POST                                         |
-  | templated     | true                                         |
   And the data form for the "create" link relation should contain the following:
   | input name        | input type |
   | href              | text:text  |

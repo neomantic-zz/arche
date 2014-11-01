@@ -41,6 +41,9 @@
       (is (= (URI. (link-href-get link-relation actual-links)) (URI. href)))
       (verify-url link-relation href))))
 
+(defn response-links []
+  (get (json/parse-string (last-response-body)) (name media/keyword-links)))
+
 (Then #"^I should receive the following \"([^\"]*)\" response:$" [media-type expected-response]
       (if (re-find #".+json\z" media-type)
         (is (= (from-json expected-response)
@@ -48,7 +51,7 @@
         (throw (Exception. "Currently only supports testing json responses."))))
 
 (Then #"^the resource representation should have exactly the following links:$" [table]
-      (let [actual-links (get (json/parse-string (last-response-body)) (name media/keyword-links))
+      (let [actual-links (response-links)
             expected-links (table-rows-map table)]
         ;; make sure the same number of links are present
         (is (= (count expected-links) (count actual-links))
@@ -60,7 +63,7 @@
         (verify-links expected-links actual-links)))
 
 (Then #"^the resource representation should have at least the following links:$" [table]
-      (let [actual-links (get (json/parse-string (last-response-body)) (name media/keyword-links))
+      (let [actual-links (response-links)
             expected-links (table-rows-map table)]
         (doseq [expected-link expected-links]
           (is (some #(= % (first expected-link)) (keys actual-links))))
@@ -96,10 +99,24 @@
             (is (= (get-in links [link-relation-type (name media/keyword-href)]) url))
             (verify-url link-relation-type url)))))
 
-(Then #"^the resource representation should have a \"([^\"]*)\" link relation with at least the following properties:$" [arg1 arg2]
-      (comment  Express the Regexp above with the code you wish you had  )
-      (throw (cucumber.runtime.PendingException.)))
+(Then #"^the resource representation should have a \"([^\"]*)\" link relation with at least the following properties:$" [link-relation-type table]
+      (let [rows (rest (map vec (.raw table)))
+            link-relation-body (get (response-links) link-relation-type)]
+        (is (not (nil? link-relation-body))
+            (format "expected to find the link relation type '%s'; got %s" link-relation-type (response-links)))
+        ;; TODO very href URL
+        (doseq [[key value] rows]
+          (is (= (get link-relation-body key) value)))))
 
-(Then #"^the data form for the \"([^\"]*)\" link relation should contain the following:$" [arg1 arg2]
-      (comment  Express the Regexp above with the code you wish you had  )
-      (throw (cucumber.runtime.PendingException.)))
+(Then #"^the data form for the \"([^\"]*)\" link relation should contain the following:$" [link-relation-type table]
+      (let [rows (rest (map vec (.raw table)))
+            link-relation-body (get (response-links) link-relation-type)
+            data-attributes (get link-relation-body (name media/hale-keyword-data))]
+        (is (not (nil? link-relation-body))
+            (format "expected to find the link relation type '%s'; got %s" link-relation-type (response-links)))
+        (is (not (nil? data-attributes))
+            (format "expected a '%s' attribute'; got %s" (name media/hale-keyword-data) (response-links)))
+        (is (= (count data-attributes) (count rows))
+            (format "expected exactly %d data attributes; got %d" (count data-attributes) (count rows)))
+        (doseq [[input-name input-type] rows]
+          (is (= (get-in data-attributes [input-name (name media/hale-keyword-type)]) input-type)))))

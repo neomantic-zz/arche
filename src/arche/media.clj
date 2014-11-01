@@ -32,7 +32,6 @@
 (def hale-keyword-method :method)
 (def hale-keyword-data :data)
 
-
 (defn- link-relation-value [link-relation-type]
   (fn [uri]
     {link-relation-type
