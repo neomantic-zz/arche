@@ -36,7 +36,9 @@
 
 (describe
  "media types"
- (it "returns the correct string for hale+json"
+ (it "returns the correct string for vnd.hal+json"
+     (should= "application/vnd.hale+json" hale-media-type))
+ (it "returns the correct string for hal+json"
      (should= "application/hal+json" hal-media-type)))
 
 (describe
