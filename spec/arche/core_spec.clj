@@ -104,15 +104,23 @@
    (it "returns the correct accept type in the response header"
        (should= "application/alps+json" (ring/get-header response "Accept")))))
 
-(let [response (app
-                (header (ring-mock/request :get "/")
-                        "Accept" "application/hal+json"))
-      actual-status (:status response)]
-  (describe
-   "entry point routes"
-   (it "is successful"
-       (should-be successful? response))
-   (it "returns the correct accept header"
-       (should= "application/hal+json" (ring/get-header response "Accept")))))
+
+(doseq [mime-type ["application/vnd.hale+json" "application/hal+json" "application/json"]]
+  (let [response (app
+                  (header (ring-mock/request :get "/")
+                          "Accept" mime-type))
+        actual-status (:status response)]
+    (describe
+     "entry point routes"
+     (it "is successful"
+         (should-be successful? response))
+     (it "returns the correct content type header"
+         (should=
+          mime-type
+          (ring/get-header response "Content-Type")))
+     (it "returns the correct accept header"
+         (should=
+          "application/hal+json,application/vnd.hale+json,application/json"
+          (ring/get-header response "Accept"))))))
 
 (run-specs)

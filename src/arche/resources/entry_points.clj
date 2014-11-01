@@ -110,7 +110,7 @@
               all))))))))
 
 (defresource entry-points []
-  :available-media-types [media/hal-media-type]
+  :available-media-types [media/hal-media-type media/hale-media-type media/json-media-type]
   :allowed-methods [:get]
   :exists? (fn [_]
              [true {::body (json/generate-string (entry-points-map))}])
@@ -121,7 +121,7 @@
                                 [(http-helper/header-location (self-url))
                                  (http-helper/cache-control-header-private-age (app/cache-expiry))
                                  (http-helper/header-accept
-                                  (str/join ", " ((:available-media-types resource))))])
+                                  (str/join "," ((:available-media-types resource))))])
                  :body body}))
   :etag (fn [{body ::body}]
           (http-helper/etag-make body)))

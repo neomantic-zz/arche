@@ -3,7 +3,7 @@ Feature: Discovering a way to find a resource
   As an API client
   I want to a list of links to entry points to the available discoverable resources
 
-Scenario: A client receives a list of links to find resource entries points
+Scenario Outline: A client receives a list of links to find resource entries points
   Given a discoverable resource exists with the following attributes:
     | link_relation_url | https://www.mydomain.com/alps/study |
     | href              | https://service.com/study           |
@@ -12,7 +12,7 @@ Scenario: A client receives a list of links to find resource entries points
     | link_relation_url | https://www.mydomain.com/alps/users |
     | href          | https://service.com/users           |
     | resource_name | users                               |
-  When I invoke the uniform interface method GET to "/" accepting "application/hal+json"
+  When I invoke the uniform interface method GET to "/" accepting "<Mime-Type>"
   Then I should get a status of 200
   And the resource representation should have exactly the following links:
   | link_relation | href                                                |
@@ -27,8 +27,14 @@ Scenario: A client receives a list of links to find resource entries points
   | ETag          | anything             |
   | Location      | http://example.org/  |
 
-Scenario: A Client receives a empty list of links when no resources have been registered
-  Given I invoke the uniform interface method GET to "/" accepting "application/hal+json"
+ Examples:
+  | Mime-Type                 |
+  | application/hal+json      |
+  | application/vnd.hale+json |
+  | application/json          |
+
+Scenario Outline: A Client receives a empty list of links when no resources have been registered
+  Given I invoke the uniform interface method GET to "/" accepting "<Mime-Type>"
   Then I should get a status of 200
   And the resource representation should have exactly the following links:
   | link_relation | href                                                |
@@ -40,6 +46,13 @@ Scenario: A Client receives a empty list of links when no resources have been re
   | Cache-Control | max-age=600, private |
   | ETag          | anything             |
   | Location      | http://example.org/  |
+
+ Examples:
+  | Mime-Type                 |
+  | application/hal+json      |
+  | application/vnd.hale+json |
+  | application/json          |
+
 
 Scenario: A client can receive an alps profile describing the link relations of entry points when there are none
   Given I invoke the uniform interface method GET to "/" accepting "application/hal+json"

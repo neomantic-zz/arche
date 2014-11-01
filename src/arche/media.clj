@@ -23,6 +23,7 @@
 (def keyword-href :href)
 (def hal-media-type "application/hal+json")
 (def hale-media-type "application/vnd.hale+json")
+(def json-media-type "application/json")
 (def link-relation-self :self)
 (def link-relation-profile :profile)
 (def link-relation-type :type)
