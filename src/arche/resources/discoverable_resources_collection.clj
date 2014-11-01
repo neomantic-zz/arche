@@ -95,7 +95,7 @@
 
 (defresource discoverable-resources-collection [request]
   :allowed-methods [:post :get]
-  :available-media-types [media/hal-media-type]
+  :available-media-types [media/hale-media-type media/hal-media-type]
   :handle-not-acceptable common/not-acceptable-response
   :malformed? (fn [ctx]
                 (if (method-supports-body? ctx)
@@ -133,13 +133,14 @@
                [true {::body (json/generate-string
                               (hypermedia-map (discoverable-resources-all)))}]
                false))
-  :handle-ok (fn [{body ::body}]
+  :handle-ok (fn [{resource :resource, body ::body}]
                (ring-response
                 {:status 200
                  :headers (into {}
                                 [(http-helper/cache-control-header-private-age 0)
                                  (http-helper/header-location self-url)
-                                 (http-helper/header-accept media/hal-media-type)])
+                                 (http-helper/header-accept
+                                  (str/join "," ((:available-media-types resource))))])
                  :body body}))
   :post! (fn [{parsed ::parsed}]
            (let [errors (validate-uniqueness parsed)]
