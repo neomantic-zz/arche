@@ -164,3 +164,39 @@ Scenario: A client reads a discoverable resource index as hal+json
     | Cache-Control | max-age=0, private                        |
     | ETag          | anything                                  |
     | Location      | http://example.org/discoverable_resources |
+
+
+Scenario: A client reads a discoverable resource index as vnd.hal+json
+  Given a discoverable resource exists with the following attributes:
+  | link_relation_url | https://www.mydomain.com/studies |
+  | href              | https://a-service.io/studies     |
+  | resource_name     | studies                          |
+  When I invoke the uniform interface method GET to "/discoverable_resources" accepting "application/vnd.hale+json"
+  Then I should get a status of 200
+  And the resource representation should have at least the following links:
+  | link_relation_url | href                                      |
+  | self              | http://example.org/discoverable_resources |
+  And the resource representation "items" property should have the following items:
+  | attribute | value                                             |
+  | href      | http://example.org/discoverable_resources/studies |
+  And the resource representation should have an embedded "items" property with the following links and properties:
+  | type     | identifer         | value                                             |
+  | property | link_relation_url | https://www.mydomain.com/studies                  |
+  | property | href              | https://a-service.io/studies                      |
+  | property | resource_name     | studies                                           |
+  | link     | self              | http://example.org/discoverable_resources/studies |
+  And the resource representation should have a "create" link relation with at least the following properties:
+  | property name | value                                        |
+  | href          | http://example.org/v1/discoverable_resources |
+  | method        | POST                                         |
+  | templated     | true                                         |
+  And the data form for the "create" link relation should contain the following:
+  | input name        | input type |
+  | href              | text:text  |
+  | link_relation_url | text:text  |
+  | resource_name     | text:text  |
+  And the response should have the following header fields:
+  | field         | field_contents                            |
+  | Cache-Control | max-age=0, private                        |
+  | ETag          | anything                                  |
+  | Location      | http://example.org/discoverable_resources |
