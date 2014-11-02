@@ -65,16 +65,7 @@
    (clean-database)
    (factory-discoverable-resource-create "studies"))
   (it "supports /discoverable_resources/ with a name"
-      (should-be successful? (arche-request (format "%s%s" "/discoverable_resources/" "studies"))))
-  (it "should have the correct accept header"
-                  (should= media/hal-media-type
-                           (get (:headers (arche-request (format "%s%s" "/discoverable_resources/" "studies"))) "Accept")))
-  (it "returns the correct location header"
-                  (should= (format "%s/discoverable_resources/studies" (app/base-uri))
-                           (get (:headers (arche-request (format "%s%s" "/discoverable_resources/" "studies"))) "Location")))
-  (it "returns have the correct accept header"
-                  (should= "application/hal+json"
-                           (get (:headers (arche-request (format "%s%s" "/discoverable_resources/" "studies"))) "Content-Type")))))
+      (should-be successful? (arche-request (format "%s%s" "/discoverable_resources/" "studies"))))))
 
 (describe
  "routes profiles"

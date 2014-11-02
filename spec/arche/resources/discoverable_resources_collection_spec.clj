@@ -108,7 +108,8 @@
    (it "returns correct location header"
        (should= "http://example.org/discoverable_resources/users" (get-header response "Location")))
    (it "returns correct accept header"
-       (should= "application/hal+json" (get-header response "Accept")))
+       (should= "application/hal+json,application/vnd.hale+json,application/json"
+                (get-header response "Accept")))
    (it "returns correct cache control header"
        (should= "max-age=600, private" (get-header response "Cache-Control")))
    (it "returns correct etag"

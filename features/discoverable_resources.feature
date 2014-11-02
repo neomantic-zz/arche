@@ -3,12 +3,12 @@ Feature: API for discoverable resources
   As an API client
   I want read a catalogue of available resource to discover
 
-Scenario: A client reads a discoverable resource as hale+json
+Scenario Outline: A client reads a discoverable resource as hale+json
     Given a discoverable resource exists with the following attributes:
     | link_relation_url | https://www.mydomain.com/studies |
     | href              | https://a-service.io/studies     |
     | resource_name     | studies                          |
-    When I invoke the uniform interface method GET to "/discoverable_resources/studies" accepting "application/hal+json"
+    When I invoke the uniform interface method GET to "/discoverable_resources/studies" accepting "<Mime-Type>"
     Then I should get a status of 200
     And the resource representation should have exactly the following properties:
     | link_relation_url | https://www.mydomain.com/studies |
@@ -19,10 +19,17 @@ Scenario: A client reads a discoverable resource as hale+json
     | self          | http://example.org/discoverable_resources/studies |
     | profile       | http://example.org/alps/DiscoverableResources     |
     And the response should have the following header fields:
-    | field         | field_contents                                       |
-    | Cache-Control | max-age=600, private                                 |
-    | ETag          | anything                                             |
-    | Location      | http://example.org/discoverable_resources/studies    |
+    | field         | field_contents                                                  |
+    | Cache-Control | max-age=600, private                                            |
+    | ETag          | anything                                                        |
+    | Location      | http://example.org/discoverable_resources/studies               |
+    | Accept        | application/hal+json,application/vnd.hale+json,application/json |
+
+ Examples:
+  | Mime-Type                 |
+  | application/hal+json      |
+  | application/vnd.hale+json |
+  | application/json          |
 
 Scenario: A client gets an error when the link_relation_url is not registered in wormhole
   Given no discoverable resource is registered

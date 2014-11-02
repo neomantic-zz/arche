@@ -164,6 +164,12 @@
   ;; korma problem?
   (discoverable-resource-first resource-name))
 
+(def ^:private available-media-types
+  [media/hal-media-type media/hale-media-type media/json-media-type])
+
+(defn etag-for [record]
+  (http-helper/etag-make
+   (records/cache-key (name (:tableized names)) record)))
 
 (defn ring-response-json [record status-code]
   (ring-response
@@ -171,26 +177,21 @@
     :headers (into {}
                    [(http-helper/cache-control-header-private-age (app/cache-expiry))
                     (http-helper/header-location (url-for record))
-                    (http-helper/header-accept media/hal-media-type)])
+                    (http-helper/header-etag (etag-for record))
+                    (http-helper/header-accept
+                     (clojure.string/join "," available-media-types))])
     :body (json/generate-string
            (hypermedia-map record))}))
 
-(defn etag-for [record]
-  (http-helper/etag-make
-   (records/cache-key (name (:tableized names)) record)))
-
 (defresource discoverable-resource-entity [resource-name]
-  :available-media-types [media/hal-media-type]
+  :available-media-types available-media-types
   :allowed-methods [:get]
   :exists? (fn [_]
              (if-let [record (discoverable-resource-first resource-name)]
                {::record record}
                false))
   :handle-ok (fn [{record ::record}]
-               (ring-response-json record 200))
-  :etag (fn [{record ::record}]
-          (if (not (nil? record))
-            (etag-for record))))
+               (ring-response-json record 200)))
 
 (profile/profile-register!
  {(:keyword names) discoverable-resource-alps-representation})

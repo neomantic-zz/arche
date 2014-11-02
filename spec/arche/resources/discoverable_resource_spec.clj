@@ -29,15 +29,50 @@
             [ring.util.response :only [:get-header] :as ring]
             [ring.util.codec :only [:url-encode]]
             [arche.http :refer [etag-make] :as http-helper]
+            [arche.media :refer :all :as media]
             [arche.app-state :refer :all :as app]))
 
-(defn mock-request [resource_name]
+(defn mock-request [resource_name mime-type]
   (header
    (ring-mock/request :get (format "/discoverable_resources/%s" (ring.util.codec/url-encode resource_name)))
-   "Accept" "application/hal+json"))
+   "Accept" mime-type))
 
 (defn make-request [mock-request]
   (app mock-request))
+
+(let [resource-name "studies"]
+  (doseq [mime-type [media/hale-media-type media/hal-media-type media/json-media-type]]
+    (describe
+     (format "GET discoverable_resources/{resource_name} accepting %s" mime-type)
+     (before
+      (clean-database)
+      (factory-discoverable-resource-create resource-name))
+     (after (clean-database))
+     (describe
+      "headers"
+      (it "should have the correct accept header"
+          (should= "application/hal+json,application/vnd.hale+json,application/json"
+                   (-> (mock-request resource-name mime-type)
+                       make-request
+                       (ring/get-header "Accept"))))
+      (it "returns the correct location header"
+          (should= (format "%s/discoverable_resources/studies" (app/base-uri))
+                   (-> (mock-request resource-name mime-type)
+                       make-request
+                       (ring/get-header "Location"))))
+      (it "returns an etag when resource exists"
+             (should-not-be-nil
+              (-> (mock-request resource-name mime-type)
+                  make-request
+                  (ring/get-header "Etag"))))
+      (it "does not return an etag when resource does not exists"
+             ;; test added, because liberator always hits the etag
+             ;; method
+             (should-be-nil
+              (-> (mock-request "nobodies" mime-type)
+                  make-request
+                  (ring/get-header "Etag"))))))))
+
 
 (let [resource-name "studies"
       link-relation-url "http://example.org/alps/studies"
@@ -334,42 +369,10 @@
  "etags"
  (before (clean-database))
  (after (clean-database))
- (it "returns an etag when resource exists"
-     (let [resource-name "studies"]
-       (discoverable-resource-create
-        {:resource-name resource-name
-         :link-relation-url "http://example.org/alps/studies"
-         :href "http://example.org/studies"})
-       (should-not-be-nil
-        (ring/get-header
-         (make-request (mock-request resource-name))
-         "Etag"))))
- (it "does not return an etag when resource does not exists"
-     ;; test added, because liberator always hits the etag
-     ;; method
-     (should-be-nil
-      (ring/get-header
-       (make-request (mock-request "nobodies"))
-       "Etag")))
- (it "generates an etag"
+ (it "can generates an etag"
      (let [record
            (discoverable-resource-create
             {:resource-name "studies"
              :link-relation-url "http://example.org/alps/studies"
              :href "http://example.org/studies"})]
        (should-not-be-nil (etag-for record)))))
-
-(describe "location header"
- (before (clean-database))
- (after (clean-database))
- (it "returns the location headers"
-     (let [resource-name "studies"
-           record
-           (discoverable-resource-create
-            {:resource-name resource-name
-             :link-relation-url "http://example.org/alps/studies"
-             :href "http://example.org/studies"})]
-       (should= (url-for record)
-        (ring/get-header
-         (make-request (mock-request resource-name))
-         "Location")))))
