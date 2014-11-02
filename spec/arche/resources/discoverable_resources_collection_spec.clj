@@ -362,22 +362,6 @@
                                       ]}
                   :_links {:self {:href "http://example.org/discoverable_resources"}}}
                  (hal-map [record]))))))
-
-      ;; "create": {
-      ;;       "data": {
-      ;;         "href": {
-      ;;           "type": "text:text"
-      ;;         },
-      ;;         "link_relation_url": {
-      ;;           "type": "text:text"
-      ;;         },
-      ;;         "resource_name": {
-      ;;           "type": "text:text"
-      ;;         }
-      ;;       },
-      ;;       "href": "<%= create_url %>",
-      ;;       "method": "POST",
-      ;;       "templated": true
 (describe
  "all resources as hale representable collection"
  (before (helper/clean-database))
