@@ -53,7 +53,6 @@ Scenario Outline: A Client receives a empty list of links when no resources have
   | application/vnd.hale+json |
   | application/json          |
 
-
 Scenario: A client can receive an alps profile describing the link relations of entry points when there are none
   Given I invoke the uniform interface method GET to "/" accepting "application/hal+json"
   And I follow the link to the "profile" accepting "application/alps+json"
@@ -79,10 +78,11 @@ Scenario: A client can receive an alps profile describing the link relations of 
   | href   |
   | #list  |
   And the response should have the following header fields:
-  | field         | field_contents                      |
-  | Cache-Control | max-age=600, private                |
-  | ETag          | anything                            |
-  | Location      | http://example.org/alps/EntryPoints |
+  | field         | field_contents                         |
+  | Cache-Control | max-age=600, private                   |
+  | ETag          | anything                               |
+  | Location      | http://example.org/alps/EntryPoints    |
+  | Accept        | application/alps+json,application/json |
 
 Scenario: A client can receive an alps profile describing the link relations of entry points when there are some
   Given a discoverable resource exists with the following attributes:
@@ -123,7 +123,8 @@ Scenario: A client can receive an alps profile describing the link relations of 
   | rel     | href                                |
   | profile | https://www.mydomain.com/alps/study |
   And the response should have the following header fields:
-  | field         | field_contents                      |
-  | Cache-Control | max-age=600, private                |
-  | ETag          | anything                            |
-  | Location      | http://example.org/alps/EntryPoints |
+  | field         | field_contents                         |
+  | Cache-Control | max-age=600, private                   |
+  | ETag          | anything                               |
+  | Location      | http://example.org/alps/EntryPoints    |
+  | Accept        | application/alps+json,application/json |

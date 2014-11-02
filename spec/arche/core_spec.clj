@@ -70,31 +70,7 @@
 (describe
  "routes profiles"
  (it "supports the apls/DiscoverableResources route"
-     (should-be successful? (arche-request "/alps/DiscoverableResources")))
- (it "should have the correct accept header"
-     (should= "application/alps+json"
-              (get (:headers (arche-request "/alps/DiscoverableResources")) "Accept")))
-(it "should have the location header"
-     (should= (.toString (.mutatePath (urly/url-like (app/base-uri))  "/alps/DiscoverableResources"))
-              (get (:headers (arche-request "/alps/DiscoverableResources")) "Location")))
- (it "should have the correct content type header"
-     (should= "application/alps+json"
-              (get (:headers (arche-request "/alps/DiscoverableResources")) "Content-Type"))))
-
-(let [response (app
-                (header (ring-mock/request :get "/alps/DIscoverableResources")
-                        "Accept" "application/x-yaml"))
-      actual-status (:status response)
-      actual-body (:body response)]
-  (describe
-   "profile routes with failed accept type"
-   (it "returns 406"
-       (should= 406 actual-status))
-   (it "returns the correct body"
-       (should= "Unsupported media-type. Supported media type listed in Accept header." actual-body))
-   (it "returns the correct accept type in the response header"
-       (should= "application/alps+json" (ring/get-header response "Accept")))))
-
+     (should-be successful? (arche-request "/alps/DiscoverableResources"))))
 
 (doseq [mime-type ["application/vnd.hale+json" "application/hal+json" "application/json"]]
   (let [response (app
