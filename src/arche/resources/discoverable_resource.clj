@@ -121,7 +121,27 @@
           discoverable-resources
           (where {:resource_name resource-name}))))
 
-(def ^:private default-per-page 25)
+(def default-per-page 25)
+
+(defn discoverable-resources-paginated
+  ([] (discoverable-resources-paginated 1))
+  ([page] (discoverable-resources-paginated page default-per-page))
+  ([page per-page]
+     ;; algorithm works like this: get 1 more than the maximum count (peek)
+     ;; and if amount returns match, then there is a next-page
+     (let [records (select discoverable-resources
+                           (offset (* (dec page) default-per-page))
+                           (limit (inc (if (or (< per-page 0) (> per-page default-per-page))
+                                         default-per-page
+                                         per-page)))
+                           (order :id :ASC))
+           has-next (or (> (count records) per-page)  ;;when, I wanted a specific per_page, and there were more
+                        (> (count records) default-per-page))] ;;when it beyond the max
+       {:has-prev (not (= page 1))
+        :has-next has-next
+        :records (if has-next
+                   (drop-last (apply vector records))
+                   (apply vector records))})))
 
 (defn discoverable-resources-all
   ([] (discoverable-resources-all 1))
