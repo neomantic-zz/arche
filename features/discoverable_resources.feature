@@ -174,7 +174,7 @@ Scenario: A client reads a discoverable resource index as hal+json
     | link     | self              | http://example.org/discoverable_resources/studies |
    And the response should have the following header fields:
     | field         | field_contents                                 |
-    | Cache-Control | max-age=0, private                             |
+    | Cache-Control | max-age=600, private                           |
     | ETag          | anything                                       |
     | Location      | http://example.org/discoverable_resources      |
     | Accept        | application/vnd.hale+json,application/hal+json |
@@ -209,7 +209,7 @@ Scenario: A client reads a discoverable resource index as vnd.hale+json
   | resource_name     | text:text  |
   And the response should have the following header fields:
   | field         | field_contents                                 |
-  | Cache-Control | max-age=0, private                             |
+  | Cache-Control | max-age=600, private                           |
   | ETag          | anything                                       |
   | Location      | http://example.org/discoverable_resources      |
   | Accept        | application/vnd.hale+json,application/hal+json |

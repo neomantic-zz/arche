@@ -313,7 +313,7 @@
        (should-not-throw (from-json (:body (make-get-request mime-type)))))
    (it "returns a Cache-control header"
        (should=
-        "max-age=0, private"
+        "max-age=600, private"
         (get-header (make-get-request mime-type) "Cache-control")))
    (it "returns a Content-type header"
        (should=

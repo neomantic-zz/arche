@@ -121,7 +121,7 @@
                     [(-> json
                          http-helper/etag-make
                          http-helper/header-etag)
-                     (http-helper/cache-control-header-private-age 0)
+                     (http-helper/cache-control-header-private-age (app/cache-expiry))
                      (http-helper/header-location self-url)
                      (http-helper/header-accept
                       (str/join "," ((:available-media-types (:resource context)))))])}))
