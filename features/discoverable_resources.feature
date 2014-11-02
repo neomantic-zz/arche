@@ -216,7 +216,15 @@ Scenario: A client reads a discoverable resource index as vnd.hale+json
 
 
 @WIP
-Scenario: I should not receive paginations link relations (prev or next)
+Scenario: I should not receive paginations link relations (prev or next) when no more than 25 items exist
+  Given 25 discoverable resource exists
+  When I invoke the uniform interface method GET to "/discoverable_resources" accepting "application/hal+json"
+  And the resource representation should not have the following links:
+   | next |
+   | prev |
+
+@WIP
+Scenario: I should not receive paginations headers when no more than 25 items exist
   Given 25 discoverable resource exists
   When I invoke the uniform interface method GET to "/discoverable_resources" accepting "application/hal+json"
   And the resource representation should not have the following links:
@@ -231,6 +239,14 @@ Scenario: I should receive paginations link relations (prev and next)
    | link_relation | href                                                            |
    | next          | http://example.org/discoverable_resources?page=3&per_page=25    |
    | prev          | http://example.org/discoverable_resources?page=1&per_page=25    |
+
+@WIP
+Scenario: I should receive paginations headers when no more than 25 items exist
+  Given 51 discoverable resource exists
+  When I invoke the uniform interface method GET to "/discoverable_resources?page=2" accepting "application/hal+json"
+  And the response should have the following header fields:
+  | field | field_contents                                                                                                                                             |
+  | Link  | <http://example.org/discoverable_resources?page=1&per_page=25>; rel="previous", <http://example.org/discoverable_resources?page=3&per_page=25>; rel="next" |
 
 @WIP
 Scenario: I can retrieve a specific page of discoverable resources, I'll receive a link to the prev page, but not a next link
