@@ -36,8 +36,8 @@ Scenario: A client gets an error when the link_relation_url is not registered in
   When I invoke the uniform interface method GET to "/discoverable_resources/study" accepting "application/hal+json"
   Then I should get a status of 404
 
-Scenario: The client can successfully create a discoverable resource
-  When I invoke uniform interface method POST to "/discoverable_resources" with the "application/json" body and accepting "application/hal+json" responses:
+Scenario Outline: The client can successfully create a discoverable resource
+  When I invoke uniform interface method POST to "/discoverable_resources" with the "application/json" body and accepting "<Mime-Type>" responses:
   """
   {
    "link_relation_url": "https://www.mydomain.com/studies",
@@ -51,14 +51,20 @@ Scenario: The client can successfully create a discoverable resource
    | href              | https://a-service.io/studies     |
    | resource_name     | studies                          |
   And the resource representation should have exactly the following links:
-    | link_relation | href                                              |
-    | profile       | http://example.org/alps/DiscoverableResources     |
-    | self          | http://example.org/discoverable_resources/studies |
+   | link_relation | href                                              |
+   | profile       | http://example.org/alps/DiscoverableResources     |
+   | self          | http://example.org/discoverable_resources/studies |
   And the response should have the following header fields:
-    | field         | field_contents                                    |
-    | Cache-Control | max-age=600, private                              |
-    | ETag          | anything                                          |
-    | Location      | http://example.org/discoverable_resources/studies |
+  | field         | field_contents                                                  |
+  | Cache-Control | max-age=600, private                                            |
+  | ETag          | anything                                                        |
+  | Location      | http://example.org/discoverable_resources/studies               |
+  | Accept        | application/hal+json,application/vnd.hale+json,application/json |
+
+ Examples:
+  | Mime-Type                 |
+  | application/hal+json      |
+  | application/vnd.hale+json |
 
 Scenario: The request to create a discoverable resource fails, if no resource name is supplied
   When I invoke uniform interface method POST to "discoverable_resources" with the "application/json" body and accepting "application/hal+json" responses:
@@ -167,11 +173,11 @@ Scenario: A client reads a discoverable resource index as hal+json
     | property | resource_name     | studies                                           |
     | link     | self              | http://example.org/discoverable_resources/studies |
    And the response should have the following header fields:
-    | field         | field_contents                            |
-    | Cache-Control | max-age=0, private                        |
-    | ETag          | anything                                  |
-    | Location      | http://example.org/discoverable_resources |
-
+    | field         | field_contents                                 |
+    | Cache-Control | max-age=0, private                             |
+    | ETag          | anything                                       |
+    | Location      | http://example.org/discoverable_resources      |
+    | Accept        | application/vnd.hale+json,application/hal+json |
 
 Scenario: A client reads a discoverable resource index as vnd.hale+json
   Given a discoverable resource exists with the following attributes:
@@ -202,7 +208,8 @@ Scenario: A client reads a discoverable resource index as vnd.hale+json
   | link_relation_url | text:text  |
   | resource_name     | text:text  |
   And the response should have the following header fields:
-  | field         | field_contents                            |
-  | Cache-Control | max-age=0, private                        |
-  | ETag          | anything                                  |
-  | Location      | http://example.org/discoverable_resources |
+  | field         | field_contents                                 |
+  | Cache-Control | max-age=0, private                             |
+  | ETag          | anything                                       |
+  | Location      | http://example.org/discoverable_resources      |
+  | Accept        | application/vnd.hale+json,application/hal+json |
