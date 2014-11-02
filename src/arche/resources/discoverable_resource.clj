@@ -121,8 +121,18 @@
           discoverable-resources
           (where {:resource_name resource-name}))))
 
-(defn discoverable-resources-all []
-  (select discoverable-resources))
+(def ^:private default-per-page 25)
+
+(defn discoverable-resources-all
+  ([] (discoverable-resources-all 1))
+  ([page] (discoverable-resources-all page default-per-page))
+  ([page per-page]
+     (select discoverable-resources
+             (offset (* (dec page) default-per-page))
+             (limit (if (or (< per-page 0) (> per-page default-per-page))
+                      default-per-page
+                      per-page))
+             (order :id :ASC))))
 
 (defn url-valid? [value]
   (try

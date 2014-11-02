@@ -177,15 +177,57 @@
 
 (describe
  "getting all discoverables"
- (before
-  (clean-database)
-  (discoverable-resource-create
-   {:resource-name "studies"
-    :link-relation-url "http://link-relation.io"
-    :href "http://test.host/url/studies"}))
+ (before (clean-database))
  (after (clean-database))
  (it "returns a correct number of discoverables"
-     (should= 1 (count (discoverable-resources-all)))))
+     (do
+       (discoverable-resource-create
+        {:resource-name "studies"
+         :link-relation-url "http://link-relation.io"
+         :href "http://test.host/url/studies"}))
+     (should= 1 (count (discoverable-resources-all))))
+ (it "returns a maximimum of 25 items"
+     (do
+       (doseq [x (range 26)]
+        (discoverable-resource-create
+         {:resource-name (format "studies-%d" x)
+          :link-relation-url "http://link-relation.io"
+          :href "http://test.host/url/studies"}))
+       (should= 25 (count (discoverable-resources-all)))))
+ (it "returns a page of items by page number"
+     (do
+       (doseq [x (range 1 27)]
+        (discoverable-resource-create
+         {:resource-name (format "studies-%d" x)
+          :link-relation-url "http://link-relation.io"
+          :href "http://test.host/url/studies"}))
+       (should= 1 (count (discoverable-resources-all 2)))
+       (should= "studies-26" (:resource_name (first (discoverable-resources-all 2))))))
+ (it "returns a page of items by page number and count"
+     (do
+       (doseq [x (range 1 27)]
+        (discoverable-resource-create
+         {:resource-name (format "studies-%d" x)
+          :link-relation-url "http://link-relation.io"
+          :href "http://test.host/url/studies"}))
+       (should= 1 (count (discoverable-resources-all 2 25)))
+       (should= "studies-26" (:resource_name (first (discoverable-resources-all 2))))))
+ (it "returns 25 items when less that zero are requested"
+     (do
+       (doseq [x (range 1 27)]
+        (discoverable-resource-create
+         {:resource-name (format "studies-%d" x)
+          :link-relation-url "http://link-relation.io"
+          :href "http://test.host/url/studies"}))
+       (should= 25 (count (discoverable-resources-all 1 -1)))))
+ (it "returns no more than 25 items when requests"
+     (do
+       (doseq [x (range 1 27)]
+        (discoverable-resource-create
+         {:resource-name (format "studies-%d" x)
+          :link-relation-url "http://link-relation.io"
+          :href "http://test.host/url/studies"}))
+       (should= 25 (count (discoverable-resources-all 1 26))))))
 
 
 (describe
