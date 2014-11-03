@@ -123,36 +123,38 @@
 
 (def default-per-page 25)
 
-(defn discoverable-resources-paginated
-  ([] (discoverable-resources-paginated 1))
-  ([page] (discoverable-resources-paginated page default-per-page))
-  ([page per-page]
-     ;; algorithm works like this: get 1 more than the maximum count (peek)
-     ;; and if amount returns match, then there is a next-page
-     (let [records (select discoverable-resources
-                           (offset (* (dec page) default-per-page))
-                           (limit (inc (if (or (< per-page 0) (> per-page default-per-page))
-                                         default-per-page
-                                         per-page)))
-                           (order :id :ASC))
-           has-next (or (> (count records) per-page)  ;;when, I wanted a specific per_page, and there were more
-                        (> (count records) default-per-page))] ;;when it beyond the max
-       {:has-prev (not (= page 1))
-        :has-next has-next
-        :records (if has-next
-                   (drop-last (apply vector records))
-                   (apply vector records))})))
+(defn ^:private select-discoverable-resources [page per-page]
+  (select discoverable-resources
+           (offset page)
+           (limit per-page)
+           (order :id :ASC)))
+
+(defn ^:private paginate-fn [fetcher-fn default-per-page]
+  (fn paginate
+    ([] (paginate 1))
+    ([page] (paginate page default-per-page))
+    ([page per-page]
+       ;; algorithm works like this: get 1 more than the maximum count (peek)
+       ;; and if amount returns match, then there is a next-page
+       (let [offset (* (dec page) default-per-page)
+             limit (inc (if (or (< per-page 0) (> per-page default-per-page))
+                          default-per-page
+                          per-page))
+             records (lazy-seq (fetcher-fn offset limit))
+             has-next (or (> (count records) per-page)  ;;when, I wanted a specific per_page, and there were more
+                          (> (count records) default-per-page))]
+         {:has-prev (not (= page 1))
+          :has-next has-next
+          :records (if has-next
+                     (drop-last (apply vector records))
+                     (apply vector records))}))))
+
+(def discoverable-resources-paginate
+  (paginate-fn select-discoverable-resources 25))
 
 (defn discoverable-resources-all
-  ([] (discoverable-resources-all 1))
-  ([page] (discoverable-resources-all page default-per-page))
-  ([page per-page]
-     (select discoverable-resources
-             (offset (* (dec page) default-per-page))
-             (limit (if (or (< per-page 0) (> per-page default-per-page))
-                      default-per-page
-                      per-page))
-             (order :id :ASC))))
+  (select discoverable-resources
+           (order :id :ASC)))
 
 (defn url-valid? [value]
   (try

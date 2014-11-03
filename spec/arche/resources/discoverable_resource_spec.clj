@@ -175,6 +175,13 @@
  (it "returns keywordified name"
      (should= :discoverable-resources (:keyword names))))
 
+(defn create-paginateable [number-of]
+  (doseq [i (range number-of)]
+    (discoverable-resource-create
+     {:resource-name "studies"
+      :link-relation-url "http://link-relation.io"
+      :href "http://test.host/url/studies"})))
+
 (describe
  "getting paginated"
  (before (clean-database))
@@ -182,40 +189,27 @@
  (context
   "when there are none"
   (it "returns false for previous"
-      (should= false (:has-prev (discoverable-resources-paginated))))
+      (should= false (:has-prev (discoverable-resources-paginate))))
   (it "returns false for next"
-      (should= false (:has-next (discoverable-resources-paginated))))
+      (should= false (:has-next (discoverable-resources-paginate))))
   (it "returns no records"
-      (should= 0 (count (:records (discoverable-resources-paginated))))))
+      (should= 0 (count (:records (discoverable-resources-paginate))))))
  (describe
   "getting without pagination parameters"
   (context
    "getting all (first page, with limit)"
    (it "returns a correct number of discoverables"
-       (discoverable-resource-create
-        {:resource-name "studies"
-         :link-relation-url "http://link-relation.io"
-         :href "http://test.host/url/studies"})
-       (should= 1 (count (:records (discoverable-resources-paginated)))))
+       (create-paginateable 1)
+       (should= 1 (count (:records (discoverable-resources-paginate)))))
    (it "returns false for prev"
-       (discoverable-resource-create
-        {:resource-name "studies"
-         :link-relation-url "http://link-relation.io"
-         :href "http://test.host/url/studies"})
-       (should= false (:has-prev (discoverable-resources-paginated))))
+       (create-paginateable 1)
+       (should= false (:has-prev (discoverable-resources-paginate))))
    (it "returns false for next"
-       (discoverable-resource-create
-        {:resource-name "studies"
-         :link-relation-url "http://link-relation.io"
-         :href "http://test.host/url/studies"})
-       (should= false (:has-next (discoverable-resources-paginated))))
+       (create-paginateable 1)
+       (should= false (:has-next (discoverable-resources-paginate))))
    (it "returns the max if there are more than the max"
-       (doseq [x (range (+ 1 default-per-page))]
-         (discoverable-resource-create
-          {:resource-name (format "studies-%d" x)
-           :link-relation-url "http://link-relation.io"
-           :href "http://test.host/url/studies"}))
-       (should= default-per-page (count (:records (discoverable-resources-paginated)))))))
+       (create-paginateable (+ 1 default-per-page))
+       (should= default-per-page (count (:records (discoverable-resources-paginate)))))))
  (describe
   "getting a specific page"
   (describe
@@ -223,269 +217,121 @@
    (context
     "when there are none"
     (it "returns a correct number of discoverables"
-        (should= 0 (count (:records (discoverable-resources-paginated)))))
+        (should= 0 (count (:records (discoverable-resources-paginate)))))
     (it "returns false for prev"
-        (should= false (:has-prev (discoverable-resources-paginated))))
+        (should= false (:has-prev (discoverable-resources-paginate))))
     (it "returns false for next"
-       (should= false (:has-next (discoverable-resources-paginated)))))
+       (should= false (:has-next (discoverable-resources-paginate)))))
    (context
     "when there are none beyond the first page"
     (it "returns false for prev"
-        (doseq [x (range default-per-page)]
-          (discoverable-resource-create
-           {:resource-name (format "studies-%d" x)
-            :link-relation-url "http://link-relation.io"
-            :href "http://test.host/url/studies"}))
-        (should= false (:has-prev (discoverable-resources-paginated 1))))
+        (create-paginateable default-per-page)
+        (should= false (:has-prev (discoverable-resources-paginate 1))))
     (it "returns false for next"
-        (doseq [x (range default-per-page)]
-          (discoverable-resource-create
-           {:resource-name (format "studies-%d" x)
-            :link-relation-url "http://link-relation.io"
-            :href "http://test.host/url/studies"}))
-        (should= false (:has-next (discoverable-resources-paginated 1))))
+        (create-paginateable default-per-page)
+        (should= false (:has-next (discoverable-resources-paginate 1))))
     (it "returns only count of items below the max"
-        (doseq [x (range 3)]
-          (discoverable-resource-create
-           {:resource-name (format "studies-%d" x)
-            :link-relation-url "http://link-relation.io"
-            :href "http://test.host/url/studies"}))
-        (should= 3 (count (:records (discoverable-resources-paginated 1))))))
+        (create-paginateable 3)
+        (should= 3 (count (:records (discoverable-resources-paginate 1))))))
    (context
     "when there are more beyond the first page"
+    (before (create-paginateable (+ 1 default-per-page)))
     (it "returns true for next"
-        (doseq [x (range (+ 1 default-per-page))]
-          (discoverable-resource-create
-           {:resource-name (format "studies-%d" x)
-            :link-relation-url "http://link-relation.io"
-            :href "http://test.host/url/studies"}))
-        (should= true (:has-next (discoverable-resources-paginated 1))))
+        (should= true (:has-next (discoverable-resources-paginate 1))))
     (it "returns false for prev"
-        (doseq [x (range (+ 1 default-per-page))]
-          (discoverable-resource-create
-           {:resource-name (format "studies-%d" x)
-            :link-relation-url "http://link-relation.io"
-            :href "http://test.host/url/studies"}))
-        (should= false (:has-prev (discoverable-resources-paginated 1))))
+        (should= false (:has-prev (discoverable-resources-paginate 1))))
     (it "returns correct number of items"
-        (doseq [x (range (+ 1 default-per-page))]
-          (discoverable-resource-create
-           {:resource-name (format "studies-%d" x)
-            :link-relation-url "http://link-relation.io"
-            :href "http://test.host/url/studies"}))
-        (should= default-per-page (count (:records (discoverable-resources-paginated 1)))))))
+        (should= default-per-page (count (:records (discoverable-resources-paginate 1))))))
+   )
   (describe
    "getting a page greater than the first"
    (context
     "when that page has nothing more beyond it"
+    (before (create-paginateable (+ 1 default-per-page)))
     (it "returns the max number of available for that page"
-        (doseq [x (range (+ 1 default-per-page))]
-          (discoverable-resource-create
-           {:resource-name (format "studies-%d" x)
-            :link-relation-url "http://link-relation.io"
-            :href "http://test.host/url/studies"}))
-        (should= 1 (count (:records (discoverable-resources-paginated 2)))))
+        (should= 1 (count (:records (discoverable-resources-paginate 2)))))
     (it "returns false for next"
-        (doseq [x (range (+ 1 default-per-page))]
-          (discoverable-resource-create
-           {:resource-name (format "studies-%d" x)
-            :link-relation-url "http://link-relation.io"
-            :href "http://test.host/url/studies"}))
-        (should= false (:has-next (discoverable-resources-paginated 2))))
+        (should= false (:has-next (discoverable-resources-paginate 2))))
     (it "returns true for prev"
-       (doseq [x (range (+ 1 default-per-page))]
-         (discoverable-resource-create
-          {:resource-name (format "studies-%d" x)
-           :link-relation-url "http://link-relation.io"
-           :href "http://test.host/url/studies"}))
-       (should= true (:has-prev (discoverable-resources-paginated 2)))))
+       (should= true (:has-prev (discoverable-resources-paginate 2)))))
    (context
     "when there are more pages beyond it"
+    (before
+     (create-paginateable (+ 1 (* default-per-page 2))))
     (it "returns the correct count of items - the maximum"
-        (doseq [x (range (+ 1 (* default-per-page 2)))]
-          (discoverable-resource-create
-           {:resource-name (format "studies-%d" x)
-            :link-relation-url "http://link-relation.io"
-            :href "http://test.host/url/studies"}))
-        (should= default-per-page (count (:records (discoverable-resources-paginated 2)))))
+        (should= default-per-page (count (:records (discoverable-resources-paginate 2)))))
     (it "returns true for prev"
-        (doseq [x (range (+ 1 (* default-per-page 2)))]
-          (discoverable-resource-create
-           {:resource-name (format "studies-%d" x)
-            :link-relation-url "http://link-relation.io"
-            :href "http://test.host/url/studies"}))
-        (should= true (:has-prev (discoverable-resources-paginated 2))))
+        (should= true (:has-prev (discoverable-resources-paginate 2))))
     (it "returns true for next"
-       (doseq [x (range (* (+ 1 default-per-page) 2))]
-         (discoverable-resource-create
-          {:resource-name (format "studies-%d" x)
-           :link-relation-url "http://link-relation.io"
-           :href "http://test.host/url/studies"}))
-       (should= true (:has-next (discoverable-resources-paginated 2)))))))
+       (should= true (:has-next (discoverable-resources-paginate 2))))))
+  )
  (describe
   "getting a pages with per-page specified"
   (context
    "when getting first page with more than the max count"
    (describe
     "with maximum count"
+    (before
+     (create-paginateable (* 2 default-per-page)))
     (it "returns only the maximum"
-       (doseq [x (range (* 2 default-per-page))]
-         (discoverable-resource-create
-          {:resource-name (format "studies-%d" x)
-           :link-relation-url "http://link-relation.io"
-           :href "http://test.host/url/studies"}))
-       (should= default-per-page (count (:records (discoverable-resources-paginated 1 80)))))
+       (should= default-per-page (count (:records (discoverable-resources-paginate 1 80)))))
     (it "returns true for next"
-        (doseq [x (range (* 2 default-per-page))]
-          (discoverable-resource-create
-           {:resource-name (format "studies-%d" x)
-            :link-relation-url "http://link-relation.io"
-            :href "http://test.host/url/studies"}))
-        (should= true (:has-next (discoverable-resources-paginated 1 80))))
+        (should= true (:has-next (discoverable-resources-paginate 1 80))))
     (it "returns false for prev"
-        (doseq [x (range (* 2 default-per-page))]
-          (discoverable-resource-create
-           {:resource-name (format "studies-%d" x)
-            :link-relation-url "http://link-relation.io"
-            :href "http://test.host/url/studies"}))
-        (should= false (:has-prev (discoverable-resources-paginated 1 80)))))
+        (should= false (:has-prev (discoverable-resources-paginate 1 80)))))
    (describe
     "when getting less than the max count"
+    (before
+     (create-paginateable default-per-page))
     (it "returns false for prev"
-        (doseq [x (range default-per-page)]
-          (discoverable-resource-create
-           {:resource-name (format "studies-%d" x)
-            :link-relation-url "http://link-relation.io"
-            :href "http://test.host/url/studies"}))
-        (should= false (:has-prev (discoverable-resources-paginated 1 24))))
+        (should= false (:has-prev (discoverable-resources-paginate 1 24))))
     (it "returns true for next"
-        (doseq [x (range default-per-page)]
-          (discoverable-resource-create
-           {:resource-name (format "studies-%d" x)
-            :link-relation-url "http://link-relation.io"
-            :href "http://test.host/url/studies"}))
-        (should= true (:has-next (discoverable-resources-paginated 1 24))))
+        (should= true (:has-next (discoverable-resources-paginate 1 24))))
     (it "returns the correct count"
-        (doseq [x (range default-per-page)]
-          (discoverable-resource-create
-           {:resource-name (format "studies-%d" x)
-            :link-relation-url "http://link-relation.io"
-            :href "http://test.host/url/studies"}))
-        (should= 24 (count (:records (discoverable-resources-paginated 1 24)))))))
+        (should= 24 (count (:records (discoverable-resources-paginate 1 24))))))
+   )
   (context
    "when getting a page greater than the first page"
    (describe
     "requesting more that the maximum count"
     (it "returns only the max"
-       (doseq [x (range (* 2 default-per-page))]
-         (discoverable-resource-create
-          {:resource-name (format "studies-%d" x)
-           :link-relation-url "http://link-relation.io"
-           :href "http://test.host/url/studies"}))
-       (should= default-per-page (count (:records (discoverable-resources-paginated 2 30)))))
+        (create-paginateable (* 2 default-per-page))
+       (should= default-per-page (count (:records (discoverable-resources-paginate 2 30)))))
     (it "returns true for prev"
-        (doseq [x (range (* 2 default-per-page))]
-          (discoverable-resource-create
-           {:resource-name (format "studies-%d" x)
-            :link-relation-url "http://link-relation.io"
-            :href "http://test.host/url/studies"}))
-        (should= true (:has-prev (discoverable-resources-paginated 2 30))))
+        (create-paginateable (* 2 default-per-page))
+        (should= true (:has-prev (discoverable-resources-paginate 2 30))))
     (context
      "and number of items for the page equals the max count "
      (it "returns false for next"
-        (doseq [x (range (* 2 default-per-page))]
-          (discoverable-resource-create
-           {:resource-name (format "studies-%d" x)
-            :link-relation-url "http://link-relation.io"
-            :href "http://test.host/url/studies"}))
-        (should= false (:has-next (discoverable-resources-paginated 2 30)))))
+         (create-paginateable (* 2 default-per-page))
+         (should= false (:has-next (discoverable-resources-paginate 2 30)))))
     (context
      "and number of items for the page equals the max count "
      (it "returns true for next"
-         (doseq [x (range (+ 1 (* 2 default-per-page)))]
-           (discoverable-resource-create
-            {:resource-name (format "studies-%d" x)
-             :link-relation-url "http://link-relation.io"
-             :href "http://test.host/url/studies"}))
-         (should= true (:has-next (discoverable-resources-paginated 2 30))))))
+         (create-paginateable (+ 1 (* 2 default-per-page)))
+         (should= true (:has-next (discoverable-resources-paginate 2 30))))))
    (describe
     "when getting less than the max count"
+    (before
+     (create-paginateable (* 2 default-per-page)))
     (it "returns true for prev"
-        (doseq [x (range (* 2 default-per-page))]
-          (discoverable-resource-create
-           {:resource-name (format "studies-%d" x)
-            :link-relation-url "http://link-relation.io"
-            :href "http://test.host/url/studies"}))
-        (should= true (:has-prev (discoverable-resources-paginated 2 24))))
+        (should= true (:has-prev (discoverable-resources-paginate 2 24))))
     (it "returns true for next, when there are more"
-        (doseq [x (range (* 2 default-per-page))]
-          (discoverable-resource-create
-           {:resource-name (format "studies-%d" x)
-            :link-relation-url "http://link-relation.io"
-            :href "http://test.host/url/studies"}))
-        (should= true (:has-next (discoverable-resources-paginated 2 24))))
+        (should= true (:has-next (discoverable-resources-paginate 2 24))))
     (it "returns the correct count"
-        (doseq [x (range (* 2 default-per-page))]
-          (discoverable-resource-create
-           {:resource-name (format "studies-%d" x)
-            :link-relation-url "http://link-relation.io"
-            :href "http://test.host/url/studies"}))
-        (should= 24 (count (:records (discoverable-resources-paginated 2 24)))))))))
+        (should= 24 (count (:records (discoverable-resources-paginate 2 24))))))
+   )))
 
 (describe
  "getting all discoverables"
  (before (clean-database))
  (after (clean-database))
  (it "returns a correct number of discoverables"
-     (do
-       (discoverable-resource-create
-        {:resource-name "studies"
-         :link-relation-url "http://link-relation.io"
-         :href "http://test.host/url/studies"}))
-     (should= 1 (count (discoverable-resources-all))))
- (it "returns a maximimum of 25 items"
-     (do
-       (doseq [x (range 26)]
-        (discoverable-resource-create
-         {:resource-name (format "studies-%d" x)
-          :link-relation-url "http://link-relation.io"
-          :href "http://test.host/url/studies"}))
-       (should= 25 (count (discoverable-resources-all)))))
- (it "returns a page of items by page number"
-     (do
-       (doseq [x (range 1 27)]
-        (discoverable-resource-create
-         {:resource-name (format "studies-%d" x)
-          :link-relation-url "http://link-relation.io"
-          :href "http://test.host/url/studies"}))
-       (should= 1 (count (discoverable-resources-all 2)))
-       (should= "studies-26" (:resource_name (first (discoverable-resources-all 2))))))
- (it "returns a page of items by page number and count"
-     (do
-       (doseq [x (range 1 27)]
-        (discoverable-resource-create
-         {:resource-name (format "studies-%d" x)
-          :link-relation-url "http://link-relation.io"
-          :href "http://test.host/url/studies"}))
-       (should= 1 (count (discoverable-resources-all 2 25)))
-       (should= "studies-26" (:resource_name (first (discoverable-resources-all 2))))))
- (it "returns 25 items when less that zero are requested"
-     (do
-       (doseq [x (range 1 27)]
-        (discoverable-resource-create
-         {:resource-name (format "studies-%d" x)
-          :link-relation-url "http://link-relation.io"
-          :href "http://test.host/url/studies"}))
-       (should= 25 (count (discoverable-resources-all 1 -1)))))
- (it "returns no more than 25 items when requests"
-     (do
-       (doseq [x (range 1 27)]
-        (discoverable-resource-create
-         {:resource-name (format "studies-%d" x)
-          :link-relation-url "http://link-relation.io"
-          :href "http://test.host/url/studies"}))
-       (should= 25 (count (discoverable-resources-all 1 26))))))
-
+     (discoverable-resource-create
+      {:resource-name "studies"
+       :link-relation-url "http://link-relation.io"
+       :href "http://test.host/url/studies"})
+     (should= 1 (count (discoverable-resources-all))))))
 
 (describe
  "correct representable map"
