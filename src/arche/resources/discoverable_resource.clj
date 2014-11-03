@@ -123,13 +123,22 @@
 
 (def default-per-page 25)
 
-(defn ^:private select-discoverable-resources [page per-page]
+(defn- select-discoverable-resources [page per-page]
   (select discoverable-resources
            (offset page)
            (limit per-page)
            (order :id :ASC)))
 
-(defn ^:private paginate-fn [fetcher-fn default-per-page]
+(def ^:private prev-page-key :prev-page)
+(def ^:private next-page-key :next-page)
+(defn- page-predicate-fn [key]
+  (fn [paginated]
+    (> (get paginated key) 0)))
+
+(def has-prev-page? (page-predicate-fn prev-page-key))
+(def has-next-page? (page-predicate-fn next-page-key))
+
+(defn- paginate-fn [fetcher-fn default-per-page]
   (fn paginate
     ([] (paginate 1))
     ([page] (paginate page default-per-page))
@@ -146,10 +155,8 @@
                         (not (= page 1)))
              has-next (or (> (count records) per-page)  ;;when, I wanted a specific per_page, and there were more
                           (> (count records) default-per-page))]
-         {:has-prev has-prev
-          :prev-page (if has-prev (dec page) 0)
-          :has-next has-next
-          :next-page (if has-next (inc page) 0)
+         {prev-page-key (if has-prev (dec page) 0)
+          next-page-key (if has-next (inc page) 0)
           :records (if has-next
                      (drop-last (apply vector records))
                      (apply vector records))}))))
