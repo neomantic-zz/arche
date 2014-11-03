@@ -140,11 +140,16 @@
              limit (inc (if (or (< per-page 0) (> per-page default-per-page))
                           default-per-page
                           per-page))
-             records (lazy-seq (fetcher-fn offset limit))
+             records (fetcher-fn offset limit)
+             has-prev (if (and (= (count records) 0) (> page 1))
+                        false
+                        (not (= page 1)))
              has-next (or (> (count records) per-page)  ;;when, I wanted a specific per_page, and there were more
                           (> (count records) default-per-page))]
-         {:has-prev (not (= page 1))
+         {:has-prev has-prev
+          :prev-page (if has-prev (dec page) 0)
           :has-next has-next
+          :next-page (if has-next (inc page) 0)
           :records (if has-next
                      (drop-last (apply vector records))
                      (apply vector records))}))))
