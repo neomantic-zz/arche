@@ -331,7 +331,7 @@
       {:resource-name "studies"
        :link-relation-url "http://link-relation.io"
        :href "http://test.host/url/studies"})
-     (should= 1 (count (discoverable-resources-all))))))
+     (should= 1 (count (discoverable-resources-all)))))
 
 (describe
  "correct representable map"

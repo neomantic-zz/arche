@@ -152,7 +152,7 @@
 (def discoverable-resources-paginate
   (paginate-fn select-discoverable-resources 25))
 
-(defn discoverable-resources-all
+(defn discoverable-resources-all []
   (select discoverable-resources
            (order :id :ASC)))
 
