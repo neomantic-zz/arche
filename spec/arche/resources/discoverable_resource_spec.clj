@@ -182,8 +182,6 @@
       :link-relation-url "http://link-relation.io"
       :href "http://test.host/url/studies"})))
 
-
-
 (describe
  "getting paginated"
  (before-all (clean-database))

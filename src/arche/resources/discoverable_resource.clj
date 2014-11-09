@@ -25,6 +25,7 @@
             [arche.alps :as alps]
             [arche.media :as media]
             [arche.db :as records]
+            [arche.paginate :refer [paginate-fn]]
             [ring.util.codec :only [:url-encode] :as ring]
             [arche.app-state :as app]
             [arche.http :as http-helper]
@@ -128,38 +129,6 @@
            (offset page)
            (limit per-page)
            (order :id :ASC)))
-
-(def ^:private prev-page-key :prev-page)
-(def ^:private next-page-key :next-page)
-(defn- page-predicate-fn [key]
-  (fn [paginated]
-    (> (get paginated key) 0)))
-
-(def has-prev-page? (page-predicate-fn prev-page-key))
-(def has-next-page? (page-predicate-fn next-page-key))
-
-(defn- paginate-fn [fetcher-fn default-per-page]
-  (fn paginate
-    ([] (paginate 1))
-    ([page] (paginate page default-per-page))
-    ([page per-page]
-       ;; algorithm works like this: get 1 more than the maximum count (peek)
-       ;; and if amount returns match, then there is a next-page
-       (let [offset (* (dec page) default-per-page)
-             limit (inc (if (or (< per-page 0) (> per-page default-per-page))
-                          default-per-page
-                          per-page))
-             records (fetcher-fn offset limit)
-             has-prev (if (and (= (count records) 0) (> page 1))
-                        false
-                        (not (= page 1)))
-             has-next (or (> (count records) per-page)  ;;when, I wanted a specific per_page, and there were more
-                          (> (count records) default-per-page))]
-         {prev-page-key (if has-prev (dec page) 0)
-          next-page-key (if has-next (inc page) 0)
-          :records (if has-next
-                     (drop-last (apply vector records))
-                     (apply vector records))}))))
 
 (def discoverable-resources-paginate
   (paginate-fn select-discoverable-resources 25))
