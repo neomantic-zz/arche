@@ -65,23 +65,56 @@
   (is (= true  (window-has-prev? 1 2))))
 
 (deftest window-has-next?-test
-  (is (= false (window-has-next? 0 0)))
-  (is (= false (window-has-next? 1 0)))
-  (is (= true  (window-has-next? 1 1)))
-  (is (= false (window-has-next? 2 3)))
-  (is (= true (window-has-next? 3 1))))
+  ;; less that zero page
+  (is (= false (window-has-next? 0 -1 0)))
+  (is (= false (window-has-next? 8 -1 0)))
+  (is (= false (window-has-next? 8 -1 2)))
+
+  ;; zero page
+  (is (= false (window-has-next? 0 0 0)))
+  (is (= false (window-has-next? 8 0 2)))
+
+  ;; page one
+  (is (= false (window-has-next? -1 1 -1)))
+  (is (= false (window-has-next? -1 1 0)))
+  (is (= false (window-has-next? -1 1 1)))
+  (is (= false (window-has-next? -1 1 2)))
+  (is (= false (window-has-next? 0 1 1)))
+  (is (= false (window-has-next? 1 1 0)))
+
+  (is (= false (window-has-next? 1 1 1)))
+
+  (is (= true (window-has-next? 2 1 1)))
+  (is (= true (window-has-next? 4 1 1)))
+
+  ;; ;; page greatr that 1
+  (is (= false (window-has-next? -1 2 -1)))
+  (is (= false (window-has-next? -1 2 0)))
+  (is (= false (window-has-next? -1 2 1)))
+  (is (= false (window-has-next? -1 2 2)))
+  (is (= false (window-has-next? 0 2 1)))
+
+  (is (= false (window-has-next? 1 2 0)))
+  (is (= false (window-has-next? 1 2 1)))
+
+  (is (= true (window-has-next? 4 1 4)))
+  (is (= false (window-has-next? 2 2 2)))
+
+  )
 
 (deftest records-test
   ;;(records vector page limit)
   (is (= []    (records [] -1 -1)))
   (is (= []    (records [] -1 0)))
   (is (= []    (records [] 0 1)))
+
   (is (= []    (records [] 1 -1)))
   (is (= []    (records [] 1 0)))
   (is (= []    (records [] 1 2)))
   (is (= [1]   (records [1] 1 2)))
   (is (= [1]   (records [1 2] 1 2)))
-  (is (= [2]   (records [1 2 3] 2 3)))
+  (is (= [1 2] (records [1 2 3] 1 2)))
+
   (is (= [2 3] (records [1 2 3] 2 4))))
 
 (deftest paginate-without-page
@@ -124,7 +157,8 @@
   (is (= {:prev-page false :next-page true :records [1 2 3]}
          ((paginate-fn1
            (fn [page per-page] [1 2 3 4])
-           3)))))
+           3))))
+  )
 
 (deftest paginate-with-negative
   (is (= {:prev-page false :next-page false :records []}
@@ -163,7 +197,7 @@
          ((paginate-fn1
            (fn [page per-page] [1 2 3])
            3) -1)))
-  (is (= {:prev-page false, :next-page true, :records []}
+  (is (= {:prev-page false, :next-page false, :records []}
          ((paginate-fn1
            (fn [page per-page] [1 2 3 4])
             3) -1))))
@@ -197,10 +231,11 @@
          ((paginate-fn1
            (fn [page per-page] [1 2 3])
            3) 0)))
-  (is (= {:prev-page false, :next-page true, :records []}
+  (is (= {:prev-page false, :next-page false, :records []}
          ((paginate-fn1
            (fn [page per-page] [1 2 3 4])
-            3) 0))))
+            3) 0)))
+  )
 
 (deftest paginate-with-page-1
   (is (= {:prev-page false :next-page false :records []}
@@ -296,13 +331,12 @@
              ;; but paginate, returns
              [3 4 5])
            3) 2)))
-  (is (= {:prev-page true, :next-page true, :records [4 5]}
-         ((paginate-fn1
-           (fn [page per-page]
-             ;; exists
-             ;;[1 2 3 4 5 6]
-             ;; but paginate, returns
-             [3 4 5 6])
-           3) 2)))
-
+  ;; (is (= {:prev-page true, :next-page true, :records [4 5]}
+  ;;        ((paginate-fn1
+  ;;          (fn [page per-page]
+  ;;            ;; exists
+  ;;            ;;[1 2 3 4 5 6]
+  ;;            ;; but paginate, returns
+  ;;            [3 4 5 6])
+  ;;          3) 2)))
   )

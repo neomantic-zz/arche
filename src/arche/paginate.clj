@@ -47,21 +47,21 @@
              default-per-page
              requested-per-page))))
 
-(defn window-has-prev? [count page]
-  (if (<= page 1)
+(defn window-has-prev? [window-total page-number]
+  (if (<= page-number 1)
     false
-    (> count 0)))
+    (> window-total 0)))
 
-(defn window-has-next? [count limit]
+(defn window-has-next? [window-total page-number limit]
   (cond
-   (or (<= limit 0) (<= count 0)) false
-   (= count (- 1 limit)) false
-   ;; count is 3, limit 3
+   (or (<= page-number 0) (<= limit 0) (<= window-total 0)) false
+   (= page-number 1) (cond
+                      (= limit 1) (if (> window-total limit)
+                                    true
+                                    false)
+                      :else (>= window-total limit))
    :else
-   (do
-     (prn (format "count %d" count))
-     (prn (format "limit %d" limit))
-     true)))
+   (= limit (- 1 window-total))))
 
 (defn records [items page limit]
   (cond
@@ -72,7 +72,7 @@
                 (apply vector (drop-last items)))
    :else
    (let [remainder (drop 1 items)]
-     (if (< (count items) limit)
+     (if (<= (count items) limit)
        remainder
        (apply vector (drop-last remainder))))))
 
@@ -86,8 +86,9 @@
        (let [offset (calculate-offset page per-page default-per-page)
              limit (calculate-limit per-page default-per-page)
              items (fetcher-fn offset limit)
-             has-prev (window-has-prev? (count items) page)
-             has-next (window-has-next? (count items) limit)]
+             window-total (count items)
+             has-prev (window-has-prev? window-total page)
+             has-next (window-has-next? window-total page limit)]
          ;;(prn (format "offset %d" offset))
          {prev-page-key has-prev
           next-page-key has-next
