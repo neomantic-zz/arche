@@ -156,7 +156,8 @@
            3))))
   (is (= {:prev-page false :next-page true :records [1 2 3]}
          ((paginate-fn1
-           (fn [page per-page] [1 2 3 4])
+           (fn [page per-page]
+             [1 2 3 4])
            3))))
   )
 
@@ -307,7 +308,6 @@
            2) 2)))
   (is (= {:prev-page true :next-page false :records [3 4]}
          (do
-           (prn "the test")
            ((paginate-fn1
              (fn [page per-page]
                ;;exists
@@ -331,12 +331,19 @@
              ;; but paginate, returns
              [3 4 5])
            3) 2)))
-  ;; (is (= {:prev-page true, :next-page true, :records [4 5]}
-  ;;        ((paginate-fn1
-  ;;          (fn [page per-page]
-  ;;            ;; exists
-  ;;            ;;[1 2 3 4 5 6]
-  ;;            ;; but paginate, returns
-  ;;            [3 4 5 6])
-  ;;          3) 2)))
-  )
+  (is (= {:prev-page true, :next-page false, :records [4 5 6]}
+         ((paginate-fn1
+           (fn [page per-page]
+             ;; exists
+             ;;[1 2 3 4 5 6]
+             ;; but paginate, returns
+             [3 4 5 6])
+           3) 2)))
+  (is (= {:prev-page true, :next-page true, :records [4 5 6]}
+         ((paginate-fn1
+           (fn [page per-page]
+             ;; exists
+             ;;[1 2 3 4 5 6]
+             ;; but paginate, returns
+             [3 4 5 6 7])
+           3) 2))))

@@ -48,24 +48,18 @@
              requested-per-page))))
 
 (defn window-has-prev? [window-total page-number]
-  (if (<= page-number 1)
-    false
+  (if (<= page-number 1) false
     (> window-total 0)))
 
 (defn window-has-next? [window-total page-number limit]
   (cond
-   (or (<= page-number 0) (<= limit 0) (<= window-total 0)) false
-   (= page-number 1) (cond
-                      (= limit 1) (if (> window-total limit)
-                                    true
-                                    false)
-                      :else (>= window-total limit))
-   :else
-   (= limit (- 1 window-total))))
+   (or (<= page-number 0) (= limit 0) (< window-total 0)) false
+   (and (= limit 1) (<= window-total 1)) false
+   (= page-number 1) (>= window-total limit)
+   :else (> window-total limit)))
 
 (defn records [items page limit]
   (cond
-   (<= page 0) []
    (empty? items) items
    (= page 1) (if (< (count items) limit)
                 items
@@ -83,7 +77,13 @@
     ([page per-page]
        ;; algorithm works like this: get 1 more than the maximum count (peek)
        ;; and if amount returns match, then there is a next-page
-       (let [offset (calculate-offset page per-page default-per-page)
+       (if (or (<= page 0)
+               (<= per-page 0)
+               (<= default-per-page 0))
+         {prev-page-key false
+          next-page-key false
+          :records []}
+         (let [offset (calculate-offset page per-page default-per-page)
              limit (calculate-limit per-page default-per-page)
              items (fetcher-fn offset limit)
              window-total (count items)
@@ -92,7 +92,7 @@
          ;;(prn (format "offset %d" offset))
          {prev-page-key has-prev
           next-page-key has-next
-          :records (records items page limit)}))))
+          :records (records items page limit)})))))
 
 (defn calculate-offset1 [page per-page]
   (* (dec page) per-page))
