@@ -22,22 +22,6 @@
 (def ^:private prev-page-key :has-prev)
 (def ^:private next-page-key :has-next)
 
-(defn page-predicate-fn [key]
-  (fn [paginated]
-    (> (get paginated key) 0)))
-
-(def has-prev-page? (page-predicate-fn prev-page-key))
-(def has-next-page? (page-predicate-fn next-page-key))
-
-(defn- calculate-page-number-fn [page-predicate dec-or-inc]
-  (fn [paginated requested-page]
-    (if (page-predicate paginated)
-      (dec-or-inc requested-page)
-      requested-page)))
-
-(def calculate-next-page-number (calculate-page-number-fn has-next-page? inc))
-(def calculate-prev-page-number (calculate-page-number-fn has-prev-page? dec))
-
 (defn calculate-offset [page per-page default-per-page]
   (if (or (<= per-page 0) (= default-per-page 0) (<= page 1))
     0
@@ -102,3 +86,14 @@
            {prev-page-key has-prev
             next-page-key has-next
             :records (records items page limit)})))))
+
+(defn with-page-numbers [paginated requested-page]
+  (let [has-next (:has-next paginated)
+        has-prev (:has-prev paginated)]
+    (cond
+     (and has-next has-prev) (assoc paginated
+                               :next-page (inc requested-page)
+                               :prev-page (dec requested-page))
+     has-next (assoc paginated :next-page (inc requested-page))
+     has-prev (assoc paginated :prev-page (dec requested-page))
+     :else paginated)))

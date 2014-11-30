@@ -391,14 +391,19 @@
               49]) 25)
           2 24))))
 
-(deftest test-has-next?
-  (is (= true (has-next-page? {:has-next true})))
-  (is (= false (has-next-page? {:has-next false}))))
+;; (deftest next-page-number
+;;   (is (= 3 (calculate-next-page-number {:has-next true} 3)))
+;;   (is (= 4 (calculate-next-page-number {:has-next true} 3))))
 
-(deftest test-has-next?
-  (is (= true (has-prev-page? {:has-prev true})))
-  (is (= false (has-prev-page? {:has-prev false}))))
-
-(deftest next-page-number
-  (is (= 3 (calculate-next-page-number {:has-next true} 3)))
-  (is (= 4 (calculate-next-page-number {:has-next true} 3))))
+(deftest with-page-number
+  (is (= {:has-next true
+          :next-page 2} (with-page-numbers {:has-next true} 1)))
+  (is (= {:has-next false} (with-page-numbers {:has-next false} 1)))
+  (is (= {:has-prev true
+          :prev-page 1} (with-page-numbers {:has-prev true} 2)))
+  (is (= {:has-prev true
+          :has-next true
+          :prev-page 1
+          :next-page 3} (with-page-numbers {:has-prev true
+                                            :has-next true} 2)))
+  )
