@@ -25,7 +25,6 @@
             [arche.alps :as alps]
             [arche.media :as media]
             [arche.db :as records]
-            [arche.paginate :refer [paginate-fn]]
             [ring.util.codec :only [:url-encode] :as ring]
             [arche.app-state :as app]
             [arche.http :as http-helper]
@@ -121,17 +120,6 @@
   (first (select
           discoverable-resources
           (where {:resource_name resource-name}))))
-
-(def default-per-page 25)
-
-(defn- select-discoverable-resources [page per-page]
-  (select discoverable-resources
-           (offset page)
-           (limit per-page)
-           (order :id :ASC)))
-
-(def discoverable-resources-paginate
-  (paginate-fn select-discoverable-resources 25))
 
 (defn discoverable-resources-all []
   (select discoverable-resources

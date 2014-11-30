@@ -17,6 +17,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (ns arche.resources.discoverable-resources-collection
+  (:use korma.core)
   (:require [liberator.core :refer [resource defresource =method]]
             [liberator.representation :refer [ring-response Representation]]
             [cheshire.core :refer :all :as json]
@@ -24,6 +25,7 @@
             [clojure.java.io :as io]
             [arche.http :as http-helper]
             [arche.app-state :as app]
+            [arche.paginate :refer [paginate-fn]]
             [arche.validations :refer [default-error-messages validate has-errors? errors-get]]
             [arche.resources.discoverable-resource
              :refer :all :as entity :exclude [hypermedia-map]]
@@ -135,6 +137,17 @@
   Representation
   (as-response [this context]
     (index-ring-map context (hale-map records))))
+
+(def default-per-page 25)
+
+(def discoverable-resources-paginate
+  (paginate-fn
+   (fn [start number-of-items]
+     (select discoverable-resources
+             (offset start)
+             (limit number-of-items)
+             (order :id :ASC)))
+   default-per-page))
 
 (defresource discoverable-resources-collection [request]
   :allowed-methods [:post :get]

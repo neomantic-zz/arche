@@ -30,7 +30,9 @@
             [arche.http :refer [etag-make]]
             [arche.validations :refer [errors-key]]
             [arche.resources.discoverable-resource
-             :refer [required-descriptors discoverable-resource-first] :as entity]
+             :refer [required-descriptors
+                     discoverable-resource-create
+                     discoverable-resource-first] :as entity]
             [arche.core :refer [app] :as web]))
 
 (defn post-request [path accept-type content-type body]
@@ -469,3 +471,195 @@
                           (test-processable
                            {:link_relation_url "https://service.io/hello"})
                           [errors-key :link_relation_url]))))
+
+(defn create-paginateable [number-of]
+  (doseq [i (range number-of)]
+    (entity/discoverable-resource-create
+     {:resource-name "studies"
+      :link-relation-url "http://link-relation.io"
+      :href "http://test.host/url/studies"})))
+
+
+(describe
+ "getting paginated"
+ (before-all (clean-database))
+ (after-all (clean-database))
+ (describe
+  "getting all pages"
+  (describe
+   "when there are none"
+   (with-all paginated (discoverable-resources-paginate))
+   (it "returns false for previous"
+       (should= false (:has-prev @paginated)))
+   (it "returns false for next"
+       (should= false (:has-next @paginated)))
+   (it "returns no records"
+       (should= 0 (count (:records @paginated)))))
+  (describe
+   "when there are more than none and less that the default"
+   (before-all
+    (create-paginateable 1))
+   (with-all paginated (discoverable-resources-paginate))
+   (it "returns a correct number of discoverables"
+       (should= 1 (count (:records @paginated))))
+   (it "returns 0 for next"
+       (should= false (:has-next @paginated)))
+   (it "returns false for prev"
+       (should= false (:has-prev @paginated))))
+  (describe
+   "when there are more than the default"
+   (before-all (create-paginateable (+ 1 default-per-page)))
+   (with-all paginated (discoverable-resources-paginate))
+   (it "returns a correct number of discoverables"
+       (should= default-per-page (count (:records @paginated))))
+   (it "returns true for next"
+       (should= true (:has-next @paginated)))
+   (it "returns false for prev"
+       (should= false (:has-prev @paginated)))))
+ (describe
+  "getting a specific page"
+  (describe
+   "getting the first page"
+   (describe
+    "when there are none"
+    (before (clean-database))
+    (with-all paginated (discoverable-resources-paginate 1))
+    (it "returns a correct number of discoverables"
+        (should= 0 (count (:records @paginated))))
+    (it "returns false for prev"
+        (should= false (:has-prev @paginated)))
+    (it "returns false for next"
+        (should= false (:has-next @paginated))))
+   (context
+    "when there are less than the default"
+    (before-all (create-paginateable 3))
+    (with-all paginated (discoverable-resources-paginate 1))
+    (it "returns false for next"
+        (should= false (:has-next @paginated)))
+    (it "returns false for prev"
+        (should= false (:has-prev @paginated)))
+    (it "returns only count of items below the max"
+        (should= 3 (count (:records @paginated)))))
+   (context
+    "when there are none beyond the first page"
+    (before-all
+     (clean-database)
+     (create-paginateable default-per-page))
+    (with-all paginated (discoverable-resources-paginate 1))
+    (it "returns only count of items below the max"
+        (should= default-per-page (count (:records @paginated))))
+    (it "returns false for prev"
+        (should= false (:has-prev @paginated)))
+    (it "returns false for next"
+        (should= false (:has-next @paginated))))
+   (describe
+    "when there are more beyond the first page"
+    (before-all (create-paginateable (+ 1 default-per-page)))
+    (with-all paginated (discoverable-resources-paginate 1))
+    (it "returns true for next"
+        (should= true (:has-next @paginated)))
+    (it "returns false for prev"
+        (should= false (:has-prev @paginated)))
+    (it "returns correct number of items"
+        (should= default-per-page (count (:records @paginated))))))
+  (describe
+   "getting a page greater than the first"
+   (describe
+    "when no records exist"
+    (before-all (clean-database))
+    (with-all paginated (discoverable-resources-paginate 2))
+    (it "returns false for prev"
+        (should= false (:has-prev @paginated))))
+   (describe
+    "when that page has nothing more beyond it"
+    (before-all
+     (clean-database)
+     (create-paginateable default-per-page))
+    (with-all paginated (discoverable-resources-paginate 2))
+    (it "returns the max number of available for that page"
+        (should= 0 (count (:records @paginated))))
+    (it "returns false for next"
+        (should= false (:has-next @paginated)))
+    (it "returns true for prev"
+        (should= true (:has-prev @paginated))))
+   (describe
+    "when that page has 1 more beyond it"
+    (before-all
+     (clean-database)
+     (create-paginateable (+ 1 default-per-page)))
+    (with-all paginated (discoverable-resources-paginate 2))
+    (it "returns the max number of available for that page"
+        (should= 1 (count (:records @paginated))))
+    (it "returns false for next"
+        (should= false (:has-next @paginated)))
+    (it "returns true for prev"
+        (should= true (:has-prev @paginated))))
+   (describe
+    "when there are many pages beyond it"
+    (before-all
+     (create-paginateable (+ 1 (* default-per-page 2))))
+    (with-all paginated (discoverable-resources-paginate 2))
+    (it "returns the correct count of items - the maximum"
+        (should= default-per-page (count (:records @paginated))))
+    (it "returns true for next"
+        (should= true (:has-next @paginated))))))
+ (describe
+  "getting a pages with per-page specified"
+  (context
+   "when getting first page with more than the max count"
+   (describe
+    "with maximum count"
+    (before-all
+     (create-paginateable (* 2 default-per-page)))
+    (with-all paginated (discoverable-resources-paginate 1 80))
+    (it "returns only the maximum"
+       (should= default-per-page (count (:records @paginated))))
+    (it "returns true for next"
+        (should= true (:has-next @paginated)))
+    (it "returns false for prev"
+        (should= false (:has-prev @paginated))))
+   (describe
+    "when getting less than the max count"
+    (before-all (create-paginateable default-per-page))
+    (with-all paginated (discoverable-resources-paginate 1 24))
+    (it "returns false for prev"
+        (should= false (:has-prev @paginated)))
+    (it "returns true for next"
+        (should= true (:has-next @paginated)))
+    (it "returns the correct count"
+        (should= 24 (count (:records @paginated))))))
+  (context
+   "when getting a page greater than the first page"
+   (describe
+    "requesting more than the maximum count"
+    (describe
+     "and the amount of the next page equals the default"
+     (before-all
+      (clean-database)
+      (create-paginateable (* 2 default-per-page)))
+     (with-all paginated (discoverable-resources-paginate 2 30))
+     (it "returns only the max"
+         (should= default-per-page (count (:records @paginated))))
+     (it "returns false for next"
+         (should= false (:has-next @paginated)))
+     (it "returns true for prev"
+         (should= true (:has-prev @paginated))))
+    (describe
+     "and the next page has items before it"
+     (before-all
+      (create-paginateable (+ 1 (* 2 default-per-page))))
+     (with-all paginated (discoverable-resources-paginate 2 30))
+     (it "returns true for next"
+         (should= true (:has-next @paginated)))))
+   (describe
+    "when getting less than the max count"
+    (before-all
+     (clean-database)
+     (create-paginateable (* 2 default-per-page)))
+    (with-all paginated (discoverable-resources-paginate 2 24))
+    (it "returns true for prev"
+        (should= true (:has-prev @paginated)))
+    (it "returns true for next"
+        (should= true (:has-next @paginated)))
+    (it "returns the correct count"
+        (should= 24 (count (:records @paginated))))))))
