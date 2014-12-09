@@ -354,17 +354,17 @@
        {:items []
         :_embedded {:items []}
         :_links {:self {:href (str "http://example.org/discoverable_resources?page=1&per_page=" default-per-page)}}}
-       (hal-map1 (discoverable-resources-paginate))))
+       (hal-map (discoverable-resources-paginate))))
   (describe
    "creating links when there are no records"
    (it "does not include the prev link relation"
        (should-not-contain
         media/link-relation-prev
-        (media/keyword-links (hal-map1 (discoverable-resources-paginate)))))
+        (media/keyword-links (hal-map (discoverable-resources-paginate)))))
    (it "does not include the next link relation"
        (should-not-contain
         media/link-relation-next
-        (media/keyword-links (hal-map1 (discoverable-resources-paginate)))))))
+        (media/keyword-links (hal-map (discoverable-resources-paginate)))))))
  (context
   "when there at least some"
   (it "returns the correct map when there is at least 1"
@@ -380,7 +380,7 @@
                                         }
                                        ]}
                    :_links {:self {:href "http://example.org/discoverable_resources?page=1&per_page=25"}}}
-                  (hal-map1 (discoverable-resources-paginate))))))
+                  (hal-map (discoverable-resources-paginate))))))
  (describe
   "creating links when there are more than the per page"
   (before
@@ -388,7 +388,7 @@
   (it "includes the next link relation"
       (should= {:href "http://example.org/discoverable_resources?page=2&per_page=25"}
                (media/link-relation-next
-                (media/keyword-links (hal-map1 (discoverable-resources-paginate)))))))
+                (media/keyword-links (hal-map (discoverable-resources-paginate)))))))
  (describe
   "creating links when there is a page"
   (before
@@ -397,7 +397,7 @@
       (should= {:next {:href "http://example.org/discoverable_resources?page=3&per_page=25"}
                 :prev {:href "http://example.org/discoverable_resources?page=1&per_page=25"}
                 :self {:href "http://example.org/discoverable_resources?page=2&per_page=25"}}
-               (media/keyword-links (hal-map1 (discoverable-resources-paginate 2)))))))
+               (media/keyword-links (hal-map (discoverable-resources-paginate 2)))))))
 
 
 (describe
@@ -416,7 +416,11 @@
                          :data {:href {:type "text:text"}
                                 :link_relation_url {:type "text:text"}
                                 :resource_name {:type "text:text"}}}}}
-      (hale-map []))))
+      (hale-map {:page 0
+                 :records []
+                 :next-page false
+                 :prev-page false
+                 :per-page default-per-page}))))
  (context
   "when there at least some"
   (it "returns the correct map when there is at least 1"
@@ -433,13 +437,13 @@
                                                 }
                                        }
                                       ]}
-                  :_links {:self {:href "http://example.org/discoverable_resources"}
+                  :_links {:self {:href (str "http://example.org/discoverable_resources?page=1&per_page=" default-per-page)}
                            :create {:href "http://example.org/discoverable_resources"
                                     :method "POST"
                                     :data {:href {:type "text:text"}
                                            :link_relation_url {:type "text:text"}
                                            :resource_name {:type "text:text"}}}}}
-                 (hale-map [record]))))))
+                 (hale-map (discoverable-resources-paginate)))))))
 
 (describe
  "processable"

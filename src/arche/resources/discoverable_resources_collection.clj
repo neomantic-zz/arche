@@ -118,7 +118,7 @@
      has-prev (conj self-link (media/prev-link-relation (prev-url paginated)))
      :else self-link)))
 
-(defn hal-map1 [paginated]
+(defn hal-map [paginated]
   (let [records (:records paginated)]
     {:items (apply vector
                    (map
@@ -136,24 +136,6 @@
                                          records))}
      media/keyword-links
      (hal-links paginated)}))
-
-(defn hal-map [records]
-  {:items (apply vector
-                 (map
-                  (fn [record]
-                    {media/keyword-href (entity/url-for record)})
-                  records))
-   media/keyword-embedded {:items
-                           (apply vector
-                                  (map (fn [{:keys [link_relation_url href resource_name] :as record}]
-                                   {:link_relation_url link_relation_url
-                                    :href href
-                                    :resource_name resource_name
-                                    media/keyword-links (media/self-link-relation (entity/url-for record))
-                                    })
-                                 records))}
-   media/keyword-links
-   (media/self-link-relation self-url)})
 
 (defn hale-map [paginated]
   (let [hal-map (hal-map paginated)
