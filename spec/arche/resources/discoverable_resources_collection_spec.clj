@@ -379,7 +379,7 @@
                                                  }
                                         }
                                        ]}
-                   :_links {:self {:href "http://example.org/discoverable_resources?page=1&per_page=25"}}}
+                   :_links {:self {:href (str "http://example.org/discoverable_resources?page=1&per_page=" default-per-page)}}}
                   (hal-map (discoverable-resources-paginate))))))
  (describe
   "creating links when there are more than the per page"
@@ -394,9 +394,9 @@
   (before
    (create-paginateable (inc (* 2 default-per-page))))
   (it "includes the next link relation"
-      (should= {:next {:href "http://example.org/discoverable_resources?page=3&per_page=25"}
-                :prev {:href "http://example.org/discoverable_resources?page=1&per_page=25"}
-                :self {:href "http://example.org/discoverable_resources?page=2&per_page=25"}}
+      (should= {:next {:href (str "http://example.org/discoverable_resources?page=3&per_page=" default-per-page)}
+                :prev {:href (str "http://example.org/discoverable_resources?page=1&per_page=" default-per-page)}
+                :self {:href (str "http://example.org/discoverable_resources?page=2&per_page=" default-per-page)}}
                (media/keyword-links (hal-map (discoverable-resources-paginate 2)))))))
 
 
@@ -722,9 +722,9 @@
                             :next-page 2
                             :per-page default-per-page}))))
  (it "returns both a prev and a next link"
-     (should== {media/link-relation-self {media/keyword-href "http://example.org/discoverable_resources?page=2&per_page=25"}
-                media/link-relation-prev {media/keyword-href "http://example.org/discoverable_resources?page=1&per_page=25"}
-                media/link-relation-next {media/keyword-href "http://example.org/discoverable_resources?page=3&per_page=25"}}
+     (should== {media/link-relation-self {media/keyword-href (str "http://example.org/discoverable_resources?page=2&per_page=" default-per-page)}
+                media/link-relation-prev {media/keyword-href (str "http://example.org/discoverable_resources?page=1&per_page=" default-per-page)}
+                media/link-relation-next {media/keyword-href (str "http://example.org/discoverable_resources?page=3&per_page=" default-per-page)}}
                (hal-links {:prev-page 1
                            :has-prev true
                            :has-next true
@@ -732,7 +732,7 @@
                            :page 2
                            :per-page default-per-page})))
  (it "returns a prev link"
-     (should= {media/keyword-href "http://example.org/discoverable_resources?page=1&per_page=25"}
+     (should= {media/keyword-href (str "http://example.org/discoverable_resources?page=1&per_page=" default-per-page)}
                (media/link-relation-prev
                 (hal-links {:prev-page 1
                             :has-prev true
