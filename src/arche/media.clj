@@ -27,6 +27,8 @@
 (def link-relation-self :self)
 (def link-relation-profile :profile)
 (def link-relation-type :type)
+(def link-relation-next :next)
+(def link-relation-prev :prev)
 (def keyword-embedded :_embedded)
 (def hale-keyword-type :type)
 (def hale-type-text (hash-map hale-keyword-type "text:text"))
@@ -39,7 +41,7 @@
      (hash-map keyword-href uri)}))
 
 (def self-link-relation (link-relation-value link-relation-self))
-
 (def profile-link-relation (link-relation-value link-relation-profile))
-
 (def type-link-relation (link-relation-value link-relation-type))
+(def prev-link-relation (link-relation-value link-relation-prev))
+(def next-link-relation (link-relation-value link-relation-next))

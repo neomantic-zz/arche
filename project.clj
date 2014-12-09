@@ -61,6 +61,6 @@
   :min-lein-version "2.0.0"
   :uberjar-name "arche-standalone.jar"
   :ring {:handler arche.core/handler}
-  :test-paths ["test"]
+  :test-paths ["spec"]
   :cucumber-feature-paths ["features/"]
   :target-path "target/%s")

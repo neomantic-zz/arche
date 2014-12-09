@@ -25,7 +25,7 @@
             [clojure.java.io :as io]
             [arche.http :as http-helper]
             [arche.app-state :as app]
-            [arche.paginate :refer [paginate-fn]]
+            [arche.paginate :refer :all]
             [arche.validations :refer [default-error-messages validate has-errors? errors-get]]
             [arche.resources.discoverable-resource
              :refer :all :as entity :exclude [hypermedia-map]]
@@ -82,6 +82,61 @@
 (def type-url
   (format "%s#%s" entity/profile-url (:routable entity/names)))
 
+(def ^:private pagination-url-format "%s?page=%d&per_page=%d")
+
+(defn paginated-url-fn [url page-key]
+  (fn [paginated]
+    (format pagination-url-format
+            url
+            (get paginated page-key)
+            (get paginated :per-page))))
+
+(def prev-url (paginated-url-fn self-url :prev-page))
+(def next-url (paginated-url-fn self-url :next-page))
+
+(defn- self-link [paginated]
+  (media/self-link-relation
+   (let [page (:page paginated)]
+     (if (> page 0)
+       (format pagination-url-format
+               self-url
+               page
+               (:per-page paginated))
+       self-url))))
+
+(defn hal-links [paginated]
+  (let [has-next (next-page-key paginated)
+        has-prev (prev-page-key paginated)
+        self-link  (self-link paginated)]
+    (cond
+     (and has-next has-prev) (apply
+                              conj
+                              [self-link
+                               (media/prev-link-relation (prev-url paginated))
+                               (media/next-link-relation (next-url paginated))])
+     has-next (conj self-link (media/next-link-relation (next-url paginated)))
+     has-prev (conj self-link (media/prev-link-relation (prev-url paginated)))
+     :else self-link)))
+
+(defn hal-map1 [paginated]
+  (let [records (:records paginated)]
+    {:items (apply vector
+                   (map
+                    (fn [record]
+                      {media/keyword-href (entity/url-for record)})
+                    records))
+     media/keyword-embedded {:items
+                             (apply vector
+                                    (map (fn [{:keys [link_relation_url href resource_name] :as record}]
+                                           {:link_relation_url link_relation_url
+                                            :href href
+                                            :resource_name resource_name
+                                            media/keyword-links (media/self-link-relation (entity/url-for record))
+                                            })
+                                         records))}
+     media/keyword-links
+     (hal-links paginated)}))
+
 (defn hal-map [records]
   {:items (apply vector
                  (map
@@ -100,8 +155,8 @@
    media/keyword-links
    (media/self-link-relation self-url)})
 
-(defn hale-map [records]
-  (let [hal-map (hal-map records)
+(defn hale-map [paginated]
+  (let [hal-map (hal-map paginated)
         links (media/keyword-links hal-map)]
     ;;there is nothing "smart" about this map...i.e., inspecting
     ;; the resource, and find the route, expected-attributes, etc
@@ -128,15 +183,15 @@
                      (http-helper/header-accept
                       (str/join "," ((:available-media-types (:resource context)))))])}))
 
-(defrecord ^:private HalResponse [records]
+(defrecord ^:private HalResponse [paginated]
   Representation
   (as-response [this context]
-    (index-ring-map context (hal-map records))))
+    (index-ring-map context (hal-map paginated))))
 
-(defrecord ^:private HaleResponse [records]
+(defrecord ^:private HaleResponse [paginated]
   Representation
   (as-response [this context]
-    (index-ring-map context (hale-map records))))
+    (index-ring-map context (hale-map paginated))))
 
 (def default-per-page 25)
 
@@ -156,7 +211,7 @@
   :malformed? (fn [ctx]
                 (if (method-supports-body? ctx)
                   (try
-                    (if-let [body (get-in ctx [:request :body])]
+                    (if-let [body ( get-in ctx [:request :body])]
                       [false {::parsed
                               (json/parse-string
                                (condp instance? body
@@ -186,7 +241,7 @@
   :respond-with-entity? true
   :exists? (fn [ctx]
              (if (index-action? ctx)
-               [true {::records (discoverable-resources-all)}]
+               [true {::records (discoverable-resources-paginate)}]
                false))
   :handle-ok (fn [{records ::records :as ctx}]
                (if (= (requested-mime-type ctx) media/hale-media-type)

@@ -32,6 +32,7 @@
             [arche.resources.discoverable-resource
              :refer [required-descriptors
                      discoverable-resource-create
+                     discoverable-resources-all
                      discoverable-resource-first] :as entity]
             [arche.core :refer [app] :as web]))
 
@@ -72,6 +73,13 @@
   (app (header
         (mock/request :get "/discoverable_resources")
         "Accept" mime-type)))
+
+(defn create-paginateable [number-of]
+  (doseq [i (range number-of)]
+    (entity/discoverable-resource-create
+     {:resource-name "studies"
+      :link-relation-url "http://link-relation.io"
+      :href "http://test.host/url/studies"})))
 
 (describe
  "creating a resource"
@@ -334,36 +342,64 @@
         "http://example.org/discoverable_resources"
         (get-header (make-get-request mime-type) "Location")))))
 
+
 (describe
- "all resources as hal representable collection"
+ "creating the hal map"
  (before (helper/clean-database))
  (after (helper/clean-database))
  (context
   "when there are none"
   (it "returns the correct map when there are none"
       (should==
-      {:items []
-       :_embedded {:items []}
-       :_links {:self {:href "http://example.org/discoverable_resources"}}}
-      (hal-map []))))
+       {:items []
+        :_embedded {:items []}
+        :_links {:self {:href (str "http://example.org/discoverable_resources?page=1&per_page=" default-per-page)}}}
+       (hal-map1 (discoverable-resources-paginate))))
+  (describe
+   "creating links when there are no records"
+   (it "does not include the prev link relation"
+       (should-not-contain
+        media/link-relation-prev
+        (media/keyword-links (hal-map1 (discoverable-resources-paginate)))))
+   (it "does not include the next link relation"
+       (should-not-contain
+        media/link-relation-next
+        (media/keyword-links (hal-map1 (discoverable-resources-paginate)))))))
  (context
   "when there at least some"
-  (it "returns the corret map when there is at least 1"
-     (let [record (create-record)]
-       (should== {:items [
-                          {:href (entity/url-for record)}
-                          ]
-                  :_embedded {:items [{
-                                       :link_relation_url (:link_relation_url record)
-                                       :href (:href record)
-                                       :resource_name (:resource_name record)
-                                       :_links {
-                                                :self {:href (entity/url-for record)}
-                                                }
-                                       }
-                                      ]}
-                  :_links {:self {:href "http://example.org/discoverable_resources"}}}
-                 (hal-map [record]))))))
+  (it "returns the correct map when there is at least 1"
+      (let [record (create-record)]
+        (should== {:items [{:href (entity/url-for record)}]
+                   :_embedded {:items [{
+                                        :link_relation_url (:link_relation_url record)
+                                        :href (:href record)
+                                        :resource_name (:resource_name record)
+                                        :_links {
+                                                 :self {:href (entity/url-for record)}
+                                                 }
+                                        }
+                                       ]}
+                   :_links {:self {:href "http://example.org/discoverable_resources?page=1&per_page=25"}}}
+                  (hal-map1 (discoverable-resources-paginate))))))
+ (describe
+  "creating links when there are more than the per page"
+  (before
+   (create-paginateable (+ 1 default-per-page)))
+  (it "includes the next link relation"
+      (should= {:href "http://example.org/discoverable_resources?page=2&per_page=25"}
+               (media/link-relation-next
+                (media/keyword-links (hal-map1 (discoverable-resources-paginate)))))))
+ (describe
+  "creating links when there is a page"
+  (before
+   (create-paginateable (inc (* 2 default-per-page))))
+  (it "includes the next link relation"
+      (should= {:next {:href "http://example.org/discoverable_resources?page=3&per_page=25"}
+                :prev {:href "http://example.org/discoverable_resources?page=1&per_page=25"}
+                :self {:href "http://example.org/discoverable_resources?page=2&per_page=25"}}
+               (media/keyword-links (hal-map1 (discoverable-resources-paginate 2)))))))
+
+
 (describe
  "all resources as hale representable collection"
  (before (helper/clean-database))
@@ -471,14 +507,6 @@
                           (test-processable
                            {:link_relation_url "https://service.io/hello"})
                           [errors-key :link_relation_url]))))
-
-(defn create-paginateable [number-of]
-  (doseq [i (range number-of)]
-    (entity/discoverable-resource-create
-     {:resource-name "studies"
-      :link-relation-url "http://link-relation.io"
-      :href "http://test.host/url/studies"})))
-
 
 (describe
  "getting paginated"
@@ -663,3 +691,46 @@
         (should= true (:has-next @paginated)))
     (it "returns the correct count"
         (should= 24 (count (:records @paginated))))))))
+
+(describe
+ "creating links"
+ (it "returns a self link"
+     (should= {media/keyword-href (str "http://example.org/discoverable_resources?page=1&per_page=" default-per-page)}
+               (media/link-relation-self
+                (hal-links {:page 1
+                            :per-page default-per-page
+                            :has-next false
+                            :has-prev false}))))
+(it "returns a self link with pagination query pags"
+     (should= {media/keyword-href (str "http://example.org/discoverable_resources?page=2&per_page=" default-per-page)}
+               (media/link-relation-self
+                (hal-links {:has-next true
+                            :has-prev true
+                            :per-page default-per-page
+                            :next-page 3
+                            :prev-page 1
+                            :page 2}))))
+(it "returns a next link"
+     (should= {media/keyword-href (str "http://example.org/discoverable_resources?page=2&per_page=" default-per-page)}
+               (media/link-relation-next
+                (hal-links {:page 1
+                            :has-next true
+                            :next-page 2
+                            :per-page default-per-page}))))
+ (it "returns both a prev and a next link"
+     (should== {media/link-relation-self {media/keyword-href "http://example.org/discoverable_resources?page=2&per_page=25"}
+                media/link-relation-prev {media/keyword-href "http://example.org/discoverable_resources?page=1&per_page=25"}
+                media/link-relation-next {media/keyword-href "http://example.org/discoverable_resources?page=3&per_page=25"}}
+               (hal-links {:prev-page 1
+                           :has-prev true
+                           :has-next true
+                           :next-page 3
+                           :page 2
+                           :per-page default-per-page})))
+ (it "returns a prev link"
+     (should= {media/keyword-href "http://example.org/discoverable_resources?page=1&per_page=25"}
+               (media/link-relation-prev
+                (hal-links {:prev-page 1
+                            :has-prev true
+                            :page 2
+                            :per-page default-per-page})))))

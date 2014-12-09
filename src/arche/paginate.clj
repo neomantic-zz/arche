@@ -19,16 +19,21 @@
 
 (ns arche.paginate)
 
-(def ^:private prev-page-key :has-prev)
-(def ^:private next-page-key :has-next)
+(def prev-page-key :has-prev)
+(def next-page-key :has-next)
+(def prev-page-num-key :prev-page)
+(def next-page-num-key :next-page)
+(def per-page-key :per-page)
+
+(defn- calculate-per-page [requested default]
+  (if (> requested default)
+    default
+    requested))
 
 (defn calculate-offset [page per-page default-per-page]
   (if (or (<= per-page 0) (= default-per-page 0) (<= page 1))
     0
-    (let [number-of (if (> per-page default-per-page)
-                      default-per-page
-                      per-page)]
-      (dec (* (dec page) number-of)))))
+    (dec (* (dec page) (calculate-per-page per-page default-per-page)))))
 
 (defn calculate-limit [page requested-per-page default-per-page]
   (cond
@@ -64,6 +69,19 @@
        remainder
        (apply vector (drop-last remainder))))))
 
+(defn- with-page-numbers [paginated requested-page]
+  (let [has-next (next-page-key paginated)
+        has-prev (prev-page-key paginated)]
+    (assoc
+        (cond
+         (and has-next has-prev) (assoc paginated
+                                   next-page-num-key (inc requested-page)
+                                   prev-page-num-key (dec requested-page))
+         has-next (assoc paginated next-page-num-key (inc requested-page))
+         has-prev (assoc paginated prev-page-num-key (dec requested-page))
+         :else paginated)
+      :page requested-page)))
+
 (defn paginate-fn [fetcher-fn default-per-page]
   (fn paginate
     ([] (paginate 1))
@@ -76,6 +94,7 @@
                (<= default-per-page 0))
          {prev-page-key false
           next-page-key false
+          per-page-key 0
           :records []}
          (let [offset (calculate-offset page per-page default-per-page)
                limit (calculate-limit page per-page default-per-page)
@@ -83,17 +102,8 @@
                window-total (count items)
                has-prev (window-has-prev? window-total page)
                has-next (window-has-next? window-total page limit)]
-           {prev-page-key has-prev
-            next-page-key has-next
-            :records (records items page limit)})))))
-
-(defn with-page-numbers [paginated requested-page]
-  (let [has-next (:has-next paginated)
-        has-prev (:has-prev paginated)]
-    (cond
-     (and has-next has-prev) (assoc paginated
-                               :next-page (inc requested-page)
-                               :prev-page (dec requested-page))
-     has-next (assoc paginated :next-page (inc requested-page))
-     has-prev (assoc paginated :prev-page (dec requested-page))
-     :else paginated)))
+           (with-page-numbers
+             {prev-page-key has-prev
+              next-page-key has-next
+              per-page-key (calculate-per-page per-page default-per-page)
+              :records (records items page limit)} page))))))
