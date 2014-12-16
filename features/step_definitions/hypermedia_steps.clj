@@ -120,3 +120,19 @@
             (format "expected exactly %d data attributes; got %d" (count data-attributes) (count rows)))
         (doseq [[input-name input-type] rows]
           (is (= (get-in data-attributes [input-name (name media/hale-keyword-type)]) input-type)))))
+
+
+(When #"^the resource representation should not have the following links:$" [table]
+      (let [actual-links (response-links)
+            excluded-links (table-rows-map table)]
+        (doseq [link excluded-links]
+          (is (nil? (some #(= %  link) (keys actual-links)))))))
+
+(Then #"^the resource representation should have an embedded \"([^\"]*)\" property with (\d+) items$" [property number-of]
+      (prn (last-response-body))
+      (let [embedded-content (get (json/parse-string (last-response-body)) (name media/keyword-embedded))
+            embedded (get embedded-content property)]
+        (is (not (nil? embedded-content))  "expected embedded content; found none")
+        (is (not (nil? embedded)) "expected embedded items; found none")
+        (is (= number-of (count embedded)))))
+

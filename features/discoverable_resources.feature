@@ -220,16 +220,18 @@ Scenario: I should not receive paginations link relations (prev or next) when no
   Given 25 discoverable resource exists
   When I invoke the uniform interface method GET to "/discoverable_resources" accepting "application/hal+json"
   And the resource representation should not have the following links:
-   | next |
-   | prev |
+  | link_relation | 
+  | next          | 
+  | prev          | 
 
 @WIP
 Scenario: I should not receive paginations headers when no more than 25 items exist
   Given 25 discoverable resource exists
   When I invoke the uniform interface method GET to "/discoverable_resources" accepting "application/hal+json"
   And the resource representation should not have the following links:
-   | next |
-   | prev |
+  | link_relation | 
+  | next          | 
+  | prev          | 
 
 @WIP
 Scenario: I should receive paginations link relations (prev and next)
@@ -266,7 +268,8 @@ Scenario: I can retrieve a specific page of discoverable resources, I'll receive
    | link_relation | href                                                            |
    | next          | http://example.org/v1/discoverable_resources?page=2&per_page=25 |
   And the resource representation should not have the following links:
-   | prev |
+  | link_relation |
+  | prev          |
 
 @WIP
 Scenario: When I retrieve a specific page, I should receive a self like that indicates the page, and the per page count
@@ -280,8 +283,8 @@ Scenario: When I retrieve a specific page, I should receive a self like that ind
 Scenario: When I retrieve a specific page, I'll receive only a limited set of items
   Given 26 discoverable resource exists
   When I invoke the uniform interface method GET to "/discoverable_resources?page=2" accepting "application/hal+json"
-  Then the resource representation should have 1 items in its links
-  And the resource representation should have 1 embedded resource items
+  Then the resource representation should have an embedded "items" property with 1 items
+  #Then the resource representation should have 1 items in its links
 
 @WIP
 Scenario: When twice as many items of the default number of 25, I should receive a prev link
@@ -295,12 +298,12 @@ Scenario: When twice as many items of the default number of 25, I should receive
 Scenario: I can specify the number discover resources items returned
   Given 26 discoverable resource exists
   When I invoke the uniform interface method GET to "/discoverable_resources?per_page=3" accepting "application/hal+json"
-  Then the resource representation should have 3 items in its links
-  And the resource representation should have 3 embedded resource items
+  Then the resource representation should have an embedded "items" property with 3 items
+#  Then the resource representation should have 3 items in its links
 
 @WIP
 Scenario: I can request at most 100 items
   Given 101 discoverable resource exists
   When I invoke the uniform interface method GET to "/discoverable_resources?per_page=101" accepting "application/hal+json"
-  Then the resource representation should have 100 items in its links
-  And the resource representation should have 100 embedded resource items
+  Then the resource representation should have an embedded "items" property with 3 items
+#  Then the resource representation should have 100 items in its links

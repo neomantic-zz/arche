@@ -193,3 +193,10 @@
                             attribute
                             (clojure.string/join ", " (get-in response-map [:errors (keyword attribute)])) )))
               (rest (map vec (.raw table)))))))
+
+(Given #"^(\d+) discoverable resource exists$" [number-of]
+       (dotimes [number (dec (Integer. number-of))]
+         (discoverable-resource-create
+          {:resource-name (format "a-resource-name-%d" number)
+           :link-relation-url (format "http://test.host/alps/resource-profile-%d" number)
+           :href (format "http://test.host/a-resource-path-%d" number)})))
