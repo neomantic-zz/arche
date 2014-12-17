@@ -24,7 +24,7 @@
             [speclj.core :refer :all]
             [arche.app-state :refer :all :as app]
             [arche.media :refer :all :as media]
-            [arche.core :refer :all]
+            [arche.core :refer :all :as web]
             [ring.mock.request :refer :all :as ring-mock]
             [ring.util.response :only [:get-header] :as ring]
             [clojurewerkz.urly.core :as urly]
@@ -32,7 +32,7 @@
             [environ.core :refer [env]]))
 
 (defn arche-request [uri & params]
-  (app {:request-method :get :uri uri :params (first params)}))
+  (web/routes {:request-method :get :uri uri :params (first params)}))
 
 (defn successful? [response]
   (= (:status response) 200))
@@ -58,36 +58,39 @@
     :href (format "%s%s" "http://factory/" resource-name)}))
 
 (describe
- "routes to GET discoverable resources"
+ "routes"
  (describe
-  "when item exists"
-  (before
-   (clean-database)
-   (factory-discoverable-resource-create "studies"))
-  (it "supports /discoverable_resources/ with a name"
-      (should-be successful? (arche-request (format "%s%s" "/discoverable_resources/" "studies"))))))
-
-(describe
- "routes profiles"
- (it "supports the apls/DiscoverableResources route"
-     (should-be successful? (arche-request "/alps/DiscoverableResources"))))
+  "for collection of disoverable resources"
+  (after (clean-database))
+  (it "support a route to get an individual"
+      (do
+        (factory-discoverable-resource-create "studies")
+        (should-be successful? (arche-request (format "%s%s" "/discoverable_resources/" "studies")))))
+  (it "supports the /discoverable_resource route with query params"
+      (should-be successful? (arche-request "/discoverable_resources/?page=2")))
+  (it "supports the /discoverable_resource route with query params"
+      (should-be successful? (arche-request "/discoverable_resources?page=2")))
+  (it "supports the /discoverable_resource route"
+      (should-be successful? (arche-request "/discoverable_resources"))))
+ (describe
+  "for profiles"
+  (it "supports the apls/DiscoverableResources route"
+      (should-be successful? (arche-request "/alps/DiscoverableResources")))))
 
 (doseq [mime-type ["application/vnd.hale+json" "application/hal+json" "application/json"]]
-  (let [response (app
-                  (header (ring-mock/request :get "/")
-                          "Accept" mime-type))
-        actual-status (:status response)]
-    (describe
-     "entry point routes"
-     (it "is successful"
-         (should-be successful? response))
-     (it "returns the correct content type header"
-         (should=
-          mime-type
-          (ring/get-header response "Content-Type")))
-     (it "returns the correct accept header"
-         (should=
-          "application/hal+json,application/vnd.hale+json,application/json"
-          (ring/get-header response "Accept"))))))
+    (let [response (web/routes
+                    (header (ring-mock/request :get "/")
+                            "Accept" mime-type))
+          actual-status (:status response)]
+      (describe
+       (str "entry points routes for mime-type" mime-type)
+       (it "is successful"
+           (should-be successful? response))
+       (it "returns the correct content type header"
+           (should= mime-type (ring/get-header response "Content-Type")))
+       (it "returns the correct accept header"
+           (should=
+            "application/hal+json,application/vnd.hale+json,application/json"
+            (ring/get-header response "Accept"))))))
 
 (run-specs)

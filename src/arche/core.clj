@@ -21,7 +21,6 @@
   (:require [compojure.route :as route]
             [compojure.core :refer [defroutes GET ANY]]
             [compojure.handler :refer [api]]
-            [compojure.route :as route]
             [arche.resources.discoverable-resource
              :only (names discoverable-resource-entity)
              :as entity]
@@ -29,22 +28,24 @@
              :refer [] :as collection]
             [arche.resources.entry-points :only (entry-points route) :as entry]
             [arche.resources.profiles :as profile]
-            [arche.app-state :as app]
+            [arche.app-state :as config]
             [ring.adapter.jetty :as jetty]
             [environ.core :refer [env]]
             [inflections.core :refer :all :as inflect]))
 
-(defroutes app
-  (GET (format "/%s/:resource-name" app/alps-path) [resource-name]
+(defroutes routes
+  (GET (format "/%s/:resource-name" config/alps-path) [resource-name]
        (profile/alps-profiles (inflect/hyphenate resource-name)))
   (GET (format "/%s/:resource-name" (:routable entity/names))  [resource-name]
        (entity/discoverable-resource-entity resource-name))
   (GET entry/route [] (entry/entry-points))
-  (ANY (format "/%s" (:routable entity/names)) [request]
+  (ANY "/discoverable_resources*" [request]
+       (collection/discoverable-resources-collection request))
+  (ANY "/discoverable_resources/*" [request]
        (collection/discoverable-resources-collection request))
   (route/not-found "Not Found"))
 
-(def handler (api #'app))
+(def handler (api #'routes))
 
 (defn -main [& [port]]
   (let [port (Integer. (or port (env :port) 5000))]
