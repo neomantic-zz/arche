@@ -32,7 +32,11 @@
             [environ.core :refer [env]]))
 
 (defn arche-request [uri & params]
-  (web/routes {:request-method :get :uri uri :params (first params)}))
+  (let [uri (urly/url-like uri)]
+    (web/handler {:request-method :get,
+                  :uri (urly/path-of uri)
+                  :query-string (urly/query-of uri),
+                  :params (first params)})))
 
 (defn successful? [response]
   (= (:status response) 200))

@@ -41,8 +41,6 @@
   (GET entry/route [] (entry/entry-points))
   (ANY "/discoverable_resources*" [request]
        (collection/discoverable-resources-collection request))
-  (ANY "/discoverable_resources/*" [request]
-       (collection/discoverable-resources-collection request))
   (route/not-found "Not Found"))
 
 (def handler (api #'routes))
