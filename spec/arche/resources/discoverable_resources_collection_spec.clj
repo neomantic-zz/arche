@@ -34,13 +34,14 @@
                      discoverable-resource-create
                      discoverable-resources-all
                      discoverable-resource-first] :as entity]
-            [arche.core :refer [app] :as web]))
+            [arche.core :refer [handler] :as web]))
 
 (defn post-request [path accept-type content-type body]
-  (web/app (mock/header
-            (mock/header (mock/request :post path body)
-                         "Accept" accept-type)
-            "Content-Type" content-type)))
+  (web/handler (mock/header
+                (mock/header (mock/request :post path body)
+                             "Accept" accept-type)
+                "Content-Type" content-type)))
+
 (defn create-record []
   (entity/discoverable-resource-create
    {:resource-name "studies"
@@ -70,9 +71,9 @@
 
 ;; FIXME can't get with "/" on the end
 (defn make-get-request [mime-type]
-  (app (header
-        (mock/request :get "/discoverable_resources")
-        "Accept" mime-type)))
+  (web/handler (header
+                (mock/request :get "/discoverable_resources")
+                "Accept" mime-type)))
 
 (defn create-paginateable [number-of]
   (doseq [i (range number-of)]
@@ -341,7 +342,6 @@
        (should=
         "http://example.org/discoverable_resources"
         (get-header (make-get-request mime-type) "Location")))))
-
 
 (describe
  "creating the hal map"
@@ -738,3 +738,39 @@
                             :has-prev true
                             :page 2
                             :per-page default-per-page})))))
+
+(describe
+ "converting pagination query params"
+ (it "returns page 1 when no page is passed"
+     (should== [1 1]
+               (query-params->pagination-params {"per_page" "1"})))
+ (it "returns page 1 when page is 0"
+     (should== [1 1]
+               (query-params->pagination-params {"page" "0", "per_page" "1"})))
+ (it "returns page 1 when page is below zero"
+     (should== [1 1]
+               (query-params->pagination-params {"page" "-1", "per_page" "1"})))
+ (it "returns page number when it is above 1"
+     (should== [24 1]
+               (query-params->pagination-params {"page" "24", "per_page" "1"})))
+ (it "returns page 1 when page is below set to some other string"
+     (should== [1 1]
+               (query-params->pagination-params {"page" "snthsnhnth", "per_page" "1"})))
+ (it "returns the default per page when it's not provided"
+     (should== [1 default-per-page]
+               (query-params->pagination-params {"page" "1"})))
+ (it "returns 0 per page when 0 is requested"
+     (should== [1 0]
+               (query-params->pagination-params {"page" "1", "per_page" "0"})))
+ (it "returns 0 per page when -1 is requested"
+     (should== [1 0]
+               (query-params->pagination-params {"page" "1", "per_page" "-1"})))
+ (it "returns 0 per page when something random is requested"
+     (should== [1 0]
+               (query-params->pagination-params {"page" "1", "per_page" "shsnhsh"})))
+ (it "returns the per page passed when a value greater than the default is provided"
+     (should== [1 default-per-page]
+               (query-params->pagination-params {"page" "1", "per_page" "80"})))
+ (it "returns the per page passed when it not provided"
+     (should== [1 3]
+               (query-params->pagination-params {"page" "1", "per_page" "3"}))))

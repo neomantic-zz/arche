@@ -21,6 +21,7 @@
   (:require [liberator.core :refer [resource defresource =method]]
             [liberator.representation :refer [ring-response Representation]]
             [cheshire.core :refer :all :as json]
+            [ring.middleware.params :refer :all]
             [clojure.string :only (join) :as str]
             [clojure.java.io :as io]
             [arche.http :as http-helper]
@@ -186,6 +187,31 @@
              (order :id :ASC)))
    default-per-page))
 
+(def ^:private page-query-key "page")
+(def ^:private per-page-query-key "per_page")
+
+(defn query-params->pagination-params [query-params]
+  (defn param->integer [param-value]
+    (if (nil? param-value) param-value
+        (try
+          (Integer. param-value)
+          (catch Exception e
+            nil))))
+  (let [page-query (get query-params page-query-key)
+        per-page-query (get query-params per-page-query-key)]
+    (vector (let [pagination-page (param->integer page-query)]
+              (if (or (nil? pagination-page) (<= pagination-page 0))
+                1
+                pagination-page))
+            (let [pagination-per-page (param->integer per-page-query)]
+              (cond
+                (and (not (empty? per-page-query))
+                     (nil? pagination-per-page)) 0
+                (or (nil? pagination-per-page)
+                   (> pagination-per-page default-per-page)) default-per-page
+                (<= pagination-per-page 0) 0
+                :else pagination-per-page)))))
+
 (defresource discoverable-resources-collection [request]
   :allowed-methods [:post :get]
   :available-media-types [media/hale-media-type media/hal-media-type]
@@ -193,7 +219,7 @@
   :malformed? (fn [ctx]
                 (if (method-supports-body? ctx)
                   (try
-                    (if-let [body ( get-in ctx [:request :body])]
+                    (if-let [body (get-in ctx [:request :body])]
                       [false {::parsed
                               (json/parse-string
                                (condp instance? body
@@ -221,14 +247,12 @@
   :handle-unprocessable-entity respond-to-unprocessable
   :post-redirect? false
   :respond-with-entity? true
-  :exists? (fn [ctx]
-             (if (index-action? ctx)
-               [true {::records (discoverable-resources-paginate)}]
-               false))
-  :handle-ok (fn [{records ::records :as ctx}]
-               (if (= (requested-mime-type ctx) media/hale-media-type)
-                 (HaleResponse. records)
-                 (HalResponse. records)))
+  :exists? (fn [ctx] (index-action? ctx))
+  :handle-ok (fn [{:keys [query-params] :as ctx}]
+               (let [records (apply discoverable-resources-paginate (query-params->pagination-params query-params))]
+                 (if (= (requested-mime-type ctx) media/hale-media-type)
+                   (HaleResponse. records)
+                   (HalResponse. records))))
   :post! (fn [{parsed ::parsed}]
            (let [errors (validate-uniqueness parsed)]
              (if (has-errors? errors)
