@@ -38,7 +38,7 @@
    "Accept" mime-type))
 
 (defn make-request [mock-request]
-  (app mock-request))
+  (handler mock-request))
 
 (let [resource-name "studies"]
   (doseq [mime-type [media/hale-media-type media/hal-media-type media/json-media-type]]

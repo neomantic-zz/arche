@@ -22,14 +22,14 @@
   (:require [speclj.core :refer :all]
             [ring.util.response :only [:get-header] :as ring]
             [clojurewerkz.urly.core :as urly]
-            [arche.core :refer [app] :as web]
+            [arche.core :refer [handler] :as web]
             [arche.app-state :as app]
             [ring.mock.request :refer :all :as ring-mock]))
 
 (defn make-mock-request [uri mime-type]
-  (web/app (header
-            (ring-mock/request :get uri)
-            "Accept" mime-type)))
+  (web/handler (header
+                (ring-mock/request :get uri)
+                "Accept" mime-type)))
 
 (describe
  "GET alps/{profile} request"

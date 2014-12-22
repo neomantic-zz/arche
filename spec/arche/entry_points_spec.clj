@@ -18,9 +18,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (ns arche.entry-points-spec
-  (:use arche.resources.entry-points
-        arche.core)
+  (:use arche.resources.entry-points)
   (:require [speclj.core :refer :all]
+            [arche.core :as web]
             [arche.core-spec :only (arche-request factory-discoverable-resource-create
                                            clean-database) :as support]
             [arche.resources.discoverable-resource
@@ -56,7 +56,7 @@
    "Accept" "application/hal+json"))
 
 (defn make-request []
-  (app mock-request))
+  (web/handler mock-request))
 
 (describe
  "route"
@@ -236,4 +236,4 @@
            request (header
                     mock-request
                     "If-None-Match" etag)]
-       (should= 304 (:status (app request))))))
+       (should= 304 (:status (web/handler request))))))
