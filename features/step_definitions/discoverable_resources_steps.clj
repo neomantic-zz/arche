@@ -49,6 +49,7 @@
 (def last-response-status (last-response-property :status))
 
 ;; cucumber helpers
+;; {"header1" "headers", "value-of-header1" "value_of-header2"}
 (defn table-to-map [table]
   (into {} (map vec (.raw table))))
 
@@ -60,9 +61,12 @@
 
 
 (defn url-to-test [path]
-  (let [url (urly/url-like "http://localhost")
-        with-port (.mutatePort url test-port)]
-    (.toString (.mutatePath with-port path))))
+  (let [path-url (urly/url-like path)]
+    (-> (urly/url-like "http://localhost")
+      (.mutatePort test-port)
+      (.mutatePath (urly/path-of path-url))
+      (.mutateQuery (urly/query-of path-url))
+      .toString)))
 
 (defn unexpected-response-message [url response]
   (format "expected successful response from %s: got %d, with body '%s'"
@@ -195,8 +199,9 @@
               (rest (map vec (.raw table)))))))
 
 (Given #"^(\d+) discoverable resource exists$" [number-of]
-       (dotimes [number (dec (Integer. number-of))]
-         (discoverable-resource-create
-          {:resource-name (format "a-resource-name-%d" number)
-           :link-relation-url (format "http://test.host/alps/resource-profile-%d" number)
-           :href (format "http://test.host/a-resource-path-%d" number)})))
+       (dotimes [number (Integer. number-of)]
+         (let [record-id (inc number)]
+           (discoverable-resource-create
+            {:resource-name (format "a-resource-name-%d" record-id)
+             :link-relation-url (format "http://test.host/alps/resource-profile-%d" record-id)
+             :href (format "http://test.host/a-resource-path-%d" record-id)}))))

@@ -124,15 +124,19 @@
 
 (When #"^the resource representation should not have the following links:$" [table]
       (let [actual-links (response-links)
-            excluded-links (table-rows-map table)]
-        (doseq [link excluded-links]
-          (is (nil? (some #(= %  link) (keys actual-links)))))))
+            exclude-link-relations (rest (.raw table))]
+        (doseq [link-relation exclude-link-relations]
+          (is (nil? (some #(= %  link-relation) (keys actual-links)))))))
 
 (Then #"^the resource representation should have an embedded \"([^\"]*)\" property with (\d+) items$" [property number-of]
-      (prn (last-response-body))
       (let [embedded-content (get (json/parse-string (last-response-body)) (name media/keyword-embedded))
             embedded (get embedded-content property)]
         (is (not (nil? embedded-content))  "expected embedded content; found none")
         (is (not (nil? embedded)) "expected embedded items; found none")
-        (is (= number-of (count embedded)))))
+        (is (= (Integer. number-of) (count embedded)))))
 
+(Then #"^the resource representation \"([^\"]*)\" property should have (\d+) items$" [property number-of]
+      (let [parsed (json/parse-string (last-response-body))
+            actual (get parsed property)]
+        (is (not (nil? actual)) (format "missing the '%s' property; got %s" property parsed))
+        (is (= (Integer. number-of) (count actual)))))

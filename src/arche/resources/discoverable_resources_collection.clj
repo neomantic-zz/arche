@@ -105,19 +105,24 @@
                (:per-page paginated))
        self-url))))
 
-(defn hal-links [paginated]
+(defn- with-pagination-predicates [paginated prev-next-fn]
   (let [has-next (next-page-key paginated)
-        has-prev (prev-page-key paginated)
-        self-link  (self-link paginated)]
-    (cond
-     (and has-next has-prev) (apply
-                              conj
-                              [self-link
-                               (media/prev-link-relation (prev-url paginated))
-                               (media/next-link-relation (next-url paginated))])
-     has-next (conj self-link (media/next-link-relation (next-url paginated)))
-     has-prev (conj self-link (media/prev-link-relation (prev-url paginated)))
-     :else self-link)))
+        has-prev (prev-page-key paginated)]
+    (prev-next-fn has-prev has-next)))
+
+(defn hal-links [paginated]
+  (with-pagination-predicates paginated
+    (fn [has-prev has-next]
+      (let [self-link  (self-link paginated)]
+        (cond
+          (and has-next has-prev) (apply
+                                   conj
+                                   [self-link
+                                    (media/prev-link-relation (prev-url paginated))
+                                    (media/next-link-relation (next-url paginated))])
+          has-next (conj self-link (media/next-link-relation (next-url paginated)))
+          has-prev (conj self-link (media/prev-link-relation (prev-url paginated)))
+          :else self-link)))))
 
 (defn hal-map [paginated]
   (let [records (:records paginated)]
@@ -144,14 +149,13 @@
     ;;there is nothing "smart" about this map...i.e., inspecting
     ;; the resource, and find the route, expected-attributes, etc
     (assoc
-        hal-map
+     hal-map
       media/keyword-links
       (conj
        links
        {:create (hash-map media/hale-keyword-method "POST",
                           media/keyword-href create-url,
                           media/hale-keyword-data (into {} (map #(hash-map % media/hale-type-text) required-descriptors)))}))))
-
 
 (defn- index-ring-map [context hypermedia-map]
   (let [json (json/generate-string hypermedia-map)]
@@ -166,15 +170,46 @@
                      (http-helper/header-accept
                       (str/join "," ((:available-media-types (:resource context)))))])}))
 
-(defrecord ^:private HalResponse [paginated]
+(defn- create-header-links [paginated]
+  (clojure.string/join
+   ", "
+   (with-pagination-predicates paginated
+     (fn [has-next has-prev]
+       (defn format-url-fn [url-fn link-relation-type]
+         (fn []
+           (format "<%s>; rel=\"%s\"" (url-fn paginated) link-relation-type)))
+       (def prev-link-url (format-url-fn prev-url "previous"))
+       (def next-link-url (format-url-fn next-url (name media/link-relation-next)))
+       (cond
+         (and has-next has-prev) [(prev-link-url)
+                                  (next-link-url)]
+         has-next [(next-link-url)]
+         has-prev [(prev-link-url)]
+         :else [])))))
+
+(defn- index-response-fn [map-fn]
+  (fn [context paginated]
+    (let [ring-hashmap (index-ring-map context (map-fn paginated))
+          given-headers (:headers ring-hashmap)
+          link-header (create-header-links paginated)]
+      (if (empty? link-header)
+        ring-hashmap
+        (assoc
+            ring-hashmap
+            :headers
+            (assoc given-headers
+               "Link" link-header))))))
+
+(defrecord ^:private HalResponse
+  [paginated]
   Representation
   (as-response [this context]
-    (index-ring-map context (hal-map paginated))))
+    ((index-response-fn hal-map) context paginated)))
 
 (defrecord ^:private HaleResponse [paginated]
   Representation
   (as-response [this context]
-    (index-ring-map context (hale-map paginated))))
+    ((index-response-fn hale-map) context paginated)))
 
 (def default-per-page 25)
 
@@ -248,8 +283,9 @@
   :post-redirect? false
   :respond-with-entity? true
   :exists? (fn [ctx] (index-action? ctx))
-  :handle-ok (fn [{:keys [query-params] :as ctx}]
-               (let [records (apply discoverable-resources-paginate (query-params->pagination-params query-params))]
+  :handle-ok (fn [ctx]
+               (let [records (apply discoverable-resources-paginate
+                                    (-> ctx :request :query-params query-params->pagination-params))]
                  (if (= (requested-mime-type ctx) media/hale-media-type)
                    (HaleResponse. records)
                    (HalResponse. records))))
