@@ -19,23 +19,43 @@
 
 (ns arche.paginate)
 
+;; The functions in arche.paginate will paginate a collection and produce a hash-map
+;; of the following form:
+;;
+
+
 (def prev-page-key :has-prev)
 (def next-page-key :has-next)
 (def prev-page-num-key :prev-page)
 (def next-page-num-key :next-page)
 (def per-page-key :per-page)
 
-(defn- calculate-per-page [requested default]
+(defn- calculate-per-page
+  "Returns the value to be used a items per page, if
+  more than the default is request, returns the default instead"
+  [requested default]
   (if (> requested default)
     default
     requested))
 
-(defn calculate-offset [page per-page default-per-page]
+;; Both calculate-offset and calculated-limit, returns integers
+;; that constitute the 'window' in the collection. The width of the 'window'
+;; exceeds the boundaries of the offset and limit to determine if any
+;; items preceed the number of items per page (previous items) or if
+;; any items proceed the number of items per page (next items)
+
+(defn calculate-offset
+  "Given a page number, the requested per page, and the default per-page,
+  returns the offset; the position in the collection from which other
+  further items should be collected"
+  [page per-page default-per-page]
   (if (or (<= per-page 0) (= default-per-page 0) (<= page 1))
     0
     (dec (* (dec page) (calculate-per-page per-page default-per-page)))))
 
-(defn calculate-limit [page requested-per-page default-per-page]
+(defn calculate-limit
+  "Calculates the the number of items to collect."
+  [page requested-per-page default-per-page]
   (cond
    (or (<= requested-per-page 0) (<= page 0))  0
    (and (> requested-per-page 0) (<= default-per-page 0)) 0
@@ -46,18 +66,26 @@
              (+ 1 requested)
              (+ 2 requested)))))
 
-(defn window-has-prev? [window-total page-number]
+(defn window-has-prev?
+  "Returns boolean indicating if items preceed those
+  of the paginated collection."
+  [window-total page-number]
   (if (<= page-number 1) false
     (> window-total 0)))
 
-(defn window-has-next? [window-total page-number limit]
+(defn window-has-next?
+  "Returns boolean indicating if items proceed those
+  of the paginated collection."
+  [window-total page-number limit]
   (cond
    (or (<= page-number 0) (= limit 0) (< window-total 0)) false
    (and (= limit 1) (<= window-total 1)) false
    (= page-number 1) (>= window-total limit)
    :else (>= window-total limit)))
 
-(defn records [items page limit]
+(defn records
+  "Returns the paginated collection of items"
+  [items page limit]
   (cond
    (empty? items) items
    (= page 1) (if (< (count items) limit)
@@ -69,7 +97,9 @@
        remainder
        (apply vector (drop-last remainder))))))
 
-(defn- with-page-numbers [paginated requested-page]
+(defn- with-page-numbers
+  "Assoc'd the previous and next page number of the paginated items"
+  [paginated requested-page]
   (let [has-next (next-page-key paginated)
         has-prev (prev-page-key paginated)]
     (assoc
@@ -82,7 +112,15 @@
          :else paginated)
       :page requested-page)))
 
-(defn paginate-fn [fetcher-fn default-per-page]
+(defn paginate-fn
+  "Given a function that actually retrieves items and the default items
+  to return, return a function that accepts no parameters - returns 1st
+  page with defaults - one parameter (a page number) - returns that page
+  with defaults, or 2 parameters (a page number, and amount per page). The
+  return value is a hash-map in the following form: {:records [],
+  :has-prev false, :has-next false, :per-page <default>,
+  :next-page 0, :prev-page 0}"
+  [fetcher-fn default-per-page]
   (fn paginate
     ([] (paginate 1))
     ([page] (paginate page default-per-page))
