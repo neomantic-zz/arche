@@ -262,8 +262,7 @@
   (is (= {:has-prev false, :has-next false, :records []}
          ((paginate-fn
            (fn [page per-page] [1 2 3 4])
-            3) 0)))
-  )
+            3) 0))))
 
 (deftest paginate-with-page-1
   (is (= {:has-prev false :has-next false :records []}
@@ -373,8 +372,7 @@
              ;;[1 2 3 4 5 6]
              ;; but paginate, returns
              [3 4 5 6 7])
-           3) 2)))
-  )
+           3) 2))))
 
 (deftest with-request-count1
   (is (= {:has-prev true,
@@ -401,5 +399,4 @@
           :has-next true
           :prev-page 1
           :next-page 3} (with-page-numbers {:has-prev true
-                                            :has-next true} 2)))
-  )
+                                            :has-next true} 2))))
