@@ -82,7 +82,7 @@
       (should-be successful? (arche-request "/alps/DiscoverableResources")))))
 
 (doseq [mime-type ["application/vnd.hale+json" "application/hal+json" "application/json"]]
-    (let [response (web/routes
+    (let [response (web/handler
                     (header (ring-mock/request :get "/")
                             "Accept" mime-type))
           actual-status (:status response)]

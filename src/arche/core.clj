@@ -19,7 +19,7 @@
 
 (ns arche.core
   (:require [compojure.route :as route]
-            [compojure.core :refer [defroutes GET ANY]]
+            [compojure.core :refer [routes GET ANY]]
             [compojure.handler :refer [api]]
             [arche.resources.discoverable-resource
              :only (names discoverable-resource-entity)
@@ -33,17 +33,19 @@
             [environ.core :refer [env]]
             [inflections.core :refer :all :as inflect]))
 
-(defroutes routes
-  (GET (format "/%s/:resource-name" config/alps-path) [resource-name]
-       (profile/alps-profiles (inflect/hyphenate resource-name)))
-  (GET (format "/%s/:resource-name" (:routable entity/names))  [resource-name]
-       (entity/discoverable-resource-entity resource-name))
-  (GET entry/route [] (entry/entry-points))
-  (ANY "/discoverable_resources*" [request]
-       (collection/discoverable-resources-collection request))
-  (route/not-found "Not Found"))
-
-(def handler (api #'routes))
+(def handler
+  "The handler which responds to routes for getting/creating discoverable resources,
+  and retrieving the list of entry points, and alps profiles"
+  (api
+   (routes
+    (GET (format "/%s/:resource-name" config/alps-path) [resource-name]
+         (profile/alps-profiles (inflect/hyphenate resource-name)))
+    (GET (format "/%s/:resource-name" (:routable entity/names))  [resource-name]
+         (entity/discoverable-resource-entity resource-name))
+    (GET entry/route [] (entry/entry-points))
+    (ANY "/discoverable_resources*" [request]
+         (collection/discoverable-resources-collection request))
+    (route/not-found "Not Found"))))
 
 (defn -main [& [port]]
   (let [port (Integer. (or port (env :port) 5000))]
