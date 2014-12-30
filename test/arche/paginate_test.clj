@@ -391,10 +391,6 @@
               49]) 25)
           2 24))))
 
-;; (deftest next-page-number
-;;   (is (= 3 (calculate-next-page-number {:has-next true} 3)))
-;;   (is (= 4 (calculate-next-page-number {:has-next true} 3))))
-
 (deftest with-page-number
   (is (= {:has-next true
           :next-page 2} (with-page-numbers {:has-next true} 1)))
