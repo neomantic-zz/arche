@@ -20,9 +20,17 @@
 (ns arche.alps
   (:refer-clojure :exclude [resolve type]))
 
-(def document-version "1.0")
+;; The identifiers and functions in arche.alps are to be used for creating
+;; alps profile documents
 
-(def json-media-type "application/alps+json")
+
+(def document-version
+  "Alps version number"
+  "1.0")
+
+(def json-media-type
+  "Alps mime-type"
+  "application/alps+json")
 
 (def keyword-doc        :doc)
 (def keyword-value      :value)
@@ -37,45 +45,72 @@
 (def keyword-version    :version)
 (def keyword-name       :name)
 
-(defn alps-element [keyword]
+(defn alps-element-fn
+  "Given a alps reserved word, returns a fn that
+  accepts 1 param, the value, to associate with the keyword
+  when it returns a hash-map"
+  [keyword]
   (fn [value] (hash-map keyword value)))
 
-(def alps (alps-element keyword-alps))
-(def href (alps-element keyword-href))
-(def type (alps-element keyword-type))
-(def id (alps-element keyword-id))
-(def rt (alps-element keyword-rt))
-(def rel (alps-element keyword-rel))
-(def version (alps-element keyword-version))
+(def alps
+  "A function that associates a alue with the alps reserved word"
+  (alps-element-fn keyword-alps))
+(def href
+  "A function that associates a value with the alps href reserved word"
+  (alps-element-fn keyword-href))
+(def type
+  "A function that associates a value with the alps type reserved word"
+  (alps-element-fn keyword-type))
+(def id
+  "A function that associates a value with the alps id reserved word"
+  (alps-element-fn keyword-id))
+(def rt
+  "A function that associates a value with the alps rt (return type) reserved word"
+  (alps-element-fn keyword-rt))
+(def rel
+  "A function that associates a value with the alps rel reserved word"
+  (alps-element-fn keyword-rel))
+(def version
+  "A function that associates a value with the alps version reserved word"
+  (alps-element-fn keyword-version))
 
 (defn doc [documentation]
+  "Accepting a value representation documentation, associate with the doc keyword"
   {keyword-doc
     {keyword-value documentation}})
 
 (defn link [link-relation url]
+  "Accepting both a link relation type and a URL, return a hash map
+  that represents a alps document's represenatation of a link"
   {keyword-link
    (conj (rel (name link-relation))
          (href url))})
 
 (defn descriptor [descriptions]
-  ((alps-element keyword-descriptor)
+  "Given a collection of descriptions, return a hash-map that represents
+   an alps set of descriptors"
+  ((alps-element-fn keyword-descriptor)
    descriptions))
 
 (def descriptor-types
+  "A hash map which associate a keyword with an alps string
+  that represents the two kinds of descriptors: safe and semanticx"
   {:safe "safe"
    :semantic "semantic"})
 
 (def schemas
+  "Returns a hash map associating a keyword for two alps profiles: Text and URL"
   {:url "http://alps.io/schema.org/URL"
    :text "http://alps.io/schema.org/Text"})
 
 (defn document-hash-map [elements]
+  "Returns a hash-map representing the 'root' of a alps document"
   {keyword-alps elements})
 
-(defn descriptor-make [type]
+(defn descriptor-fn [descriptor-type]
   (fn [& descriptors]
-    (merge {keyword-type ((keyword type) descriptor-types)}
+    (merge {keyword-type (get descriptor-types descriptor-type)}
            (into {} descriptors))))
 
-(def descriptor-safe (descriptor-make "safe"))
-(def descriptor-semantic (descriptor-make "semantic"))
+(def descriptor-safe (descriptor-fn :safe))
+(def descriptor-semantic (descriptor-fn :semantic))
