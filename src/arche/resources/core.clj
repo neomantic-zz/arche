@@ -22,6 +22,8 @@
             [liberator.representation  :refer [ring-response as-response]]))
 
 (defn not-acceptable-response [liberator-ctx]
+  "Given a liberator context hash, return a ring response with 405, and an 'Accept'
+  header contain acceptable media-types."
   (ring-response
    {:status 406
     :headers (http-helper/header-accept
@@ -30,6 +32,7 @@
     :body "Unsupported media-type. Supported media type listed in Accept header."}))
 
 (defn error-map-make [errors error-messages]
+  "Returns a hash-map intended for json output of an error message."
   {:errors
    (into {}
          (map (fn [[attribute error-keys]]
