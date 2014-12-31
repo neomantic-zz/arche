@@ -33,25 +33,39 @@
             [arche.resources.core :refer :all :as common]
             [arche.media :as media]))
 
-(defn- method-supports-body? [ctx]
+(defn- method-supports-body?
+  "Returns true of our resource supports HTTP method that have a body.
+  Returns true on POST and PUT only."
+  [ctx]
   (#{:put :post} (get-in ctx [:request :request-method])))
 
-(def supported-content-types ["application/json"])
+(def supported-content-types
+  "The support content type for a POST request."
+  ["application/json"])
 
 (def error-messages
+  "The errors messages suitable for a discoverable resources POST request."
   (assoc default-error-messages
     :taken-by "has already been taken"))
 
-(defn- requested-mime-type [liberator-ctx]
+(defn- requested-mime-type
+  "Given a liberator context, returns the media-type"
+  [liberator-ctx]
   (get-in liberator-ctx [:representation :media-type]))
 
-(defn test-processable [attributes]
+(defn test-processable
+  "Tests if the POST request is processable...if it contains all the
+  required fields."
+  [attributes]
   (validate attributes
             [entity/validate-href
              entity/validate-link-relation
              entity/validate-resource-name-present]))
 
-(defn respond-with-errors [status errors]
+(defn respond-with-errors
+  "Given a status code and a hash-map of errors, returns a JSON body
+  as a ring-response."
+  [status errors]
   (ring-response
    {:status status
     :headers (conj
@@ -60,42 +74,69 @@
     :body (json/generate-string
            (common/error-map-make (errors-get errors) error-messages))}))
 
-(defn respond-to-bad-request [{errors ::errors}]
+(defn respond-to-bad-request
+  "Given a hash-map with the ::errors key, returns a ring response with
+  the errors and the 400 status code."
+  [{errors ::errors}]
   (respond-with-errors 400 errors))
 
-(defn respond-to-unprocessable [{errors ::errors}]
+(defn respond-to-unprocessable
+  "Give a hash-map with the ::errors key, returns a ring response with the
+  errors and the 422 error code"
+  [{errors ::errors}]
   (respond-with-errors 422 errors))
 
-(defn- supported-content-type? [liberator-ctx]
+(defn- supported-content-type?
+  "Returns a boolean indicated if the submitted content type is supported"
+  [liberator-ctx]
   (some #{(get-in liberator-ctx [:request :headers "content-type"])} supported-content-types))
 
-(defn- index-action? [ctx]
+(defn- index-action?
+  "Returns a boolean indicating if the request is intended to retrieves
+  the collection."
+  [ctx]
   (=method :get ctx))
 
-(defn- create-action? [ctx]
+(defn- create-action?
+  "Returns a boolean indicating if the request is intended to create an item"
+  [ctx]
   (=method :post ctx))
 
 (def self-url
+  "Returns a string representing the URL for the collection of resources"
   (app/app-uri-for (str "/" (:routable entity/names))))
 
 (def ^:private create-url self-url)
 
 (def type-url
+  "Returns a string for the collection type url used in the hypermedia document"
   (format "%s#%s" entity/profile-url (:routable entity/names)))
 
-(def ^:private pagination-url-format "%s?page=%d&per_page=%d")
+(def ^:private pagination-url-format
+  "The format to be used when creating a paginatoin link"
+  "%s?page=%d&per_page=%d")
 
-(defn paginated-url-fn [url page-key]
+(defn paginated-url-fn
+  "Given a user and a pagination page key (:prev-page, :next-page)
+  return a function that creates the url"
+  [url page-key]
   (fn [paginated]
     (format pagination-url-format
             url
             (get paginated page-key)
             (get paginated :per-page))))
 
-(def prev-url (paginated-url-fn self-url :prev-page))
-(def next-url (paginated-url-fn self-url :next-page))
+(def prev-url
+  "Returns a string for the pagination prev URL"
+  (paginated-url-fn self-url :prev-page))
 
-(defn- self-link [paginated]
+(def next-url
+  "Returns a string for the pagination next URL"
+  (paginated-url-fn self-url :next-page))
+
+(defn- self-link
+  "Returns the self link string with optional pagination params"
+  [paginated]
   (media/self-link-relation
    (let [page (:page paginated)]
      (if (> page 0)
@@ -110,7 +151,9 @@
         has-prev (prev-page-key paginated)]
     (prev-next-fn has-prev has-next)))
 
-(defn hal-links [paginated]
+(defn hal-links
+  "Returns a hash map with hal links used for a discoverable resources resource"
+  [paginated]
   (with-pagination-predicates paginated
     (fn [has-prev has-next]
       (let [self-link  (self-link paginated)]
@@ -124,7 +167,10 @@
           has-prev (conj self-link (media/prev-link-relation (prev-url paginated)))
           :else self-link)))))
 
-(defn hal-map [paginated]
+(defn hal-map
+  "Given a hash-map with the :records keyword, return a hashmap suitable for
+  JSON serialization to a HAL document"
+  [paginated]
   (let [records (:records paginated)]
     {:items (apply vector
                    (map
@@ -143,7 +189,9 @@
      media/keyword-links
      (hal-links paginated)}))
 
-(defn hale-map [paginated]
+(defn hale-map
+  "Returns a hash-map suitable for a HALE JSON serialization"
+  [paginated]
   (let [hal-map (hal-map paginated)
         links (media/keyword-links hal-map)]
     ;;there is nothing "smart" about this map...i.e., inspecting
@@ -157,7 +205,10 @@
                           media/keyword-href create-url,
                           media/hale-keyword-data (into {} (map #(hash-map % media/hale-type-text) required-descriptors)))}))))
 
-(defn- index-ring-map [context hypermedia-map]
+(defn- index-ring-map
+  "Given a liberator context and a hash-map representation the response, return
+  a hash-map suitable for a ring response"
+  [context hypermedia-map]
   (let [json (json/generate-string hypermedia-map)]
     {:body json
      :status 200
@@ -170,7 +221,9 @@
                      (http-helper/header-accept
                       (str/join "," ((:available-media-types (:resource context)))))])}))
 
-(defn- create-header-links [paginated]
+(defn- create-header-links
+  "Returns the string used in a Link header that indicates response pagination."
+  [paginated]
   (clojure.string/join
    ", "
    (with-pagination-predicates paginated
@@ -187,7 +240,8 @@
          has-prev [(prev-link-url)]
          :else [])))))
 
-(defn- index-response-fn [map-fn]
+(defn- index-response-fn
+  [map-fn]
   (fn [context paginated]
     (let [ring-hashmap (index-ring-map context (map-fn paginated))
           given-headers (:headers ring-hashmap)
@@ -211,9 +265,13 @@
   (as-response [this context]
     ((index-response-fn hale-map) context paginated)))
 
-(def default-per-page 25)
+(def default-per-page
+  "The default per page pagination count"
+  25)
 
 (def discoverable-resources-paginate
+  "Returns a hash-map representation a paginated collection of
+  discoverable resources"
   (paginate-fn
    (fn [start number-of-items]
      (select discoverable-resources
@@ -226,6 +284,8 @@
 (def ^:private per-page-query-key "per_page")
 
 (defn query-params->pagination-params [query-params]
+  "Converts a HTTP requests query params to those suitable for the
+  pagination fn."
   (defn param->integer [param-value]
     (if (nil? param-value) param-value
         (try
@@ -247,7 +307,10 @@
                 (<= pagination-per-page 0) 0
                 :else pagination-per-page)))))
 
-(defresource discoverable-resources-collection [request]
+;; A liberator resource representing resource called DiscoverableResources; a
+;; collection resource that of individual discoverable resource
+(defresource discoverable-resources-collection
+  [request]
   :allowed-methods [:post :get]
   :available-media-types [media/hale-media-type media/hal-media-type]
   :handle-not-acceptable common/not-acceptable-response
