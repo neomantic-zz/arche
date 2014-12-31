@@ -19,7 +19,7 @@
 
 (ns arche.media)
 
-;; Arche.media contains keywords and methods for creating hypermediaa
+;; arche.media contains keywords and methods for creating hal and hale hypermediaa
 ;; documents
 
 (def keyword-links :_links)
@@ -44,31 +44,31 @@
      (hash-map keyword-href uri)}))
 
 (def self-link-relation
-  "Returns a hash-map representation a hypermedia link
+  "Returns a hash-map representation of a HAL hypermedia link
   whose link-relation type is 'self', and
   whose href is set to the value of the parameter"
   (link-map-fn link-relation-self))
 
 (def profile-link-relation
-  "Returns a hash-map representation a hypermedia link
+  "Returns a hash-map representation a HAL hypermedia link
   whose link-relation type is 'profile', and
   whose href is set to the value of the parameter"
   (link-map-fn link-relation-profile))
 
 (def type-link-relation
-  "Returns a hash-map representation a hypermedia link
+  "Returns a hash-map representation a HAL hypermedia link
   whose link-relation type is 'type', and
   whose href is set to the value of the parameter"
   (link-map-fn link-relation-type))
 
 (def prev-link-relation
-  "Returns a hash-map representation a hypermedia link
+  "Returns a hash-map representation a HAL hypermedia link
   whose link-relation type is 'prev', and
   whose href is set to the value of the parameter"
   (link-map-fn link-relation-prev))
 
 (def next-link-relation
-  "Returns a hash-map representation a hypermedia link
+  "Returns a hash-map representation a HAL hypermedia link
   whose link-relation type is 'next', and
   whose href is set to the value of the parameter"
   (link-map-fn link-relation-next))

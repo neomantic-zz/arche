@@ -48,7 +48,7 @@
 
 (defn cache-control-header-private-age [number]
   "Returns a hash-map with the key set as Cache-Control, and the value
-   set to private, and with a max-age equal to the value of the parameter"
+   set to private and a max-age equal to the value of the parameter"
   (header-cache-control (format "max-age=%d, private" number)))
 
 (defn etag-make [string]

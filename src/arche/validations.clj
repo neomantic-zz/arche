@@ -27,19 +27,19 @@
 
 (defn validate-fn
   "Given a symbol representation its failure message, and a function that
-  accepts one parameter andreturns boolean value, returns
-  a function that applies the boolean-proc to the submitted data, and returns
-  a empty vector the value passes inspection, else the vector populated
-  with the failure key"
-  [boolean-proc symbol]
+  accepts one parameter and returns boolean value, returns
+  a function that applies the boolean-fn to the submitted data. If the boolean-fn
+  returns true, then an empty vector is returned, else vector populated with
+  the error key-word"
+  [boolean-fn error-keyword]
   (fn [submitted]
-    (if (boolean-proc submitted)
+    (if (boolean-fn submitted)
       []
-      [symbol])))
+      [error-keyword])))
 
 (def validate-presence
   "A function that tests for 'presence' - if the submitted value is
-   nil or empty...if so, then validation fails and [:blank] is returned"
+   nil or empty...if so, then the validation fails and [:blank] is returned"
   (validate-fn
    (fn [submitted]
      (and (not (nil? submitted))
@@ -47,9 +47,8 @@
    :blank))
 
 (defn validate-format-fn
-  "Given a function that tests for the format of a item, returns a function
-  that will return [:invalid] if the format fails,
-  [:invalid] if the applicaton of the format function returns false"
+  "Given a function that tests for the format of a item, returns [:invalid]
+   if the format fails, or an empty vector."
   [format-fn]
   (validate-fn
    (fn [value]
@@ -57,18 +56,16 @@
    :invalid))
 
 (defn validate-uniqueness-fn
-  "Accepts a function that tests for a items uniqueness, and when
-  applied to a submitted value returns [:taken] when it fails the
-  uniqueness test."
-  [fn]
-  (validate-fn fn :taken))
+  "Accepts a function that tests for an item's uniqueness, Returns [:taken]
+  on failure, and [] on success"
+  [uniqueness-fn]
+  (validate-fn uniqueness-fn :taken))
 
 (defn validates-attribute
   "Given key which is expected in a hash-map and a set of validation
   functions, tests the submitted value associated with the key.
-  If all validations pass, returns an empty hash-map, else it returns
-  hash-map with a vector associated with key that contains all the
-  failure keywords."
+  If all validations pass, it returns an empty hash-map, else it returns
+  hash-map with a vector that contains all the failure keywords."
   [attribute & validations]
   (fn [all-attributes]
     (if (empty? validations)
@@ -93,10 +90,10 @@
 
 
 (defn validate
-  "Given a hash map of attribute key words and value, apply all
-  apply a vector of validations (functions of validate-attributes). If
-  any validation fails, annotate the hash-map with an error keys, otherwise
-  returns the submited hash-map."
+  "Given a hash-map of attribute keywords and its associated value, apply
+  a vector of validations (functions of validate-attributes). If
+  any validation fails, annotate the given hash-map with an error keys, with
+  the vector of error keys. Otherwise it returns the submitted hash-map."
   [attributes validations]
   (let [collected-errors (into {} (map #(% attributes) validations))]
     (if (empty? collected-errors)
@@ -106,6 +103,6 @@
        attributes))))
 
 (defn errors-get
-  "Returns the collection of errors"
+  "Returns the collection of errors."
   [errors-map]
   (errors-key errors-map))

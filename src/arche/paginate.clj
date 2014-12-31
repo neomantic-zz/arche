@@ -19,11 +19,6 @@
 
 (ns arche.paginate)
 
-;; The functions in arche.paginate will paginate a collection and produce a hash-map
-;; of the following form:
-;;
-
-
 (def prev-page-key :has-prev)
 (def next-page-key :has-next)
 (def prev-page-num-key :prev-page)
@@ -31,8 +26,8 @@
 (def per-page-key :per-page)
 
 (defn- calculate-per-page
-  "Returns the value to be used a items per page, if
-  more than the default is request, returns the default instead"
+  "Returns the value to be used for the number items returned per page. If
+  requested is greater than the default, the default is returned"
   [requested default]
   (if (> requested default)
     default
@@ -46,8 +41,8 @@
 
 (defn calculate-offset
   "Given a page number, the requested per page, and the default per-page,
-  returns the offset; the position in the collection from which other
-  further items should be collected"
+  returns the offset - the position in the collection from which other
+  further items should be collected."
   [page per-page default-per-page]
   (if (or (<= per-page 0) (= default-per-page 0) (<= page 1))
     0
@@ -67,7 +62,7 @@
              (+ 2 requested)))))
 
 (defn window-has-prev?
-  "Returns boolean indicating if items preceed those
+  "Returns a boolean indicating if items preceed those
   of the paginated collection."
   [window-total page-number]
   (if (<= page-number 1) false
@@ -98,7 +93,7 @@
        (apply vector (drop-last remainder))))))
 
 (defn- with-page-numbers
-  "Assoc'd the previous and next page number of the paginated items"
+  "Assoc's the previous and next page number of the paginated items"
   [paginated requested-page]
   (let [has-next (next-page-key paginated)
         has-prev (prev-page-key paginated)]
@@ -113,10 +108,10 @@
       :page requested-page)))
 
 (defn paginate-fn
-  "Given a function that actually retrieves items and the default items
-  to return, return a function that accepts no parameters - returns 1st
-  page with defaults - one parameter (a page number) - returns that page
-  with defaults, or 2 parameters (a page number, and amount per page). The
+  "Given a function that retrieves items and the default items
+  to be retrieved, returns a function that accepts no parameters - returns 1st
+  page with defaults; one parameter (a page number) - returns that page
+  with defaults; or 2 parameters (a page number, and amount per page). The
   return value is a hash-map in the following form: {:records [],
   :has-prev false, :has-next false, :per-page <default>,
   :next-page 0, :prev-page 0}"

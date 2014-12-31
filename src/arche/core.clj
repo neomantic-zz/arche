@@ -34,8 +34,9 @@
             [inflections.core :refer :all :as inflect]))
 
 (def handler
-  "The handler which responds to routes for getting/creating discoverable resources,
-  and retrieving the list of entry points, and alps profiles"
+  "This handler which responds to routes for getting/creating
+   discoverable resources, retrieving the list of entry points and
+   alps profiles."
   (api
    (routes
     (GET (format "/%s/:resource-name" config/alps-path) [resource-name]
@@ -48,5 +49,8 @@
     (route/not-found "Not Found"))))
 
 (defn -main [& [port]]
+  "The main method that starts the jetty server.  If the PORT
+  environmental has been set, then the server will listen to requests
+  on that port. Otherwise the default port of 5000 is used."
   (let [port (Integer. (or port (env :port) 5000))]
     (jetty/run-jetty handler {:port port :join? false})))

@@ -37,12 +37,12 @@
   [:created_at :updated_at])
 
 (defn sql-timestamp-now
-  "Helper to create a stamp for 'now' that is suitable for SQL value"
+  "Helper to create a timestamp for 'now' that is suitable for a SQL insert"
   []
   (to-sql-time (to-long (time/now))))
 
 (defn new-record-timestamps
-  "Returns both the created_at and updated_at times stamps for 'now' as
+  "Returns both the created_at and updated_at timesstamps for 'now' as
   as hash-map"
   []
   (let [timestamp (sql-timestamp-now)]
