@@ -51,8 +51,6 @@
   [:resource_name :link_relation_url :href])
 
 (defentity discoverable-resources
-  "A korma entity linking the identifier with the discoverable_resources table
-  an its fields."
   (pk :id)
   (table (:tableized names))
   (database records/db)
@@ -227,7 +225,6 @@
            (hypermedia-map record))}))
 
 (defresource discoverable-resource-entity [resource-name]
-  "A liberator resource for a discoverable resource entity."
   :available-media-types available-media-types
   :allowed-methods [:get]
   :exists? (fn [_]
