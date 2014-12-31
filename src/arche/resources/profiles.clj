@@ -28,14 +28,20 @@
             [inflections.core :only [:camel-case] :as inflect]
             [liberator.representation :as rep :refer [ring-response as-response]]))
 
-(def registered-profiles (atom {}))
+(def registered-profiles
+  "A atom of hash-map for storing registered profiles"
+  (atom {}))
 
-(defn profile-register! [new-profile]
+(defn profile-register!
+  "Adds a profile to the map of registered profiles"
+  [new-profile]
   (swap! registered-profiles
          conj
          new-profile))
 
-(defn registered-profile-get [resource-name]
+(defn registered-profile-get
+  "Gets the function associated with a registered profile, keyed by resource name"
+  [resource-name]
   (get @registered-profiles resource-name))
 
 (defresource alps-profiles [resource-name]
