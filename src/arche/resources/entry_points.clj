@@ -33,6 +33,7 @@
              [liberator.representation :as rep :refer [ring-response as-response]]))
 
 (def names
+  "A hash-map of user friendly names of the EntryPoints resource"
   (let [base-name "entry_points"]
     {:titleized "EntryPoints"
      :alps-type base-name
@@ -40,18 +41,26 @@
 
 (def route "/")
 
-(defn profile-url []
+(defn profile-url
+  "Returns a string representation an alps entry point URL"
+  []
   (app/alps-profile-url (:titleized names)))
 
-(defn type-url []
+(defn type-url
+  "Returns a string of a type URL"
+  []
   (format "%s#%s" (profile-url) (:alps-type names)))
 
-(defn self-url []
+(defn self-url
+  "Returns a string of a self URL"
+  []
   (.toString (.mutatePath
               (urly/url-like (app/base-uri))
               route)))
 
-(defn entry-points-map []
+(defn entry-points-map
+  "Returns a map suitable for JSON serialization of all entry points"
+  []
   (let [discoverable-resources (record/discoverable-resources-all)]
     {media/keyword-links
      (apply conj
@@ -64,7 +73,9 @@
                      {media/keyword-href (:href discoverable)}})
                   discoverable-resources)))}))
 
-(defn alps-profile-map []
+(defn alps-profile-map
+  "Returns a profile map suitable for JSON serialization"
+  []
   (let [all (record/discoverable-resources-all)
         entry-points-id "list"
         make-id (fn [id]
