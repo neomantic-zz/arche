@@ -112,9 +112,12 @@
   "Returns a string for the collection type url used in the hypermedia document"
   (format "%s#%s" entity/profile-url (:routable entity/names)))
 
+(def ^:private page-query-key "page")
+(def ^:private per-page-query-key "per_page")
+
 (def ^:private pagination-url-format
   "The format to be used when creating a paginatoin link"
-  "%s?page=%d&per_page=%d")
+  (str "%s?" page-query-key "=%d&" per-page-query-key "=%d"))
 
 (defn paginated-url-fn
   "Given a user and a pagination page key (:prev-page, :next-page)
@@ -279,9 +282,6 @@
              (limit number-of-items)
              (order :id :ASC)))
    default-per-page))
-
-(def ^:private page-query-key "page")
-(def ^:private per-page-query-key "per_page")
 
 (defn query-params->pagination-params [query-params]
   "Converts a HTTP requests query params to those suitable for the
