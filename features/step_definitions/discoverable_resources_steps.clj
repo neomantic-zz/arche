@@ -18,16 +18,15 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (ns step-definitions.discoverable-resources-steps
-  (:use arche.resources.discoverable-resource
-        cucumber.runtime.clj
+  (:use cucumber.runtime.clj
         clojure.test)
   (:require [arche.media :as media]
+            [arche.resources.discoverable-resource :refer :all]
             [arche.core :as web]
             [clojurewerkz.urly.core :as urly]
             [cheshire.core :refer :all :as json]
             [clj-http.client :as client]
-            [arche.app-state :as app]
-            [arche.config-state :refer [base-uri]]
+            [arche.config :refer [base-uri]]
             [ring.adapter.jetty :as jetty]
             [clojure.java.jdbc :as jdbc]
             [ring.util.response :as ring]
