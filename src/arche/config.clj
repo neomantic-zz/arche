@@ -38,4 +38,9 @@
     expiry
     600))
 
-(def port (Integer. (or (env :port) 5000)))
+(def port
+  "Returns the port to listen to incoming requests on.  Defaults to 5000. To
+  change the default, set the PORT environmental variable to an integer
+  above the reserver range of ports."
+  (Integer. (or (env :port) 5000)))
+
