@@ -23,6 +23,7 @@
              [arche.media :as media]
              [arche.http :as http-helper]
              [arche.app-state :as app]
+             [arche.config :refer [cache-expiry]]
              [arche.alps :as alps]
              [cheshire.core :refer :all :as json]
              [clojurewerkz.urly.core :as urly]
@@ -130,7 +131,7 @@
                 {:status 200
                  :headers (into {}
                                 [(http-helper/header-location (self-url))
-                                 (http-helper/cache-control-header-private-age (app/cache-expiry))
+                                 (http-helper/cache-control-header-private-age (cache-expiry))
                                  (http-helper/header-accept
                                   (str/join "," ((:available-media-types resource))))])
                  :body body}))

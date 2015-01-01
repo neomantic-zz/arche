@@ -24,15 +24,6 @@
             [clojurewerkz.urly.core :as urly])
   (:import [java.net URI URL]))
 
-(defn cache-expiry
-  "Returns cache-expiry to be returned in responses. If the CACHE_EXPIRY
-  environmental variable is set, then this function returns that value.
-  Otherwise, it returns the default of 600 (milliseconds)."
-   []
-  (if-let [expiry (env :cache-expiry)]
-    expiry
-    600))
-
 (defn base-uri
   "Returns the base uri of the application based on the required BASE_URI
   environmental variable.  An example of a base URI is http://www.example.org.

@@ -23,6 +23,7 @@
             [liberator.core :refer [resource defresource]]
             [arche.http :as http-helper]
             [arche.app-state :as app]
+            [arche.config :refer [cache-expiry]]
             [arche.media :as media]
             [arche.resources.core :refer :all :as generic]
             [inflections.core :only [:camel-case] :as inflect]
@@ -59,7 +60,7 @@
                   {:status 200
                    :headers (into {}
                                   [(http-helper/header-etag (http-helper/etag-make body))
-                                   (http-helper/cache-control-header-private-age (app/cache-expiry))
+                                   (http-helper/cache-control-header-private-age (cache-expiry))
                                    (http-helper/header-accept (clojure.string/join "," ((:available-media-types resource))))
                                    (http-helper/header-location (app/alps-profile-url (inflect/camel-case resource-name)))])
                    :body body}))))

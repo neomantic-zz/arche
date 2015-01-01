@@ -25,6 +25,7 @@
             [clojure.string :only (join) :as str]
             [clojure.java.io :as io]
             [arche.http :as http-helper]
+            [arche.config :refer [cache-expiry]]
             [arche.app-state :as app]
             [arche.paginate :refer :all]
             [arche.validations :refer [default-error-messages validate has-errors? errors-get]]
@@ -219,7 +220,7 @@
                     [(-> json
                          http-helper/etag-make
                          http-helper/header-etag)
-                     (http-helper/cache-control-header-private-age (app/cache-expiry))
+                     (http-helper/cache-control-header-private-age (cache-expiry))
                      (http-helper/header-location self-url)
                      (http-helper/header-accept
                       (str/join "," ((:available-media-types (:resource context)))))])}))

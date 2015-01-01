@@ -24,7 +24,7 @@
             [liberator.representation :as rep :refer [ring-response as-response]]
             [arche.alps :as alps]
             [arche.media :as media]
-            [arche.config :refer [db]]
+            [arche.config :refer [db cache-expiry]]
             [arche.db :refer [new-record-timestamps cache-key]]
             [ring.util.codec :only [:url-encode] :as ring]
             [arche.app-state :as app]
@@ -217,7 +217,7 @@
   (ring-response
    {:status status-code
     :headers (into {}
-                   [(http-helper/cache-control-header-private-age (app/cache-expiry))
+                   [(http-helper/cache-control-header-private-age (cache-expiry))
                     (http-helper/header-location (url-for record))
                     (http-helper/header-etag (etag-for record))
                     (http-helper/header-accept
