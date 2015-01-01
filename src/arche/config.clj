@@ -23,11 +23,14 @@
             [environ.core :refer [env]]))
 
 ;; "The value representing the connection to a mysql database"
-(defdb db
+
+(def jdbc-dbspec
   (mysql {:user (env :database-user)
           :password (env :database-password)
           :host (env :database-host)
           :db (env :database-name)}))
+
+(defdb korma-db jdbc-dbspec)
 
 (def cache-expiry
   "Returns cache-expiry to be returned in responses. If the CACHE_EXPIRY

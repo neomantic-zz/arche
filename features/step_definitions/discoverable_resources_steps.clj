@@ -26,7 +26,7 @@
             [clojurewerkz.urly.core :as urly]
             [cheshire.core :refer :all :as json]
             [clj-http.client :as client]
-            [arche.config :refer [base-uri]]
+            [arche.config :refer [base-uri jdbc-dbspec]]
             [ring.adapter.jetty :as jetty]
             [clojure.java.jdbc :as jdbc]
             [ring.util.response :as ring]
@@ -113,17 +113,10 @@
       (.stop @server)
       (reset! server nil))))
 
-(def dbspec {:classname "com.mysql.jdbc.Driver"
-             :subprotocol "mysql"
-             :user (env :database-user)
-             :password (env :database-password)
-             :delimiters "`"
-             :subname (format "//%s:3306/%s"
-                              (env :database-host)
-                              (env :database-name))})
-
 (defn database-truncate []
-  (jdbc/db-do-commands dbspec "TRUNCATE TABLE discoverable_resources;"))
+  (jdbc/db-do-commands
+   jdbc-dbspec
+   (format "TRUNCATE TABLE %s;" (-> names :tableized name))))
 
 
 (defn to-json [args]

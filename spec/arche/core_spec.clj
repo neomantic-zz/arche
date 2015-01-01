@@ -18,18 +18,18 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (ns arche.core-spec
-  (:use arche.db
-        arche.resources.discoverable-resource)
   (:require [clojure.java.jdbc :as jdbc]
             [speclj.core :refer :all]
+            [arche.resources.discoverable-resource :refer [names discoverable-resource-create]]
+            [korma.db :refer :all]
+            [arche.config :refer :all]
             [arche.app-state :refer :all :as app]
             [arche.media :refer :all :as media]
             [arche.core :refer :all :as web]
             [ring.mock.request :refer :all :as ring-mock]
-            [ring.util.response :only [:get-header] :as ring]
+            [ring.util.response :refer [get-header] :as ring]
             [clojurewerkz.urly.core :as urly]
-            [arche.resources.profiles :refer :all :as profile]
-            [environ.core :refer [env]]))
+            [arche.resources.profiles :refer :all :as profile]))
 
 (defn arche-request [uri & params]
   (let [uri (urly/url-like uri)]
@@ -41,19 +41,10 @@
 (defn successful? [response]
   (= (:status response) 200))
 
-(def dbspec {:classname "com.mysql.jdbc.Driver"
-             :subprotocol "mysql"
-             :user (env :database-user)
-             :password (env :database-password)
-             :delimiters "`"
-             :subname (format "//%s:3306/%s"
-                              (env :database-host)
-                              (env :database-name))})
-
 (defn clean-database []
   (jdbc/db-do-commands
-   dbspec
-   "TRUNCATE TABLE discoverable_resources;"))
+   jdbc-dbspec
+   (format "TRUNCATE TABLE %s;" (-> names :tableized name))))
 
 (defn factory-discoverable-resource-create [resource-name]
   (discoverable-resource-create

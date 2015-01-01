@@ -35,3 +35,14 @@
  "port"
  (it "returns 5000 as its default"
      (should= 5000 port)))
+
+(describe
+ "jdbc-dbspec"
+ (it "should be a mysql dbspec"
+     (should= "com.mysql.jdbc.Driver" (:classname jdbc-dbspec))
+     (should= "mysql" (:subprotocol jdbc-dbspec))))
+
+(describe
+ "korma-db"
+ (it "should exist"
+     (should-not-be-nil korma-db)))

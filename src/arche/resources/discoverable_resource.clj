@@ -24,7 +24,7 @@
             [liberator.representation :as rep :refer [ring-response as-response]]
             [arche.alps :as alps]
             [arche.media :as media]
-            [arche.config :refer [db cache-expiry]]
+            [arche.config :refer [korma-db cache-expiry]]
             [arche.db :refer [new-record-timestamps cache-key]]
             [ring.util.codec :only [:url-encode] :as ring]
             [arche.app-state :as app]
@@ -54,7 +54,7 @@
 (defentity discoverable-resources
   (pk :id)
   (table (:tableized names))
-  (database db)
+  (database korma-db)
   (entity-fields :resource_name :link_relation_url :href :updated_at :id :created_at))
 
 (defn url-for [record]

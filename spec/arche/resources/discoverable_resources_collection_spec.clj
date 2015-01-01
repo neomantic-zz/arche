@@ -102,29 +102,28 @@
               (from-json
                (:body (valid-post))))))
 
-(let [resource-name "users"
-      response (post-request
-                     "/discoverable_resources"
-                     "application/hal+json"
-                     "application/json"
-                     (to-json
-                      {:link_relation_url "https://test.host/alps/users"
-                       :href "https://test.host/users"
-                       :resource_name resource-name}))
-      record (entity/discoverable-resource-first resource-name)]
+(let [resource-name "users"]
   (describe
    "headers on valid post"
    (before (helper/clean-database))
    (after (helper/clean-database))
+   (with-all! response (post-request
+                        "/discoverable_resources"
+                        "application/hal+json"
+                        "application/json"
+                        (to-json
+                         {:link_relation_url "https://test.host/alps/users"
+                          :href "https://test.host/users"
+                          :resource_name resource-name})))
    (it "returns correct location header"
-       (should= "http://example.org/discoverable_resources/users" (get-header response "Location")))
+       (should= (str "http://example.org/discoverable_resources/" resource-name) (get-header @response "Location")))
    (it "returns correct accept header"
        (should= "application/hal+json,application/vnd.hale+json,application/json"
-                (get-header response "Accept")))
+                (get-header @response "Accept")))
    (it "returns correct cache control header"
-       (should= "max-age=600, private" (get-header response "Cache-Control")))
+       (should= "max-age=600, private" (get-header @response "Cache-Control")))
    (it "returns correct etag"
-       (should-not-be-nil (get-header response "ETag")))))
+       (should-not-be-nil (get-header @response "ETag")))))
 
 (let [response (post-request
                 "/discoverable_resources"
