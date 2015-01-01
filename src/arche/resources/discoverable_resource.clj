@@ -217,7 +217,7 @@
   (ring-response
    {:status status-code
     :headers (into {}
-                   [(http-helper/cache-control-header-private-age (cache-expiry))
+                   [(http-helper/cache-control-header-private-age cache-expiry)
                     (http-helper/header-location (url-for record))
                     (http-helper/header-etag (etag-for record))
                     (http-helper/header-accept

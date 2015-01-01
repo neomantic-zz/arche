@@ -29,11 +29,10 @@
           :host (env :database-host)
           :db (env :database-name)}))
 
-(defn cache-expiry
+(def cache-expiry
   "Returns cache-expiry to be returned in responses. If the CACHE_EXPIRY
   environmental variable is set, then this function returns that value.
   Otherwise, it returns the default of 600 (milliseconds)."
-   []
   (if-let [expiry (env :cache-expiry)]
     expiry
     600))

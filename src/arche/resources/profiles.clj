@@ -60,7 +60,7 @@
                   {:status 200
                    :headers (into {}
                                   [(http-helper/header-etag (http-helper/etag-make body))
-                                   (http-helper/cache-control-header-private-age (cache-expiry))
+                                   (http-helper/cache-control-header-private-age cache-expiry)
                                    (http-helper/header-accept (clojure.string/join "," ((:available-media-types resource))))
                                    (http-helper/header-location (app/alps-profile-url (inflect/camel-case resource-name)))])
                    :body body}))))
