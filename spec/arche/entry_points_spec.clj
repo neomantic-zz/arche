@@ -26,6 +26,7 @@
             [arche.resources.discoverable-resource
              :only (discoverable-resource-first discoverable-resources-all)
              :as record]
+            [arche.config :refer [base-uri]]
             [ring.mock.request :refer :all :as ring-mock]
             [ring.util.response :only [:get-header] :as ring]
             [clojurewerkz.urly.core :as urly]
@@ -35,19 +36,19 @@
 (def expected-profile-url
   (.toString
    (.mutatePath
-    (urly/url-like (app/base-uri))
+    (urly/url-like (base-uri))
     "/alps/EntryPoints")))
 
 (def expected-type-url
   (format "%s#%s"
           (.mutatePath
-           (urly/url-like (app/base-uri))
+           (urly/url-like (base-uri))
            "/alps/EntryPoints")
           "entry_points"))
 
 (def expected-self-url
   (.toString (.mutatePath
-              (urly/url-like (app/base-uri))
+              (urly/url-like (base-uri))
               route)))
 
 (def mock-request

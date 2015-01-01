@@ -25,3 +25,8 @@
  "expiry"
  (it "returns a cache expiry value"
      (should= 600 (cache-expiry))))
+
+(describe
+ "base-uri"
+ (it "returns the correct base-uri"
+     (should-not-be-nil (base-uri))))

@@ -22,11 +22,6 @@
   (:require [speclj.core :refer :all]))
 
 (describe
- "environment"
- (it "returns the correct base-uri"
-     (should-not-be-nil (base-uri))))
-
-(describe
  "paths"
  (it "returns the correct string for the alps path"
      (should= "alps" alps-path)))

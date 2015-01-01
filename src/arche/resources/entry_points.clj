@@ -23,7 +23,7 @@
              [arche.media :as media]
              [arche.http :as http-helper]
              [arche.app-state :as app]
-             [arche.config :refer [cache-expiry]]
+             [arche.config :refer [cache-expiry base-uri]]
              [arche.alps :as alps]
              [cheshire.core :refer :all :as json]
              [clojurewerkz.urly.core :as urly]
@@ -56,7 +56,7 @@
   "Returns a string of a self URL"
   []
   (.toString (.mutatePath
-              (urly/url-like (app/base-uri))
+              (urly/url-like (base-uri))
               route)))
 
 (defn entry-points-map
