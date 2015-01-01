@@ -28,7 +28,7 @@ To run a local version arche, use the following command:
 
 1. Compile the application: `lein uberjar`
 2. Assign all the environmental variables listed below in the shell
-that you will run the web application
+that you will run arche
 3. Execute the command in the same shell as the environmental
 variables: `java -cp target/uberjar/arche-standalone.jar clojure.main
 -m arche.core`
@@ -38,8 +38,8 @@ variables: `java -cp target/uberjar/arche-standalone.jar clojure.main
 If everything has been setup correctly, you can test the app using
 curl.
 
-If the arche is listening to port 3000 on localhost and its `BASE_URI`
-assigned to localhost, and excute `curl -H "application/hal+json"
+If arche is listening to port 3000 on localhost and its `BASE_URI`
+is assigned to localhost, excute `curl -H "application/hal+json"
 http://localhost:3000/`. The correct response is the following:
 
 ``` json
