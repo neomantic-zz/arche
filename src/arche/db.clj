@@ -18,19 +18,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (ns arche.db
-  (:require [korma.db :refer [defdb mysql]]
-            [environ.core :refer [env]]
-            [clj-time.core :as time]
+  (:require [clj-time.core :as time]
             [clj-time.coerce :refer [to-long to-string to-sql-time from-sql-time]])
   (:import [org.joda.time.format DateTimeFormat]))
-
-;; "The value representing the connection to a mysql database"
-
-(defdb db
-  (mysql {:user (env :database-user)
-                  :password (env :database-password)
-                  :host (env :database-host)
-                  :db (env :database-name)}))
 
 (def timestamp-fields
   "Time stamps fields"

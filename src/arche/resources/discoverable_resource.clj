@@ -24,7 +24,8 @@
             [liberator.representation :as rep :refer [ring-response as-response]]
             [arche.alps :as alps]
             [arche.media :as media]
-            [arche.db :as records]
+            [arche.config :refer [db]]
+            [arche.db :refer [new-record-timestamps cache-key]]
             [ring.util.codec :only [:url-encode] :as ring]
             [arche.app-state :as app]
             [arche.http :as http-helper]
@@ -53,7 +54,7 @@
 (defentity discoverable-resources
   (pk :id)
   (table (:tableized names))
-  (database records/db)
+  (database db)
   (entity-fields :resource_name :link_relation_url :href :updated_at :id :created_at))
 
 (defn url-for [record]
@@ -190,7 +191,7 @@
   (insert
    discoverable-resources
    (values (conj
-            (records/new-record-timestamps)
+            (new-record-timestamps)
             {:resource_name resource-name
              :link_relation_url link-relation-url
              :href href})))
@@ -207,7 +208,7 @@
   "A string suitable for the records etag."
   [record]
   (http-helper/etag-make
-   (records/cache-key (name (:tableized names)) record)))
+   (cache-key (name (:tableized names)) record)))
 
 (defn ring-response-json
   "Given a record, and a status code, returns a ring JSON response for an
