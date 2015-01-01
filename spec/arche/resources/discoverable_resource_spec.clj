@@ -25,6 +25,7 @@
   (:require [speclj.core :refer :all]
             [cheshire.core :refer :all :as json]
             [arche.db :refer [cache-key] :as record]
+            [arche.config :refer [base-uri]]
             [ring.mock.request :refer :all :as ring-mock]
             [ring.util.response :only [:get-header] :as ring]
             [ring.util.codec :only [:url-encode]]
@@ -56,7 +57,7 @@
                        make-request
                        (ring/get-header "Accept"))))
       (it "returns the correct location header"
-          (should= (format "%s/discoverable_resources/studies" (app/base-uri))
+          (should= (format "%s/discoverable_resources/studies" (base-uri))
                    (-> (mock-request resource-name mime-type)
                        make-request
                        (ring/get-header "Location"))))
@@ -96,16 +97,16 @@
 (describe
  "creating urls"
  (it "creates the correct discoverable resource entity url"
-     (should= (format "%s/discoverable_resources/studies" (app/base-uri))
+     (should= (format "%s/discoverable_resources/studies" (base-uri))
               (url-for {:resource_name "studies"})))
  (it "creates the correct discoverable resource entity url with url encoding"
-     (should= (format "%s%s" (app/base-uri) "/discoverable_resources/ugly%20resource%20name")
+     (should= (format "%s%s" (base-uri) "/discoverable_resources/ugly%20resource%20name")
               (url-for {:resource_name "ugly resource name"}))))
 
 (describe
  "alps"
  (it "returns the correct profile url"
-     (should= profile-url (format "%s/alps/%s"(app/base-uri) "DiscoverableResources")))
+     (should= profile-url (format "%s/alps/%s"(base-uri) "DiscoverableResources")))
  (it "creates the correct representation of an alps document"
      (should== {:alps
                 {:descriptor
