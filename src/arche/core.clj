@@ -28,7 +28,8 @@
              :refer [] :as collection]
             [arche.resources.entry-points :only (entry-points route) :as entry]
             [arche.resources.profiles :as profile]
-            [arche.app-state :as config]
+            [arche.app-state :as app-state]
+            [arche.config :as config :refer [port]]
             [ring.adapter.jetty :as jetty]
             [environ.core :refer [env]]
             [inflections.core :refer :all :as inflect]))
@@ -39,7 +40,7 @@
    alps profiles."
   (api
    (routes
-    (GET (format "/%s/:resource-name" config/alps-path) [resource-name]
+    (GET (format "/%s/:resource-name" app-state/alps-path) [resource-name]
          (profile/alps-profiles (inflect/hyphenate resource-name)))
     (GET (format "/%s/:resource-name" (:routable entity/names))  [resource-name]
          (entity/discoverable-resource-entity resource-name))
@@ -52,5 +53,4 @@
   "The main method that starts the jetty server.  If the PORT
   environmental has been set, then the server will listen to requests
   on that port. Otherwise the default port of 5000 is used."
-  (let [port (Integer. (or port (env :port) 5000))]
-    (jetty/run-jetty handler {:port port :join? false})))
+  (jetty/run-jetty handler {:port config/port :join? false}))

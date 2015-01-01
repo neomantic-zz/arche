@@ -37,3 +37,5 @@
   (if-let [expiry (env :cache-expiry)]
     expiry
     600))
+
+(def port (Integer. (or (env :port) 5000)))
