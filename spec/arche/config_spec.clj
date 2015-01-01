@@ -22,11 +22,16 @@
             [arche.config :refer :all]))
 
 (describe
- "expiry"
- (it "returns a cache expiry value"
-     (should= 600 (cache-expiry))))
+ "cache-expiry"
+ (it "returns 600 as its default"
+     (should= 600 cache-expiry)))
 
 (describe
  "base-uri"
  (it "returns the correct base-uri"
      (should-not-be-nil base-uri)))
+
+(describe
+ "port"
+ (it "returns 5000 as its default"
+     (should= 5000 port)))
