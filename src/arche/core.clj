@@ -31,7 +31,6 @@
             [arche.app-state :as app-state]
             [arche.config :as config :refer [port]]
             [ring.adapter.jetty :as jetty]
-            [environ.core :refer [env]]
             [inflections.core :refer :all :as inflect]))
 
 (def handler
