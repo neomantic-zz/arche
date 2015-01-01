@@ -36,19 +36,19 @@
 (def expected-profile-url
   (.toString
    (.mutatePath
-    (urly/url-like (base-uri))
+    (urly/url-like base-uri)
     "/alps/EntryPoints")))
 
 (def expected-type-url
   (format "%s#%s"
           (.mutatePath
-           (urly/url-like (base-uri))
+           (urly/url-like base-uri)
            "/alps/EntryPoints")
           "entry_points"))
 
 (def expected-self-url
   (.toString (.mutatePath
-              (urly/url-like (base-uri))
+              (urly/url-like base-uri)
               route)))
 
 (def mock-request

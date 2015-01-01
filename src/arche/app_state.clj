@@ -28,7 +28,7 @@
   "Given a path, this function returns a string representation of the path
   with the base-uri prepended to it."
   [path]
-  (let [url (urly/url-like (base-uri))]
+  (let [url (urly/url-like base-uri)]
     (.toString (.mutatePath url path))))
 
 (def alps-path

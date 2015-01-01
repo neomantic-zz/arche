@@ -24,6 +24,7 @@
             [clojurewerkz.urly.core :as urly]
             [arche.core :refer [handler] :as web]
             [arche.app-state :as app]
+            [arche.config :refer [base-uri]]
             [ring.mock.request :refer :all :as ring-mock]))
 
 (defn make-mock-request [uri mime-type]
@@ -38,7 +39,7 @@
               (-> (make-mock-request "/alps/DiscoverableResources" "application/alps+json")
                   (ring/get-header "Accept"))))
  (it "should have the location header"
-     (should= (.toString (.mutatePath (urly/url-like (app/base-uri))  "/alps/DiscoverableResources"))
+     (should= (.toString (.mutatePath (urly/url-like base-uri)  "/alps/DiscoverableResources"))
               (-> (make-mock-request "/alps/DiscoverableResources" "application/alps+json")
                   (ring/get-header "Location")))))
 

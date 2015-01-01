@@ -29,4 +29,4 @@
 (describe
  "base-uri"
  (it "returns the correct base-uri"
-     (should-not-be-nil (base-uri))))
+     (should-not-be-nil base-uri)))

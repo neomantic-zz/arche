@@ -56,7 +56,7 @@
   "Returns a string of a self URL"
   []
   (.toString (.mutatePath
-              (urly/url-like (base-uri))
+              (urly/url-like base-uri)
               route)))
 
 (defn entry-points-map

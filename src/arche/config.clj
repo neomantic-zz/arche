@@ -44,14 +44,12 @@
   above the reserver range of ports."
   (Integer. (or (env :port) 5000)))
 
-
-(defn base-uri
+(def base-uri
   "Returns the base uri of the application based on the required BASE_URI
   environmental variable.  An example of a base URI is http://www.example.org.
   All URLs that the app produces are based off this base-uri. This
   function throws an expection if the BASE_URI environmental variable has
   not been set."
-  []
   (if-let [uri (env :base-uri)]
     uri
     (throw (Exception. "Missing base uri environmental variable"))))

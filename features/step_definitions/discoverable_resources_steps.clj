@@ -27,6 +27,7 @@
             [cheshire.core :refer :all :as json]
             [clj-http.client :as client]
             [arche.app-state :as app]
+            [arche.config-state :refer [base-uri]]
             [ring.adapter.jetty :as jetty]
             [clojure.java.jdbc :as jdbc]
             [ring.util.response :as ring]
@@ -84,11 +85,11 @@
                                    :body body}))
 
 (defn call-app-url [url accept-type]
-  (if (= (urly/host-of url) (urly/host-of (app/base-uri)))
+  (if (= (urly/host-of url) (urly/host-of base-uri))
     (let [path (urly/path-of (urly/url-like url))]
       (execute-get-request path {"Accept" accept-type}))
     (throw (Exception. (format "That wasn't an app url from the base-uri %s: %s"
-                               (app/base-uri)
+                               base-uri
                                url)))))
 
 (defn verify-app-url [url accept-type]
