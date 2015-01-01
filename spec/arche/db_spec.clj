@@ -44,11 +44,10 @@
 
 (describe
  "cache keys"
+ (with sql-timestamp (sql-timestamp-now))
  (it "correct creates it"
-     (let [timestamp (sql-timestamp-now)
-           convert-stamp #(let [formatter (. DateTimeFormat (forPattern  "YMdHmsS9"))]
-                             (. formatter (print (coerce/to-long %))))]
-       (should=
-        (format "atable-name/1-%s" (convert-stamp timestamp))
-        (cache-key "atable-name" {:id 1
-                                  :updated_at timestamp})))))
+     (should=
+      (format "atable-name/1-%s" (let [formatter (. DateTimeFormat (forPattern  "YMdHmsS9"))]
+                                   (. formatter (print (coerce/to-long @sql-timestamp)))))
+      (cache-key "atable-name" {:id 1
+                                :updated_at @sql-timestamp}))))
