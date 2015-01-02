@@ -193,8 +193,8 @@
                             (clojure.string/join ", " (get-in response-map [:errors (keyword attribute)])) )))
               (rest (map vec (.raw table)))))))
 
-(Given #"^(\d+) discoverable resource exists$" [number-of]
-       (dotimes [number (Integer. number-of)]
+(Given #"^(\d+) discoverable resource exists - including the discoverable resources entry point$" [number-of]
+       (dotimes [number (dec (Integer. number-of))]
          (let [record-id (inc number)]
            (discoverable-resource-create
             {:resource-name (format "a-resource-name-%d" record-id)

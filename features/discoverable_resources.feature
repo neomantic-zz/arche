@@ -190,8 +190,9 @@ Scenario: A client reads a discoverable resource index as vnd.hale+json
   | link_relation_url | href                                                         |
   | self              | http://example.org/discoverable_resources?page=1&per_page=25 |
   And the resource representation "items" property should have the following items:
-  | attribute | value                                             |
-  | href      | http://example.org/discoverable_resources/studies |
+  | attribute | value                                                             |
+  | href      | http://example.org/discoverable_resources/studies                 |
+  | href      | http://example.org/discoverable_resources/discoverable_resources  |
   And the resource representation should have an embedded "items" property with the following links and properties:
   | type     | identifer         | value                                             |
   | property | link_relation_url | https://www.mydomain.com/studies                  |
@@ -215,7 +216,7 @@ Scenario: A client reads a discoverable resource index as vnd.hale+json
   | Accept        | application/vnd.hale+json,application/hal+json |
 
 Scenario: I should not receive paginations link relations (prev or next) when no more than 25 items exist
-  Given 25 discoverable resource exists
+  Given 25 discoverable resource exists - including the discoverable resources entry point
   When I invoke the uniform interface method GET to "/discoverable_resources" accepting "application/hal+json"
   And the resource representation should not have the following links:
   | link_relation |
@@ -223,7 +224,7 @@ Scenario: I should not receive paginations link relations (prev or next) when no
   | prev          |
 
 Scenario: I should receive paginations link relations (prev and next)
-  Given 51 discoverable resource exists
+  Given 51 discoverable resource exists - including the discoverable resources entry point
   When I invoke the uniform interface method GET to "/discoverable_resources?page=2" accepting "application/hal+json"
   And the resource representation should have at least the following links:
    | link_relation | href                                                            |
@@ -231,14 +232,14 @@ Scenario: I should receive paginations link relations (prev and next)
    | prev          | http://example.org/discoverable_resources?page=1&per_page=25    |
 
 Scenario: I should receive paginations headers when more than 25 items exist
-  Given 51 discoverable resource exists
+  Given 51 discoverable resource exists - including the discoverable resources entry point
   When I invoke the uniform interface method GET to "/discoverable_resources?page=2" accepting "application/hal+json"
   And the response should have the following header fields:
   | field | field_contents                                                                                                                                             |
   | Link  | <http://example.org/discoverable_resources?page=1&per_page=25>; rel="previous", <http://example.org/discoverable_resources?page=3&per_page=25>; rel="next" |
 
 Scenario: I can retrieve a specific page of discoverable resources, I'll receive a link to the prev page, but not a next link
-  Given 26 discoverable resource exists
+  Given 26 discoverable resource exists - including the discoverable resources entry point
   When I invoke the uniform interface method GET to "/discoverable_resources?page=2" accepting "application/hal+json"
   Then the resource representation should have at least the following links:
    | link_relation | href                                                            |
@@ -247,7 +248,7 @@ Scenario: I can retrieve a specific page of discoverable resources, I'll receive
    | next |
 
 Scenario: I can retrieve a specific page of discoverable resources, I'll receive a link to the next page, but not a prev link
-  Given 26 discoverable resource exists
+  Given 26 discoverable resource exists - including the discoverable resources entry point
   When I invoke the uniform interface method GET to "/discoverable_resources?page=1" accepting "application/hal+json"
   Then the resource representation should have at least the following links:
    | link_relation | href                                                            |
@@ -257,33 +258,33 @@ Scenario: I can retrieve a specific page of discoverable resources, I'll receive
   | prev          |
 
 Scenario: When I retrieve a specific page, I should receive a self like that indicates the page, and the per page count
-  Given 26 discoverable resource exists
+  Given 26 discoverable resource exists - including the discoverable resources entry point
   When I invoke the uniform interface method GET to "/discoverable_resources?page=2" accepting "application/hal+json"
   Then the resource representation should have at least the following links:
    | link_relation | href                                                         |
    | self          | http://example.org/discoverable_resources?page=2&per_page=25 |
 
 Scenario: When I retrieve a specific page, I'll receive only a limited set of items
-  Given 26 discoverable resource exists
+  Given 26 discoverable resource exists - including the discoverable resources entry point
   When I invoke the uniform interface method GET to "/discoverable_resources?page=2" accepting "application/hal+json"
   Then the resource representation should have an embedded "items" property with 1 items
   And the resource representation "items" property should have 1 items
 
 Scenario: When there are twice as many items as the default per-page number, I should receive a prev link, when I get the page after the first
-  Given 51 discoverable resource exists
+  Given 51 discoverable resource exists - including the discoverable resources entry point
   When I invoke the uniform interface method GET to "/discoverable_resources?page=2" accepting "application/hal+json"
   Then the resource representation should have at least the following links:
    | link_relation | href                                                            |
    | prev          | http://example.org/discoverable_resources?page=1&per_page=25    |
 
 Scenario: I can specify the number discoverable resources items to return
-  Given 26 discoverable resource exists
+  Given 26 discoverable resource exists - including the discoverable resources entry point
   When I invoke the uniform interface method GET to "/discoverable_resources?per_page=3" accepting "application/hal+json"
   Then the resource representation should have an embedded "items" property with 3 items
   And the resource representation "items" property should have 3 items
 
 Scenario: I can request at most 100 items
-  Given 101 discoverable resource exists
+  Given 101 discoverable resource exists - including the discoverable resources entry point
   When I invoke the uniform interface method GET to "/discoverable_resources?per_page=101" accepting "application/hal+json"
   Then the resource representation should have an embedded "items" property with 25 items
   And the resource representation "items" property should have 25 items
