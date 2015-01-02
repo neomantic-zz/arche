@@ -20,7 +20,7 @@
 (ns arche.resources.discoverable-resources-collection-spec
   (:use arche.resources.discoverable-resources-collection)
   (:require [speclj.core :refer :all]
-            [arche.core-spec :refer [clean-database] :as helper]
+            [arche.test-support :refer :all :as helper]
             [cheshire.core :refer [generate-string parse-string] :as j]
             [ring.mock.request :refer [header request] :as mock]
             [ring.util.response :refer [get-header]]
@@ -84,8 +84,8 @@
 
 (describe
  "creating a resource"
- (before (helper/clean-database))
- (after (helper/clean-database))
+ (before (helper/truncate-database))
+ (after (helper/truncate-database))
  (it "returns 201"
      (should= 201 (:status (valid-post))))
  (it "handles valid json"
@@ -105,8 +105,8 @@
 (let [resource-name "users"]
   (describe
    "headers on valid post"
-   (before (helper/clean-database))
-   (after (helper/clean-database))
+   (before (helper/truncate-database))
+   (after (helper/truncate-database))
    (with-all! response (post-request
                         "/discoverable_resources"
                         "application/hal+json"
@@ -245,12 +245,12 @@
 
 (describe
    "creating duplicates"
-   (before (clean-database)
+   (before (truncate-database)
            (entity/discoverable-resource-create
             {:resource-name "studies"
              :link-relation-url "http://example.org/alps/studies"
              :href "http://example.org/studies"}))
-   (after (clean-database))
+   (after (truncate-database))
    (it "returns 400 trying to create an existing resource"
        (let [response
              (post-request "/discoverable_resources"
@@ -311,8 +311,8 @@
 (doseq [mime-type [mime-hale mime-hal]]
   (describe
    (format "getting all using the %s mime-type" mime-type)
-   (before (helper/clean-database))
-   (after (helper/clean-database))
+   (before (helper/truncate-database))
+   (after (helper/truncate-database))
    (it "is successful when there are none"
        (should= 200 (:status (make-get-request mime-type))))
    (it "is successful when there are some"
@@ -344,8 +344,8 @@
 
 (describe
  "creating the hal map"
- (before (helper/clean-database))
- (after (helper/clean-database))
+ (before (helper/truncate-database))
+ (after (helper/truncate-database))
  (context
   "when there are none"
   (it "returns the correct map when there are none"
@@ -401,8 +401,8 @@
 
 (describe
  "all resources as hale representable collection"
- (before (helper/clean-database))
- (after (helper/clean-database))
+ (before (helper/truncate-database))
+ (after (helper/truncate-database))
  (context
   "when there are none"
   (it "returns the correct map when there are none"
@@ -513,8 +513,8 @@
 
 (describe
  "getting paginated"
- (before-all (clean-database))
- (after-all (clean-database))
+ (before-all (truncate-database))
+ (after-all (truncate-database))
  (describe
   "getting all pages"
   (describe
@@ -553,7 +553,7 @@
    "getting the first page"
    (describe
     "when there are none"
-    (before (clean-database))
+    (before (truncate-database))
     (with-all paginated (discoverable-resources-paginate 1))
     (it "returns a correct number of discoverables"
         (should= 0 (count (:records @paginated))))
@@ -574,7 +574,7 @@
    (context
     "when there are none beyond the first page"
     (before-all
-     (clean-database)
+     (truncate-database)
      (create-paginateable default-per-page))
     (with-all paginated (discoverable-resources-paginate 1))
     (it "returns only count of items below the max"
@@ -597,14 +597,14 @@
    "getting a page greater than the first"
    (describe
     "when no records exist"
-    (before-all (clean-database))
+    (before-all (truncate-database))
     (with-all paginated (discoverable-resources-paginate 2))
     (it "returns false for prev"
         (should= false (:has-prev @paginated))))
    (describe
     "when that page has nothing more beyond it"
     (before-all
-     (clean-database)
+     (truncate-database)
      (create-paginateable default-per-page))
     (with-all paginated (discoverable-resources-paginate 2))
     (it "returns the max number of available for that page"
@@ -616,7 +616,7 @@
    (describe
     "when that page has 1 more beyond it"
     (before-all
-     (clean-database)
+     (truncate-database)
      (create-paginateable (+ 1 default-per-page)))
     (with-all paginated (discoverable-resources-paginate 2))
     (it "returns the max number of available for that page"
@@ -666,7 +666,7 @@
     (describe
      "and the amount of the next page equals the default"
      (before-all
-      (clean-database)
+      (truncate-database)
       (create-paginateable (* 2 default-per-page)))
      (with-all paginated (discoverable-resources-paginate 2 30))
      (it "returns only the max"
@@ -685,7 +685,7 @@
    (describe
     "when getting less than the max count"
     (before-all
-     (clean-database)
+     (truncate-database)
      (create-paginateable (* 2 default-per-page)))
     (with-all paginated (discoverable-resources-paginate 2 24))
     (it "returns true for prev"
