@@ -1,6 +1,6 @@
 # Arche Design
 
-Arche list of entry points is provides in the generic hal+json
+Arche's list of entry points is provides in the generic hal+json
 hypermedia format. The URLs are available on the root of the Arche
 service. If environmental variable BASE_URI has been set to
 "http://arche.host", then a GET request to the root with the
@@ -28,13 +28,13 @@ service. If environmental variable BASE_URI has been set to
 
 In this HAL document, there are currently three registered
 [IANA link relation types](http://www.iana.org/assignments/link-relations/link-relations.xhtml):
-`profile`, `type`, and `self`. There is one custom link relation type:
-`discoverable_resources`. As is evident from the host name in its
-`href` value, this is a resource that Arche itself manages.
+`profile`, `type`, and `self`. There is also one custom link relation
+type: `discoverable_resources`.  From the host name in
+its `href` value, we can see that it is a resource that Arche itself manages.
 
 ## DiscoverableResources
 A `DiscoverableResources` is a collection resource whose members Arche
-uses to determine if they appear in the list of entry points.  A
+uses to determine if they should appear in the list of entry points.  A
 `DiscoverableResource` (an individual resources) which is added to
 the `DiscoverableResources` collection becomes an entry point.
 
@@ -42,7 +42,7 @@ the `DiscoverableResources` collection becomes an entry point.
 #### Manually
 
 Creating a individual resources - or "registering" - is performed by a
-POST request with a JSON body of `Content-type` `application/json` in
+POST request with a body of `Content-type` `application/json` in
 the following form:
 
 ``` json
@@ -53,34 +53,41 @@ the following form:
 }
 ```
 
-There three side-effects of this POST request.
+There are three side-effects of this POST request.
 
-1. A `DiscoverableResource` is corrected in added to the collection of
+1. A `DiscoverableResource` is created and is added to the collection of
 `DiscoverableResources`.
 
-2. A new link will show up in the hal JSON document, where the value
+2. A new link will show up in the HAL JSON document, where the value
    of `resource_name` will become a custom link relation type, and the
-   value of `href` will become the link relation types `href`.
+   value of `href` will become the link relation type's `href`.
 
 3. The ALPS profile of the EntryPoints document (at root) will contain
-   a new `safe` semantic descriptor for custome link relation type -
-   the resource name - and use at its profile URL the one provided in
-   the POST requests `link_relation_url`.
+   a new `safe` semantic descriptor for the custom link relation type -
+   the resource name - and use its profile URL set to the
+   `link_relation_url` send in the POST request's body.
 
 #### Via hypermedia
-The "manual" method described above uses so-called "out-of-band
-knowledge" that is anathema to a hypermedia purists, who would say:
-one should not need to know ahead of time that such a request is a) a
-POST, b) JSON, and c) requires three fields. Such a purist would
-insist that a hypermedia service profile a machine-parceable
-description of such a request. A client would then follow href URL of the
-`discoverable_resources` link relation and receive information from
-that response about how to create such a resource.
 
-If you have a hypermedia client that understands the
-[HALE](https://github.com/mdsol/hale) JSON specification, or if you
-send a request accepting `application/hale+json`, then Arche provides
-such a descriptive entry point.  Here's the response:
+The "manual" method described above uses so-called "out-of-band
+knowledge" that is anathema to a hypermedia purist, who would say: one
+should not need to know ahead of time that such a request is a) a
+POST, b) JSON, and c) requires three fields with those specific
+names. Such a purist would insist that a hypermedia service provide a
+machine-parceable description of such a request.
+
+Arche provides such a mechanism using the
+[HALE](https://github.com/mdsol/hale) hypermedia type and its own
+entry point for the `DiscoverableResources`. The process is as
+follows:
+
+A client first makes a request to Arche's root, and retrieve a list of
+entry points. It client then follows the URL for the
+`discoverable_resources` link relation, by making a get request with
+the `Accept` header set to `application/hale+json`.  Arche responds
+with the following:
+
+Here's the response:
 
 ``` json
 {
@@ -127,9 +134,11 @@ such a descriptive entry point.  Here's the response:
         ]
     }
 }
+```
 
-In the response, we see that already one resource has been registered,
-the `DiscoverableResources` resource.  More importantly, we see a
-custom link relation type - `create` that represents a transition on
-this collective resource. The hypermedia purists will now see all the
-information we described in our manual registration process.
+Here we see that Arche already has one registered discoverable
+resource, the `DiscoverableResources` resource.  More importantly, we
+see a custom link relation type - `create` - that represents a
+transition on this collective resource. Following this transition, by
+making a POST request to the URL in the `href` with the following
+fields will register a discoverable resource with Arche.

@@ -1,12 +1,8 @@
 # arche
 
 Arche is an API service that provides a starting point into a platform
-of hypermedia resources. It maintains a map between of human-readable
-resource names and entry point URLs. The human-readable are
-represented as custom
-[link relation types](http://en.wikipedia.org/wiki/Link_relation)
-whose semantics are described by an [ALPS](http://alps.io/spec/)
-profile.
+of hypermedia resources. It provides hypermedia clients a map between
+of human-readable resource type names and entry point URLs.
 
 ## Dependencies
 * [Clojure](http://clojure.org/)
@@ -14,10 +10,11 @@ profile.
 * mysql
 
 ## Design
-Arche provides a map of resource type names (link relation types) and
-hyperlink URLs via the generic hypermedia mime type
-`application/hal+json`. A profile of the list of entry points is
-provides by an `application/alps+json` response.
+Arche provides a map of resource type names - human-readable
+descriptors - represented as custom
+[link relation types](http://en.wikipedia.org/wiki/Link_relation) in a
+`application/hal+json` document and their semantics are described by an
+[ALPS](http://alps.io/spec/) profile.
 
 Read the [design](design.md) for further details.
 
@@ -65,6 +62,10 @@ https://github.com/neomantic/arche
 
 ## Continuous Integration
 [![Build Status](https://travis-ci.org/neomantic/arche.svg?branch=develop)](https://travis-ci.org/neomantic/arche) [https://travis-ci.org/neomantic/arche](https://travis-ci.org/neomantic/arche)
+
+## Contribute
+Contributions are welcome. Please refer to the contribution
+[documentation](CONTRIBUTE.md) for guidelines.
 
 ## Issues and Feature Requests
 
