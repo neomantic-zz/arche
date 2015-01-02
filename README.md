@@ -13,7 +13,7 @@ of human-readable resource type names and entry point URLs.
 Arche provides a map of resource type names - human-readable
 descriptors - represented as custom
 [link relation types](http://en.wikipedia.org/wiki/Link_relation) in a
-`application/hal+json` document and their semantics are described by an
+`application/hal+json` document and whose semantics are described by an
 [ALPS](http://alps.io/spec/) profile.
 
 Read the [design](design.md) for further details.
@@ -41,7 +41,7 @@ To run a local version arche, use the following command:
 
 1. Compile the application: `lein uberjar`
 2. Assign all the environmental variables listed below in the shell
-that you will run arche
+that you will run Arche
 3. Execute the command in the same shell as the environmental
 variables: `java -cp target/uberjar/arche-standalone.jar clojure.main
 -m arche.core`
