@@ -1,9 +1,25 @@
 # arche
 
+Arche is an API service that provides a starting point into a platform
+of hypermedia resources. It maintains a map between of human-readable
+resource names and entry point URLs. The human-readable are
+represented as custom
+[link relation types](http://en.wikipedia.org/wiki/Link_relation)
+whose semantics are described by an [ALPS](http://alps.io/spec/)
+profile.
+
 ## Dependencies
 * [Clojure](http://clojure.org/)
 * [leiningen](http://leiningen.org/)
 * mysql
+
+## Design
+Arche provides a map of resource type names (link relation types) and
+hyperlink URLs via the generic hypermedia mime type
+`application/hal+json`. A profile of the list of entry points is
+provides by an `application/alps+json` response.
+
+Read the [design](design.md) for further details.
 
 # Setup
 
@@ -40,23 +56,8 @@ curl.
 
 If arche is listening to port 3000 on localhost and its `BASE_URI`
 is assigned to localhost, excute `curl -H "application/hal+json"
-http://localhost:3000/`. The correct response is the following:
-
-``` json
-{
-    "_links": {
-        "profile": {
-            "href": "http://localhost:3000/alps/EntryPoints"
-        },
-        "type": {
-            "href": "http://localhost:3000/alps/EntryPoints#entry_points"
-        },
-        "self": {
-            "href": "http://localhost:3000"
-        }
-    }
-}
-```
+http://localhost:3000/`. The correct response is shown in the [design
+document](design.md).
 
 ## Source Code
 
