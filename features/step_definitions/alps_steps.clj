@@ -111,7 +111,7 @@
                           (format "The value of the property '%s' was not equal; got %s" (name property-key) found))))))))
         (throw (Exception. (format "The response was missing descriptors: %s" (last-response-body))))))
 
-(Then #"^the \"([^\"]*)\" descriptor should have the following descriptors:$" [descriptor-id table]
+(Then #"^the \"([^\"]*)\" descriptor should have exactly the following descriptors:$" [descriptor-id table]
       (if-let [descriptors (get-in (from-json (last-response-body))
                                    [a/keyword-alps
                                     a/keyword-descriptor])]
@@ -122,6 +122,7 @@
               (throw (Exception. (format "More than one descriptor with id '%s' was found; got %s" descriptor-id descriptors)))
               (let [found (map #(a/keyword-href %) (a/keyword-descriptor (first existing)))
                     relative-links (map #(first %) (rest (.raw table)))]
+                (is (= (count found) (count relative-links)) "The number expected links do not match")
                 (doseq [link relative-links]
                   (is (some #(= % link) found)
                       (format "Unable to find '%s' in set of descriptors: got %s" link (first existing))))))))

@@ -21,8 +21,8 @@
   (:use arche.resources.entry-points)
   (:require [speclj.core :refer :all]
             [arche.core :as web]
-            [arche.core-spec :only (arche-request factory-discoverable-resource-create
-                                           clean-database) :as support]
+            [arche.test-support :refer :all]
+            [arche.core-spec :refer [arche-request factory-discoverable-resource-create] :as support]
             [arche.resources.discoverable-resource
              :only (discoverable-resource-first discoverable-resources-all)
              :as record]
@@ -112,7 +112,7 @@
   (context
    "with nothing to discover"
    (before
-    (support/clean-database))
+    (truncate-database))
    (describe
     "empty entry-points map"
     (it "has correct default links and nothing more"
@@ -142,7 +142,7 @@
 (describe
    "profile when there are no entry points"
    (before
-    (support/clean-database))
+    (truncate-database))
    (it "creates the correct alps map"
         (should== {:alps {
                           :version "1.0"
@@ -182,7 +182,7 @@
    (before
     (support/factory-discoverable-resource-create test-resource-name))
    (after
-    (support/clean-database))
+    (truncate-database))
    (it "creates the correct map"
        (should==
         {:alps {
