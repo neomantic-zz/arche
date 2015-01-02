@@ -18,38 +18,37 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (ns arche.core
-  (:require [compojure.route :as route]
+  (:require [compojure.route :refer [not-found]]
             [compojure.core :refer [routes GET ANY]]
             [compojure.handler :refer [api]]
             [arche.resources.discoverable-resource
-             :only (names discoverable-resource-entity)
-             :as entity]
-            [arche.resources.discoverable-resources-collection
-             :refer [] :as collection]
-            [arche.resources.entry-points :only (entry-points route) :as entry]
-            [arche.resources.profiles :as profile]
-            [arche.app-state :as app-state]
+             :refer [names discoverable-resource-entity]
+             :rename {names pretty-names}]
+            [arche.resources.discoverable-resources-collection :refer [discoverable-resources-collection]]
+            [arche.resources.entry-points :refer [route entry-points] :rename {route entry-points-route}]
+            [arche.resources.profiles :refer [alps-profiles]]
+            [arche.app-state :refer :all]
             [arche.config :as config :refer [port]]
-            [ring.adapter.jetty :as jetty]
-            [inflections.core :refer :all :as inflect]))
+            [ring.adapter.jetty :refer [run-jetty]]
+            [inflections.core :refer [hyphenate]]))
 
 (def handler
-  "This handler which responds to routes for getting/creating
+  "This handler responds to routes for getting/creating
    discoverable resources, retrieving the list of entry points and
    alps profiles."
   (api
    (routes
-    (GET (format "/%s/:resource-name" app-state/alps-path) [resource-name]
-         (profile/alps-profiles (inflect/hyphenate resource-name)))
-    (GET (format "/%s/:resource-name" (:routable entity/names))  [resource-name]
-         (entity/discoverable-resource-entity resource-name))
-    (GET entry/route [] (entry/entry-points))
-    (ANY "/discoverable_resources*" [request]
-         (collection/discoverable-resources-collection request))
-    (route/not-found "Not Found"))))
+    (GET (format "/%s/:resource-name" alps-path) [resource-name]
+         (alps-profiles (hyphenate resource-name)))
+    (GET (format "/%s/:resource-name" (:routable pretty-names)) [resource-name]
+         (discoverable-resource-entity resource-name))
+    (GET entry-points-route [] (entry-points))
+    (ANY (format "/%s*"(:routable pretty-names)) [request]
+         (discoverable-resources-collection request))
+    (not-found "Not Found"))))
 
 (defn -main [& [port]]
   "The main method that starts the jetty server.  If the PORT
-  environmental has been set, then the server will listen to requests
+  environmental variable has been set, then the server will listen to requests
   on that port. Otherwise the default port of 5000 is used."
-  (jetty/run-jetty handler {:port config/port :join? false}))
+  (run-jetty handler {:port config/port :join? false}))
