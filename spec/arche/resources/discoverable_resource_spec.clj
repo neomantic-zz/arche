@@ -19,13 +19,14 @@
 
 (ns arche.resources.discoverable-resource-spec
   (:use arche.core-spec
-        arche.resources.discoverable-resource
         arche.resources.profiles
         arche.core)
   (:require [speclj.core :refer :all]
             [cheshire.core :refer :all :as json]
             [arche.db :refer [cache-key] :as record]
+            [arche.resources.discoverable-resource :refer :all]
             [arche.config :refer [base-uri]]
+            [arche.test-support :refer :all]
             [ring.mock.request :refer :all :as ring-mock]
             [ring.util.response :only [:get-header] :as ring]
             [ring.util.codec :only [:url-encode]]
@@ -35,7 +36,9 @@
 
 (defn mock-request [resource_name mime-type]
   (header
-   (ring-mock/request :get (format "/discoverable_resources/%s" (ring.util.codec/url-encode resource_name)))
+   (ring-mock/request :get (format "/%s/%s"
+                                   (:routable names)
+                                   (ring.util.codec/url-encode resource_name)))
    "Accept" mime-type))
 
 (defn make-request [mock-request]
@@ -178,8 +181,8 @@
 
 (describe
  "getting all discoverables"
- (before (clean-database))
- (after (clean-database))
+ (before (truncate-database))
+ (after (truncate-database))
  (it "returns a correct number of discoverables"
      (discoverable-resource-create
       {:resource-name "studies"
@@ -367,8 +370,8 @@
 
 (describe
  "etags"
- (before (clean-database))
- (after (clean-database))
+ (before (truncate-database))
+ (after (truncate-database))
  (it "can generates an etag"
      (let [record
            (discoverable-resource-create

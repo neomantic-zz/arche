@@ -10,17 +10,18 @@ Scenario Outline: A client receives a list of links to find resource entries poi
     | resource_name     | studies                             |
   And a discoverable resource exists with the following attributes:
     | link_relation_url | https://www.mydomain.com/alps/users |
-    | href          | https://service.com/users           |
-    | resource_name | users                               |
+    | href              | https://service.com/users           |
+    | resource_name     | users                               |
   When I invoke the uniform interface method GET to "/" accepting "<Mime-Type>"
   Then I should get a status of 200
   And the resource representation should have exactly the following links:
-  | link_relation | href                                                |
-  | studies       | https://service.com/study                           |
-  | users         | https://service.com/users                           |
-  | profile       | http://example.org/alps/EntryPoints                 |
-  | self          | http://example.org/                                 |
-  | type          | http://example.org/alps/EntryPoints#entry_points    |
+  | link_relation          | href                                             |
+  | studies                | https://service.com/study                        |
+  | users                  | https://service.com/users                        |
+  | discoverable_resources | http://example.org/discoverable_resources        |
+  | profile                | http://example.org/alps/EntryPoints              |
+  | self                   | http://example.org/                              |
+  | type                   | http://example.org/alps/EntryPoints#entry_points |
   And the response should have the following header fields:
   | field         | field_contents       |
   | Cache-Control | max-age=600, private |
@@ -33,14 +34,15 @@ Scenario Outline: A client receives a list of links to find resource entries poi
   | application/vnd.hale+json |
   | application/json          |
 
-Scenario Outline: A Client receives a empty list of links when no resources have been registered
+Scenario Outline: A Client receives a at least the discoverable resources entry point when no resources have been registered
   Given I invoke the uniform interface method GET to "/" accepting "<Mime-Type>"
   Then I should get a status of 200
   And the resource representation should have exactly the following links:
-  | link_relation | href                                                |
-  | profile       | http://example.org/alps/EntryPoints                 |
-  | self          | http://example.org/                                 |
-  | type          | http://example.org/alps/EntryPoints#entry_points    |
+  | link_relation          | href                                             |
+  | profile                | http://example.org/alps/EntryPoints              |
+  | self                   | http://example.org/                              |
+  | type                   | http://example.org/alps/EntryPoints#entry_points |
+  | discoverable_resources | http://example.org/discoverable_resources        |
   And the response should have the following header fields:
   | field         | field_contents       |
   | Cache-Control | max-age=600, private |
@@ -68,15 +70,24 @@ Scenario: A client can receive an alps profile describing the link relations of 
   | property | value                                                               |
   | type     | semantic                                                            |
   | doc      | A collection of link relations to find resources of a specific type |
+  And the "entry_points" descriptor should have exactly the following descriptors:
+  | href                    |
+  | #list                   |
+  | #discoverable_resources |
   And the "application/alps+json" document should have a "list" descriptor with the following properties:
   | property | value                                            |
   | name     | self                                             |
   | type     | safe                                             |
   | doc      | Returns a list of entry points                   |
   | rt       | http://example.org/alps/EntryPoints#entry_points |
-  And the "entry_points" descriptor should have the following descriptors:
-  | href   |
-  | #list  |
+  | id       | list                                             |
+  And the "application/alps+json" document should have a "discoverable_resources" descriptor with the following properties:
+  | property | attribute                                                                           |
+  | type     | safe                                                                                |
+  | doc      | Returns a resource of the type 'discoverable_resources' as described by its profile |
+  | rt       | http://example.org/alps/DiscoverableResources                                       |
+  | name     | discoverable_resources                                                              |
+  | id       | discoverable_resources                                                              |
   And the response should have the following header fields:
   | field         | field_contents                         |
   | Cache-Control | max-age=600, private                   |
@@ -104,10 +115,11 @@ Scenario: A client can receive an alps profile describing the link relations of 
   | id       | entry_points                                                        |
   | type     | semantic                                                            |
   | doc      | A collection of link relations to find resources of a specific type |
-  And the "entry_points" descriptor should have the following descriptors:
-  | href     |
-  | #list    |
-  | #studies |
+  And the "entry_points" descriptor should have exactly the following descriptors:
+  | href                    |
+  | #list                   |
+  | #studies                |
+  | #discoverable_resources |
   And the "application/alps+json" document should have a "list" descriptor with the following properties:
   | property | attribute                                        |
   | name     | self                                             |

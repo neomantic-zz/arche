@@ -23,6 +23,7 @@
   (:require [arche.media :as media]
             [arche.resources.discoverable-resource :refer :all]
             [arche.core :as web]
+            [arche.initialize :refer :all]
             [clojurewerkz.urly.core :as urly]
             [cheshire.core :refer :all :as json]
             [clj-http.client :as client]
@@ -113,7 +114,7 @@
       (.stop @server)
       (reset! server nil))))
 
-(defn database-truncate []
+(defn truncate-database []
   (jdbc/db-do-commands
    jdbc-dbspec
    (format "TRUNCATE TABLE %s;" (-> names :tableized name))))
@@ -129,15 +130,16 @@
 
 (Before []
         (server-start)
-        (database-truncate))
+        (truncate-database)
+        (seed-entry-point))
 
 (After []
        (reset! last-response nil)
        (server-stop)
-       (database-truncate))
+       (truncate-database))
 
 (Given #"^no discoverable resource is registered$" []
-       (database-truncate))
+       (truncate-database))
 
 (Given #"^a discoverable resource exists with the following attributes:$" [table]
        (let [table-map (table-to-map table)]
@@ -191,8 +193,8 @@
                             (clojure.string/join ", " (get-in response-map [:errors (keyword attribute)])) )))
               (rest (map vec (.raw table)))))))
 
-(Given #"^(\d+) discoverable resource exists$" [number-of]
-       (dotimes [number (Integer. number-of)]
+(Given #"^(\d+) discoverable resource exists - including the discoverable resources entry point$" [number-of]
+       (dotimes [number (dec (Integer. number-of))]
          (let [record-id (inc number)]
            (discoverable-resource-create
             {:resource-name (format "a-resource-name-%d" record-id)

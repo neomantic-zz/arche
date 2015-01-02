@@ -18,10 +18,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (ns arche.core-spec
-  (:require [clojure.java.jdbc :as jdbc]
-            [speclj.core :refer :all]
+  (:require [speclj.core :refer :all]
             [arche.resources.discoverable-resource :refer [names discoverable-resource-create]]
             [korma.db :refer :all]
+            [arche.test-support :refer :all]
             [arche.config :refer :all]
             [arche.app-state :refer :all :as app]
             [arche.media :refer :all :as media]
@@ -40,11 +40,6 @@
 
 (defn successful? [response]
   (= (:status response) 200))
-
-(defn clean-database []
-  (jdbc/db-do-commands
-   jdbc-dbspec
-   (format "TRUNCATE TABLE %s;" (-> names :tableized name))))
 
 (defn factory-discoverable-resource-create [resource-name]
   (discoverable-resource-create

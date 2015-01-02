@@ -90,9 +90,9 @@
  "error message"
  (it "returns the correct message for :blank"
      (should= "can't be blank" (:blank default-error-messages)))
- (it "returns the correct message for :blank"
+ (it "returns the correct message for :invalid"
      (should= "is not valid" (:invalid default-error-messages)))
- (it "returns the correct message for :blank"
+ (it "returns the correct message for :taken"
      (should= "is already taken" (:taken default-error-messages))))
 
 (describe
