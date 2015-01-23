@@ -137,11 +137,11 @@ Here's the response:
 ```
 
 Here we see that Arche already has one registered discoverable
-resource, the `DiscoverableResources` resource itself - in own managed
+resource: the `DiscoverableResources` resource itself - Arche's own managed
 resource.
 
 More importantly, we see a custom link relation type - `create` - that
 represents a transition on this collective resource. Following this
 transition, by making a POST request to the URL in the `href` and
-populated the body with fields and corresponding values will register
+populating the body with fields and corresponding values will register
 a new `DiscoverableResource` with Arche.
