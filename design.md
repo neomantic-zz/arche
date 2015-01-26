@@ -85,7 +85,7 @@ follows:
 A client first makes a request to Arche's root, and retrieve a list of
 entry points. It then follows the URL for the `discoverable_resources`
 link relation, by making a get request with the `Accept` header set to
-`application/hale+json`.  Arche responds with the following:
+`application/vnd.hale+json`.  Arche responds with the following:
 
 Here's the response:
 
