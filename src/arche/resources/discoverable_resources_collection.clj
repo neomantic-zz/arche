@@ -264,7 +264,8 @@
   (as-response [this context]
     ((index-response-fn hal-map) context paginated)))
 
-(defrecord ^:private HaleResponse [paginated]
+(defrecord ^:private HaleResponse
+  [paginated]
   Representation
   (as-response [this context]
     ((index-response-fn hale-map) context paginated)))
