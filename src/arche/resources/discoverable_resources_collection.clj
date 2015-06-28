@@ -117,7 +117,7 @@
 (def ^:private per-page-query-key "per_page")
 
 (def ^:private pagination-url-format
-  "The format to be used when creating a paginatoin link"
+  "The format to be used when creating a pagination link"
   (str "%s?" page-query-key "=%d&" per-page-query-key "=%d"))
 
 (defn paginated-url-fn
