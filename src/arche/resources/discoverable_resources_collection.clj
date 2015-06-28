@@ -35,7 +35,7 @@
             [arche.media :as media]))
 
 (defn- method-supports-body?
-  "Returns true of our resource supports HTTP method that have a body.
+  "Returns true if the resource supports a HTTP verb that has a body.
   Returns true on POST and PUT only."
   [ctx]
   (#{:put :post} (get-in ctx [:request :request-method])))
