@@ -2,7 +2,7 @@
 
 Arche is an API service that provides a starting point into a platform
 of hypermedia resources. It provides hypermedia clients a map between
-of human-readable resource type names and entry point URLs.
+human-readable resource type names and entry point URLs.
 
 ## Dependencies
 * [Clojure](http://clojure.org/)
